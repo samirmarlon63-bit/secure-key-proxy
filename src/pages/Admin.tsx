@@ -8,7 +8,7 @@ import {
   KeyRound, Plus, LogOut, Trash2, Copy, Check,
   Users, Ban, UserX, Clock, Terminal, Shield, Activity,
   Database, Minus, Hash, Zap, Eye, EyeOff, Wifi,
-  Server, Globe, Signal, Power, ChevronRight
+  Server, Globe, Signal, Power, ChevronRight, Lock
 } from "lucide-react";
 
 const Admin = () => {
@@ -113,29 +113,84 @@ const Admin = () => {
 
   if (!authenticated) {
     return (
-      <div className="relative min-h-screen flex items-center justify-center px-4">
+      <div className="relative min-h-screen flex flex-col items-center justify-center px-4">
         <VideoBackground />
-        <div className="relative z-10 w-full max-w-sm animate-fade-in-up">
-          <div className="glass-card p-6 glow-border">
+        <div className="relative z-10 w-full max-w-sm space-y-5">
+          {/* Header branding */}
+          <div className="text-center animate-fade-in-up">
+            <div className="w-16 h-16 rounded-2xl bg-card/80 border border-border/50 flex items-center justify-center mx-auto mb-4 shadow-2xl">
+              <Shield className="w-8 h-8 text-foreground" />
+            </div>
+            <h1 className="text-xl font-semibold text-foreground tracking-tight">Panel de Administración</h1>
+            <p className="text-xs text-muted-foreground mt-1">Sistema de gestión de proxy y keys</p>
+          </div>
+
+          {/* Stats preview */}
+          <div className="grid grid-cols-3 gap-2 animate-fade-in-up" style={{ animationDelay: "0.08s" }}>
+            {[
+              { icon: KeyRound, label: "Keys", desc: "Generar y gestionar" },
+              { icon: Users, label: "Usuarios", desc: "Control de acceso" },
+              { icon: Activity, label: "Monitor", desc: "Estadísticas en vivo" },
+            ].map(({ icon: Icon, label, desc }) => (
+              <div key={label} className="glass-card p-3 text-center">
+                <Icon className="w-4 h-4 text-muted-foreground mx-auto mb-1.5" />
+                <p className="text-[11px] text-foreground font-medium">{label}</p>
+                <p className="text-[8px] text-muted-foreground/60 mt-0.5">{desc}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Login card */}
+          <div className="glass-card p-6 glow-border animate-fade-in-up" style={{ animationDelay: "0.15s" }}>
             <div className="flex items-center gap-2 mb-1">
               <Terminal className="w-5 h-5 text-muted-foreground" />
               <span className="text-sm font-mono text-muted-foreground">admin@proxy:~$</span>
             </div>
-            <p className="text-xs text-muted-foreground/60 mb-6 font-mono pl-7">authenticate --level=root</p>
+            <p className="text-xs text-muted-foreground/60 mb-5 font-mono pl-7">authenticate --level=root</p>
             <form onSubmit={handleLogin} className="space-y-4">
-              <input
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => { setPassword(e.target.value); setError(""); }}
-                className="w-full bg-secondary/50 border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring transition-all font-mono"
-              />
-              {error && <p className="text-xs text-destructive font-mono">ERROR: {error}</p>}
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <input
+                  type="password"
+                  placeholder="Contraseña de administrador"
+                  value={password}
+                  onChange={(e) => { setPassword(e.target.value); setError(""); }}
+                  className="w-full bg-secondary/50 border border-border rounded-lg pl-10 pr-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring transition-all font-mono"
+                />
+              </div>
+              {error && (
+                <p className="text-xs text-destructive bg-destructive/10 rounded-lg p-3 font-mono">ERROR: {error}</p>
+              )}
               <button type="submit" className="w-full bg-primary text-primary-foreground font-medium py-3 rounded-lg text-sm hover:opacity-90 active:scale-[0.98] transition-all font-mono">
                 sudo access
               </button>
             </form>
           </div>
+
+          {/* System info */}
+          <div className="glass-card p-4 animate-fade-in-up" style={{ animationDelay: "0.22s" }}>
+            <div className="space-y-2">
+              {[
+                { label: "Servidor", value: "Online", dot: true },
+                { label: "Protocolo", value: "HTTPS/TLS 1.3" },
+                { label: "Cifrado", value: "AES-256-GCM" },
+                { label: "Versión", value: "v2.4.1" },
+              ].map(({ label, value, dot }) => (
+                <div key={label} className="flex items-center justify-between">
+                  <span className="text-[10px] text-muted-foreground font-mono">{label}</span>
+                  <div className="flex items-center gap-1.5">
+                    {dot && <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />}
+                    <span className="text-[10px] text-foreground font-mono font-medium">{value}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Footer */}
+          <p className="text-center text-[9px] text-muted-foreground/40 font-mono animate-fade-in-up" style={{ animationDelay: "0.3s" }}>
+            Acceso restringido — Solo personal autorizado
+          </p>
         </div>
       </div>
     );
