@@ -48,11 +48,9 @@ const Admin = () => {
     }
   };
 
-  const handleGenerate = () => {
-    const newKeys = generateKeys(quantity, keyType, duration);
-    const all = [...newKeys, ...keys];
-    saveKeys(all);
-    setKeys(all);
+  const handleGenerate = async () => {
+    await generateKeys(quantity, keyType, duration);
+    await refreshData();
     setActiveTab("keys");
   };
 
