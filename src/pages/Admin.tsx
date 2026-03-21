@@ -54,10 +54,9 @@ const Admin = () => {
     setActiveTab("keys");
   };
 
-  const handleDelete = (key: string) => {
-    const filtered = keys.filter(k => k.key !== key);
-    saveKeys(filtered);
-    refreshData();
+  const handleDelete = async (key: string) => {
+    await deleteKey(key);
+    await refreshData();
   };
 
   const handleCopy = (key: string) => {
