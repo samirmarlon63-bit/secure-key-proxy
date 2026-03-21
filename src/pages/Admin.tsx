@@ -25,9 +25,10 @@ const Admin = () => {
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [revealedKey, setRevealedKey] = useState<string | null>(null);
 
-  const refreshData = useCallback(() => {
-    setKeys(getKeys());
-    setUsers(getActiveUsers());
+  const refreshData = useCallback(async () => {
+    const [k, u] = await Promise.all([getKeys(), getActiveUsers()]);
+    setKeys(k);
+    setUsers(u);
   }, []);
 
   useEffect(() => {
