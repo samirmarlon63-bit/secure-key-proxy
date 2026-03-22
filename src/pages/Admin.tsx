@@ -7,7 +7,7 @@ import {
 import {
   KeyRound, Plus, LogOut, Trash2, Copy, Check,
   Users, Ban, UserX, Clock, Terminal, Shield, Activity,
-  Database, Minus, Hash, Zap, Eye, EyeOff, Wifi,
+  Database, Minus, Hash, Zap, Wifi,
   Server, Globe, Signal, Power, ChevronRight, Lock
 } from "lucide-react";
 
