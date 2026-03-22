@@ -216,7 +216,7 @@ const Admin = () => {
               <p className="text-[10px] text-muted-foreground font-mono">root@proxy-server</p>
             </div>
           </div>
-          <button onClick={() => setAuthenticated(false)} className="p-2 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors active:scale-95">
+          <button onClick={handleLogout} className="p-2 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors active:scale-95">
             <LogOut className="w-4 h-4 text-muted-foreground" />
           </button>
         </div>
