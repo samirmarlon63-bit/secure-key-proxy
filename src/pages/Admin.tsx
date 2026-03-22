@@ -481,7 +481,7 @@ const Admin = () => {
                               </div>
                             </div>
                             <div className="bg-secondary/30 rounded-lg px-2.5 py-2 border border-border/50">
-                              <p className="text-[11px] font-mono text-foreground tracking-wide">{revealedKey === k.key ? k.key : k.key.replace(/[A-Z0-9]/g, "•")}</p>
+                              <p className="text-[11px] font-mono text-foreground tracking-wide break-all">{k.key}</p>
                             </div>
                             <p className="text-[9px] font-mono text-muted-foreground/70">{k.duration}</p>
                           </div>
