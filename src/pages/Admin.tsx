@@ -458,7 +458,7 @@ const Admin = () => {
                         </div>
                         {unusedOther.length > 0 && (
                           <button
-                            onClick={() => { navigator.clipboard.writeText(unusedOther.map(k => k.key).join("\n")); setCopiedKey("all-other"); setTimeout(() => setCopiedKey(null), 2000); }}
+                            onClick={() => { navigator.clipboard.writeText(unusedOther.map(k => `${k.key} | ${k.status} | ${k.duration}`).join("\n")); setCopiedKey("all-other"); setTimeout(() => setCopiedKey(null), 2000); }}
                             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-mono font-medium transition-all active:scale-95 border ${copiedKey === "all-other" ? "bg-emerald-500/20 text-emerald-400 border-emerald-400/30" : "bg-secondary/50 text-muted-foreground border-border hover:border-ring hover:text-foreground"}`}
                           >
                             {copiedKey === "all-other" ? <><Check className="w-3 h-3" /> Copiadas</> : <><Copy className="w-3 h-3" /> Copiar libres</>}
