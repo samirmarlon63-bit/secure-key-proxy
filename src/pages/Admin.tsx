@@ -7,7 +7,7 @@ import {
 import {
   KeyRound, Plus, LogOut, Trash2, Copy, Check,
   Users, Ban, UserX, Clock, Terminal, Shield, Activity,
-  Database, Minus, Hash, Zap, Eye, EyeOff, Wifi,
+  Database, Minus, Hash, Zap, Wifi,
   Server, Globe, Signal, Power, ChevronRight, Lock
 } from "lucide-react";
 
@@ -23,7 +23,6 @@ const Admin = () => {
   const [keys, setKeys] = useState<ProxyKey[]>([]);
   const [users, setUsers] = useState<ActiveUser[]>([]);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
-  const [revealedKey, setRevealedKey] = useState<string | null>(null);
 
   const refreshData = useCallback(async () => {
     const [k, u] = await Promise.all([getKeys(), getActiveUsers()]);
@@ -373,7 +372,7 @@ const Admin = () => {
                   const copyId = `all-${dur}`;
                   const handleCopyAll = () => {
                     if (unusedKeys.length === 0) return;
-                    navigator.clipboard.writeText(unusedKeys.map(k => k.key).join("\n"));
+                    navigator.clipboard.writeText(unusedKeys.map(k => `${k.key} | ${k.status} | ${k.duration}`).join("\n"));
                     setCopiedKey(copyId);
                     setTimeout(() => setCopiedKey(null), 2000);
                   };
@@ -419,9 +418,6 @@ const Admin = () => {
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-0.5">
-                                  <button onClick={() => setRevealedKey(revealedKey === k.key ? null : k.key)} className="p-1 rounded-lg hover:bg-secondary/80 transition-colors active:scale-95">
-                                    {revealedKey === k.key ? <EyeOff className="w-3 h-3 text-muted-foreground" /> : <Eye className="w-3 h-3 text-muted-foreground" />}
-                                  </button>
                                   <button onClick={() => handleCopy(k.key)} className="p-1 rounded-lg hover:bg-secondary/80 transition-colors active:scale-95">
                                     {copiedKey === k.key ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3 text-muted-foreground" />}
                                   </button>
@@ -431,7 +427,7 @@ const Admin = () => {
                                 </div>
                               </div>
                               <div className="bg-secondary/30 rounded-lg px-2.5 py-2 border border-border/50">
-                                <p className="text-[11px] font-mono text-foreground tracking-wide">{revealedKey === k.key ? k.key : k.key.replace(/[A-Z0-9]/g, "•")}</p>
+                                <p className="text-[11px] font-mono text-foreground tracking-wide break-all">{k.key}</p>
                               </div>
                               <div className="flex gap-2 text-[9px] font-mono text-muted-foreground/70">
                                 <span>Creada: {new Date(k.createdAt).toLocaleDateString()}</span>
@@ -461,7 +457,7 @@ const Admin = () => {
                         </div>
                         {unusedOther.length > 0 && (
                           <button
-                            onClick={() => { navigator.clipboard.writeText(unusedOther.map(k => k.key).join("\n")); setCopiedKey("all-other"); setTimeout(() => setCopiedKey(null), 2000); }}
+                            onClick={() => { navigator.clipboard.writeText(unusedOther.map(k => `${k.key} | ${k.status} | ${k.duration}`).join("\n")); setCopiedKey("all-other"); setTimeout(() => setCopiedKey(null), 2000); }}
                             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-mono font-medium transition-all active:scale-95 border ${copiedKey === "all-other" ? "bg-emerald-500/20 text-emerald-400 border-emerald-400/30" : "bg-secondary/50 text-muted-foreground border-border hover:border-ring hover:text-foreground"}`}
                           >
                             {copiedKey === "all-other" ? <><Check className="w-3 h-3" /> Copiadas</> : <><Copy className="w-3 h-3" /> Copiar libres</>}
@@ -475,9 +471,6 @@ const Admin = () => {
                             <div className="flex items-center justify-between">
                               <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-mono font-medium ${statusColor(k.status)}`}>{statusIcon(k.status)} {k.status}</span>
                               <div className="flex items-center gap-0.5">
-                                <button onClick={() => setRevealedKey(revealedKey === k.key ? null : k.key)} className="p-1 rounded-lg hover:bg-secondary/80 transition-colors active:scale-95">
-                                  {revealedKey === k.key ? <EyeOff className="w-3 h-3 text-muted-foreground" /> : <Eye className="w-3 h-3 text-muted-foreground" />}
-                                </button>
                                 <button onClick={() => handleCopy(k.key)} className="p-1 rounded-lg hover:bg-secondary/80 transition-colors active:scale-95">
                                   {copiedKey === k.key ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3 text-muted-foreground" />}
                                 </button>
@@ -487,7 +480,7 @@ const Admin = () => {
                               </div>
                             </div>
                             <div className="bg-secondary/30 rounded-lg px-2.5 py-2 border border-border/50">
-                              <p className="text-[11px] font-mono text-foreground tracking-wide">{revealedKey === k.key ? k.key : k.key.replace(/[A-Z0-9]/g, "•")}</p>
+                              <p className="text-[11px] font-mono text-foreground tracking-wide break-all">{k.key}</p>
                             </div>
                             <p className="text-[9px] font-mono text-muted-foreground/70">{k.duration}</p>
                           </div>
