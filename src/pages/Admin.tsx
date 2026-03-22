@@ -148,11 +148,10 @@ const Admin = () => {
 
           {/* Login card */}
           <div className="glass-card p-6 glow-border animate-fade-in-up" style={{ animationDelay: "0.15s" }}>
-            <div className="flex items-center gap-2 mb-1">
-              <Terminal className="w-5 h-5 text-muted-foreground" />
-              <span className="text-sm font-mono text-muted-foreground">admin@proxy:~$</span>
+            <div className="flex items-center gap-2 mb-5">
+              <Lock className="w-5 h-5 text-muted-foreground" />
+              <span className="text-sm font-medium text-foreground">Autenticación requerida</span>
             </div>
-            <p className="text-xs text-muted-foreground/60 mb-5 font-mono pl-7">authenticate --level=root</p>
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
