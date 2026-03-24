@@ -117,6 +117,20 @@ export async function reduceKeyTime(key: string, reduceMs: number) {
   }).eq('key', key);
 }
 
+export async function addKeyTime(key: string, addMs: number) {
+  const { data } = await supabase.from('proxy_keys').select('expires_at, status').eq('key', key).single();
+  if (!data || !data.expires_at) return;
+  const newExpiry = new Date(new Date(data.expires_at).getTime() + addMs);
+  await supabase.from('proxy_keys').update({
+    expires_at: newExpiry.toISOString(),
+    status: 'Usada',
+  }).eq('key', key);
+  // Also update active_users
+  await supabase.from('active_users').update({
+    expires_at: newExpiry.toISOString(),
+  }).eq('key', key);
+}
+
 export async function isUserBlocked(key: string): Promise<boolean> {
   const clean = key.trim().toUpperCase();
   const { data } = await supabase.from('active_users').select('blocked').ilike('key', clean).single();
