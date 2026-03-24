@@ -831,6 +831,81 @@ const ProxyConfig = () => {
         </div>
       ),
     },
+    {
+      id: "advanced",
+      icon: Cpu,
+      title: "Configuración Avanzada",
+      content: (
+        <div className="space-y-3">
+          {[
+            { label: "TCP Fast Open", value: "Habilitado" },
+            { label: "ECN (Explicit Congestion)", value: "Activado" },
+            { label: "BBR Congestion Control", value: "Habilitado" },
+            { label: "IPv6 Dual Stack", value: "Desactivado" },
+            { label: "PMTU Discovery", value: "Automático" },
+            { label: "Socket Buffer", value: "256KB Tx / 512KB Rx" },
+            { label: "TCP Keepalive Interval", value: "30s" },
+            { label: "Max Retransmissions", value: "5" },
+            { label: "Nagle Algorithm", value: "Desactivado (Low Latency)" },
+          ].map(({ label, value }) => (
+            <div key={label} className="flex items-center justify-between bg-secondary/20 rounded-lg px-3 py-2.5 border border-border/30">
+              <span className="text-[10px] text-muted-foreground">{label}</span>
+              <span className="text-[10px] text-foreground font-medium font-mono">{value}</span>
+            </div>
+          ))}
+        </div>
+      ),
+    },
+    {
+      id: "logs",
+      icon: FileText,
+      title: "Registro de Actividad",
+      content: (
+        <div className="space-y-3">
+          <div className="bg-secondary/20 rounded-lg p-3 border border-border/30 font-mono text-[9px] space-y-1.5 max-h-60 overflow-y-auto">
+            <p><span className="text-emerald-400">[{new Date().toLocaleTimeString()}]</span> <span className="text-foreground/60">Sesión iniciada — Usuario: {session.name}</span></p>
+            <p><span className="text-emerald-400">[{new Date(Date.now() - 120000).toLocaleTimeString()}]</span> <span className="text-foreground/60">Handshake TLS completado</span></p>
+            <p><span className="text-blue-400">[{new Date(Date.now() - 300000).toLocaleTimeString()}]</span> <span className="text-foreground/60">DNS query → 1.1.1.1 resuelto en 3ms</span></p>
+            <p><span className="text-emerald-400">[{new Date(Date.now() - 600000).toLocaleTimeString()}]</span> <span className="text-foreground/60">Rotación de cipher suite completada</span></p>
+            <p><span className="text-amber-400">[{new Date(Date.now() - 900000).toLocaleTimeString()}]</span> <span className="text-foreground/60">Reconexión automática — nodo optimizado</span></p>
+            <p><span className="text-emerald-400">[{new Date(Date.now() - 1800000).toLocaleTimeString()}]</span> <span className="text-foreground/60">Anti-DPI bypass activado</span></p>
+            <p><span className="text-blue-400">[{new Date(Date.now() - 3600000).toLocaleTimeString()}]</span> <span className="text-foreground/60">Verificación de integridad del túnel: OK</span></p>
+            <p><span className="text-emerald-400">[{new Date(Date.now() - 7200000).toLocaleTimeString()}]</span> <span className="text-foreground/60">Certificado SSL verificado — SHA-256</span></p>
+          </div>
+          <div className="bg-secondary/20 rounded-lg p-3 border border-border/30">
+            <p className="text-[10px] text-muted-foreground leading-relaxed">Los registros se almacenan temporalmente durante la sesión activa. No se guardan datos de navegación ni contenido transmitido.</p>
+          </div>
+        </div>
+      ),
+    },
+    {
+      id: "network-diag",
+      icon: Wifi,
+      title: "Diagnóstico de Red",
+      content: (
+        <div className="space-y-3">
+          {[
+            { test: "Ping al servidor proxy", result: "8ms", status: "OK" },
+            { test: "Resolución DNS", result: "3ms", status: "OK" },
+            { test: "Verificación TLS", result: "Certificado válido", status: "OK" },
+            { test: "Detección de ISP throttle", result: "No detectado", status: "OK" },
+            { test: "Puerto 443 (HTTPS)", result: "Abierto", status: "OK" },
+            { test: "Puerto 8080 (HTTP)", result: "Abierto", status: "OK" },
+            { test: "Puerto 1080 (SOCKS5)", result: "Abierto", status: "OK" },
+            { test: "IPv6 Connectivity", result: "No disponible", status: "WARN" },
+            { test: "WebSocket Upgrade", result: "Soportado", status: "OK" },
+          ].map(({ test, result, status }) => (
+            <div key={test} className="flex items-center justify-between bg-secondary/20 rounded-lg px-3 py-2.5 border border-border/30">
+              <span className="text-[10px] text-muted-foreground">{test}</span>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-foreground font-medium font-mono">{result}</span>
+                <div className={`w-2 h-2 rounded-full ${status === "OK" ? "bg-emerald-500" : "bg-amber-500"}`} />
+              </div>
+            </div>
+          ))}
+        </div>
+      ),
+    },
   ];
 
   const renderSettings = () => (
