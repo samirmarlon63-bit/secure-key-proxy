@@ -12,6 +12,20 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  // Auto-redirect if session exists in localStorage
+  useEffect(() => {
+    const raw = localStorage.getItem("proxy_session");
+    if (raw) {
+      const s = JSON.parse(raw);
+      // Check if not expired
+      if (!s.expiresAt || new Date(s.expiresAt).getTime() > Date.now()) {
+        navigate("/proxy");
+      } else {
+        localStorage.removeItem("proxy_session");
+      }
+    }
+  }, [navigate]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
