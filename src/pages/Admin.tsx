@@ -573,6 +573,27 @@ const Admin = () => {
                         </button>
                       ))}
                     </div>
+
+                    <div className="flex items-center gap-1 pt-1">
+                      <Plus className="w-3 h-3 text-emerald-400" />
+                      <span className="text-[10px] text-emerald-400 font-mono mr-1">Agregar:</span>
+                      {[
+                        { label: "+30m", mins: 30 },
+                        { label: "+1h", mins: 60 },
+                        { label: "+6h", mins: 360 },
+                        { label: "+12h", mins: 720 },
+                        { label: "+1d", mins: 1440 },
+                        { label: "+7d", mins: 10080 },
+                      ].map(({ label, mins }) => (
+                        <button
+                          key={label}
+                          onClick={() => handleAddTime(u.key, mins)}
+                          className="px-2 py-1 rounded bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-mono text-emerald-400 hover:bg-emerald-500/20 active:scale-95 transition-all"
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 ))}
               </div>
