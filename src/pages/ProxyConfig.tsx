@@ -603,6 +603,78 @@ const ProxyConfig = () => {
           </div>
         ))}
       </div>
+
+      {/* Server Stats */}
+      <div className="glass-card p-4 animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
+        <div className="flex items-center gap-2 mb-3">
+          <Activity className="w-4 h-4 text-muted-foreground" />
+          <span className="text-xs text-muted-foreground font-medium">Estadísticas de Servidores</span>
+        </div>
+        <div className="grid grid-cols-3 gap-2">
+          {[
+            { label: "Activos", value: "27/27", color: "text-emerald-400" },
+            { label: "Carga", value: "34%", color: "text-foreground" },
+            { label: "Latencia", value: "8ms", color: "text-foreground" },
+          ].map(({ label, value, color }) => (
+            <div key={label} className="bg-secondary/20 rounded-lg px-2 py-2.5 border border-border/30 text-center">
+              <p className={`text-sm font-bold font-mono ${color}`}>{value}</p>
+              <p className="text-[8px] text-muted-foreground/70 uppercase tracking-wider">{label}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Geo-Routing */}
+      <div className="glass-card p-4 animate-fade-in-up" style={{ animationDelay: "0.15s" }}>
+        <div className="flex items-center gap-2 mb-3">
+          <Globe className="w-4 h-4 text-muted-foreground" />
+          <span className="text-xs text-muted-foreground font-medium">Enrutamiento Geográfico</span>
+        </div>
+        <div className="space-y-2">
+          {[
+            { region: "América", servers: 10, load: 28 },
+            { region: "Europa", servers: 8, load: 42 },
+            { region: "Asia-Pacífico", servers: 6, load: 35 },
+            { region: "África/Medio Oriente", servers: 3, load: 18 },
+          ].map(({ region, servers, load }) => (
+            <div key={region} className="bg-secondary/20 rounded-lg px-3 py-2 border border-border/30">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[10px] text-muted-foreground">{region}</span>
+                <span className="text-[9px] text-foreground font-mono">{servers} servidores — {load}% carga</span>
+              </div>
+              <div className="w-full h-1 rounded-full bg-secondary/50 overflow-hidden">
+                <div className="h-full rounded-full bg-emerald-500/60" style={{ width: `${load}%` }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Protocol Selector */}
+      <div className="glass-card p-4 animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
+        <div className="flex items-center gap-2 mb-3">
+          <Lock className="w-4 h-4 text-muted-foreground" />
+          <span className="text-xs text-muted-foreground font-medium">Protocolos Disponibles</span>
+        </div>
+        <div className="space-y-2">
+          {[
+            { proto: "HTTP Proxy", port: "8080", status: "Estándar", active: true },
+            { proto: "HTTPS/TLS", port: "443", status: "Cifrado", active: true },
+            { proto: "SOCKS5", port: "1080", status: "Avanzado", active: true },
+            { proto: "SOCKS4a", port: "1081", status: "Legacy", active: false },
+            { proto: "SSH Tunnel", port: "22", status: "Túnel seguro", active: true },
+            { proto: "WireGuard", port: "51820", status: "VPN Layer", active: false },
+          ].map(({ proto, port, status, active }) => (
+            <div key={proto} className="flex items-center justify-between bg-secondary/20 rounded-lg px-3 py-2 border border-border/30">
+              <div>
+                <p className="text-[10px] text-foreground font-medium">{proto}</p>
+                <p className="text-[8px] text-muted-foreground font-mono">Puerto: {port} — {status}</p>
+              </div>
+              <div className={`w-2 h-2 rounded-full ${active ? "bg-emerald-500" : "bg-muted-foreground/30"}`} />
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 
