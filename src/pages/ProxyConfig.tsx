@@ -199,9 +199,12 @@ const ProxyConfig = () => {
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between animate-fade-in-up">
-        <div>
-          <h1 className="text-lg font-semibold text-foreground">Configurar Proxy</h1>
-          <p className="text-xs text-muted-foreground">Hola, {session.name}</p>
+        <div className="flex items-center gap-3">
+          <img src={defaultAvatar} alt="Avatar" className="w-10 h-10 rounded-full border-2 border-border object-cover" />
+          <div>
+            <h1 className="text-lg font-semibold text-foreground">Configurar Proxy</h1>
+            <p className="text-xs text-muted-foreground">Hola, {session.name}</p>
+          </div>
         </div>
         <button onClick={handleLogout} className="p-2 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors active:scale-95">
           <LogOut className="w-4 h-4 text-muted-foreground" />
