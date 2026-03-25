@@ -124,7 +124,10 @@ const Admin = () => {
   if (!authenticated) {
     return (
       <div className="relative min-h-screen flex flex-col items-center justify-center px-4">
-        <VideoBackground />
+        <div className="fixed inset-0 z-0">
+          <img src={adminBg} alt="" className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-background/85 backdrop-blur-sm" />
+        </div>
         <div className="relative z-10 w-full max-w-sm space-y-5">
           {/* Header branding */}
           <div className="text-center animate-fade-in-up">
