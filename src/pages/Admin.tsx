@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import VideoBackground from "@/components/VideoBackground";
+import adminBg from "@/assets/admin-bg.jpeg";
 import {
   getKeys, generateKeys, deleteKey, type ProxyKey,
   getActiveUsers, blockUser, unblockUser, kickUser, deleteUser, reduceKeyTime, addKeyTime, type ActiveUser

@@ -689,6 +689,9 @@ const ProxyConfig = () => {
       title: "Perfil",
       content: (
         <div className="space-y-3">
+          <div className="flex justify-center">
+            <img src={defaultAvatar} alt="Avatar" className="w-20 h-20 rounded-full border-2 border-border object-cover" />
+          </div>
           <div className="bg-secondary/20 rounded-lg px-3 py-2.5 border border-border/30">
             <p className="text-[9px] text-muted-foreground/70 uppercase tracking-wider mb-0.5">Nombre</p>
             <p className="text-sm text-foreground font-medium">{session.name}</p>
