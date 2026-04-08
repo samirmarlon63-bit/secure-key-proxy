@@ -9,7 +9,7 @@ import {
   Lock, User, KeyRound, Power, LogOut, Gamepad2, Loader2,
   Shield, Activity, Zap, Eye, ChevronRight, Cpu, HardDrive,
   Home, Settings, FileText, UserCircle, Code, AlertTriangle,
-  Copy, Check, ChevronDown, Crosshair, Target, Volume2
+  Copy, Check, ChevronDown, Crosshair, Target
 } from "lucide-react";
 
 interface Session {
@@ -98,18 +98,8 @@ const ProxyConfig = () => {
   // Game toggles
   const [noRecoil, setNoRecoil] = useState(false);
   const [autoAim, setAutoAim] = useState(false);
-  const [bugMiraX2, setBugMiraX2] = useState(false);
   const [fovEnabled, setFovEnabled] = useState(false);
   const [fovSize, setFovSize] = useState(120);
-  const [aimSmooth, setAimSmooth] = useState(50);
-  const [firerate, setFirerate] = useState(70);
-  const [sensitivity, setSensitivity] = useState(40);
-  const [headshot, setHeadshot] = useState(false);
-  const [antiKnock, setAntiKnock] = useState(false);
-  const [speedHack, setSpeedHack] = useState(false);
-  const [wallHack, setWallHack] = useState(false);
-  const [aimLock, setAimLock] = useState(false);
-  const [damageBoost, setDamageBoost] = useState(60);
 
   useEffect(() => {
     const checkSession = async () => {
@@ -185,43 +175,61 @@ const ProxyConfig = () => {
 
   if (!session) return null;
 
-  // Toggle component
-  const Toggle = ({ label, value, onChange, color = "emerald" }: { label: string; value: boolean; onChange: (v: boolean) => void; color?: string }) => (
-    <div className="flex items-center justify-between bg-secondary/20 rounded-lg px-3 py-2.5 border border-border/30">
-      <span className="text-xs text-foreground font-medium">{label}</span>
+  // Animated Toggle component
+  const AnimatedToggle = ({ label, icon, value, onChange }: { label: string; icon: React.ReactNode; value: boolean; onChange: (v: boolean) => void }) => (
+    <div
+      className={`flex items-center justify-between rounded-xl px-4 py-3.5 border transition-all duration-500 ${
+        value
+          ? "bg-primary/5 border-primary/30 shadow-[0_0_15px_rgba(255,255,255,0.05)]"
+          : "bg-secondary/30 border-border/20"
+      }`}
+    >
+      <div className="flex items-center gap-3">
+        <div className={`p-1.5 rounded-lg transition-all duration-500 ${value ? "bg-primary/10 text-primary" : "bg-secondary/50 text-muted-foreground"}`}>
+          {icon}
+        </div>
+        <span className={`text-sm font-medium transition-colors duration-300 ${value ? "text-foreground" : "text-muted-foreground"}`}>{label}</span>
+      </div>
       <button
         onClick={() => onChange(!value)}
-        className={`w-10 h-5.5 rounded-full transition-all relative ${value ? (color === "emerald" ? "bg-emerald-500" : color === "blue" ? "bg-blue-500" : color === "amber" ? "bg-amber-500" : color === "purple" ? "bg-purple-500" : "bg-emerald-500") : "bg-secondary border border-border/50"}`}
-        style={{ width: 40, height: 22 }}
+        className={`relative w-12 h-7 rounded-full transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
+          value ? "bg-primary shadow-[0_0_12px_rgba(255,255,255,0.15)]" : "bg-secondary border border-border/40"
+        }`}
       >
-        <span className={`absolute top-[3px] w-4 h-4 rounded-full transition-transform shadow-sm ${value ? "bg-background translate-x-[20px]" : "bg-muted-foreground/70 translate-x-[3px]"}`} />
+        <span
+          className={`absolute top-[3px] w-[22px] h-[22px] rounded-full transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
+            value
+              ? "translate-x-[23px] bg-primary-foreground shadow-[0_0_8px_rgba(255,255,255,0.3)]"
+              : "translate-x-[3px] bg-muted-foreground/50"
+          }`}
+        />
       </button>
     </div>
   );
 
-  // Slider component
-  const SliderBar = ({ label, value, onChange, min = 0, max = 100, unit = "%" }: { label: string; value: number; onChange: (v: number) => void; min?: number; max?: number; unit?: string }) => (
-    <div className="bg-secondary/20 rounded-lg px-3 py-2.5 border border-border/30">
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-[10px] text-muted-foreground font-medium">{label}</span>
-        <span className="text-[10px] text-foreground font-mono font-medium">{value}{unit}</span>
+  // FOV Slider
+  const FovSlider = ({ value, onChange }: { value: number; onChange: (v: number) => void }) => (
+    <div className="rounded-xl px-4 py-3 bg-secondary/20 border border-border/20 transition-all duration-300">
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-xs text-muted-foreground font-medium">Tamaño de FOV</span>
+        <span className="text-xs text-foreground font-mono bg-secondary/50 px-2 py-0.5 rounded-md">{value}px</span>
       </div>
       <input
         type="range"
-        min={min}
-        max={max}
+        min={40}
+        max={300}
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full h-1 rounded-full appearance-none bg-secondary/60 cursor-pointer accent-emerald-500"
+        className="w-full h-1.5 rounded-full appearance-none cursor-pointer"
         style={{
-          background: `linear-gradient(to right, hsl(142 72% 50%) ${((value - min) / (max - min)) * 100}%, hsl(0 0% 14%) ${((value - min) / (max - min)) * 100}%)`,
+          background: `linear-gradient(to right, hsl(var(--primary)) ${((value - 40) / 260) * 100}%, hsl(var(--secondary)) ${((value - 40) / 260) * 100}%)`,
         }}
       />
     </div>
   );
 
   const renderHome = () => (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between animate-fade-in-up">
         <div className="flex items-center gap-3">
@@ -240,78 +248,57 @@ const ProxyConfig = () => {
       <button
         onClick={launchFreeFire}
         disabled={launchingFF}
-        className="w-full glass-card p-3 flex items-center gap-3 hover:bg-card/90 active:scale-[0.98] transition-all animate-fade-in-up border-orange-500/20"
+        className="w-full glass-card p-3.5 flex items-center gap-3 hover:bg-card/90 active:scale-[0.98] transition-all animate-fade-in-up"
       >
-        {launchingFF ? <Loader2 className="w-5 h-5 text-orange-400 animate-spin" /> : <Gamepad2 className="w-5 h-5 text-orange-400" />}
+        {launchingFF ? <Loader2 className="w-5 h-5 text-primary animate-spin" /> : <Gamepad2 className="w-5 h-5 text-primary" />}
         <div className="flex-1 text-left">
           <span className="text-sm font-medium text-foreground">Free Fire</span>
           {launchingFF && <p className="text-[9px] text-muted-foreground font-mono">{ffStatus}</p>}
         </div>
         {launchingFF && (
           <div className="w-16 h-1 rounded-full bg-secondary/50 overflow-hidden">
-            <div className="h-full bg-orange-400 rounded-full transition-all" style={{ width: `${(ffMethod / FREEFIRE_METHODS.length) * 100}%` }} />
+            <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${(ffMethod / FREEFIRE_METHODS.length) * 100}%` }} />
           </div>
         )}
       </button>
 
-      {/* Game Functions */}
-      <div className="glass-card p-3 animate-fade-in-up space-y-2" style={{ animationDelay: "0.05s" }}>
-        <div className="flex items-center gap-2 mb-1">
+      {/* Modules */}
+      <div className="glass-card p-4 animate-fade-in-up space-y-3" style={{ animationDelay: "0.05s" }}>
+        <div className="flex items-center gap-2 pb-1 border-b border-border/20 mb-1">
           <Crosshair className="w-4 h-4 text-muted-foreground" />
-          <span className="text-xs text-muted-foreground font-medium">Combat Mods</span>
+          <span className="text-xs text-muted-foreground font-semibold tracking-wide uppercase">Módulos</span>
         </div>
-        <Toggle label="No Recoil" value={noRecoil} onChange={setNoRecoil} color="emerald" />
-        <Toggle label="Auto Apuntado" value={autoAim} onChange={setAutoAim} color="blue" />
-        <Toggle label="Bug Mira x2" value={bugMiraX2} onChange={setBugMiraX2} color="amber" />
-        <Toggle label="Headshot Lock" value={headshot} onChange={setHeadshot} color="purple" />
-        <Toggle label="Anti-Knock" value={antiKnock} onChange={setAntiKnock} color="emerald" />
-        <Toggle label="Aim Lock" value={aimLock} onChange={setAimLock} color="blue" />
+
+        <AnimatedToggle label="No Recoil" icon={<Shield className="w-4 h-4" />} value={noRecoil} onChange={setNoRecoil} />
+        <AnimatedToggle label="Auto Apuntado" icon={<Target className="w-4 h-4" />} value={autoAim} onChange={setAutoAim} />
       </div>
 
       {/* FOV Section */}
-      <div className="glass-card p-3 animate-fade-in-up space-y-2" style={{ animationDelay: "0.1s" }}>
-        <div className="flex items-center gap-2 mb-1">
+      <div className="glass-card p-4 animate-fade-in-up space-y-3" style={{ animationDelay: "0.1s" }}>
+        <div className="flex items-center gap-2 pb-1 border-b border-border/20 mb-1">
           <Eye className="w-4 h-4 text-muted-foreground" />
-          <span className="text-xs text-muted-foreground font-medium">Field of View</span>
+          <span className="text-xs text-muted-foreground font-semibold tracking-wide uppercase">Field of View</span>
         </div>
-        <Toggle label="FOV" value={fovEnabled} onChange={setFovEnabled} color="amber" />
+
+        <AnimatedToggle label="FOV Overlay" icon={<Eye className="w-4 h-4" />} value={fovEnabled} onChange={setFovEnabled} />
+
         {fovEnabled && (
-          <SliderBar label="FOV Size" value={fovSize} onChange={setFovSize} min={40} max={300} unit="px" />
+          <div className="animate-fade-in-up">
+            <FovSlider value={fovSize} onChange={setFovSize} />
+          </div>
         )}
-      </div>
-
-      {/* Sliders */}
-      <div className="glass-card p-3 animate-fade-in-up space-y-2" style={{ animationDelay: "0.15s" }}>
-        <div className="flex items-center gap-2 mb-1">
-          <Volume2 className="w-4 h-4 text-muted-foreground" />
-          <span className="text-xs text-muted-foreground font-medium">Performance Tuning</span>
-        </div>
-        <SliderBar label="Aim Smoothness" value={aimSmooth} onChange={setAimSmooth} />
-        <SliderBar label="Fire Rate Boost" value={firerate} onChange={setFirerate} />
-        <SliderBar label="Sensitivity Override" value={sensitivity} onChange={setSensitivity} />
-        <SliderBar label="Damage Multiplier" value={damageBoost} onChange={setDamageBoost} unit="x" />
-      </div>
-
-      {/* Extra toggles */}
-      <div className="glass-card p-3 animate-fade-in-up space-y-2" style={{ animationDelay: "0.2s" }}>
-        <div className="flex items-center gap-2 mb-1">
-          <Zap className="w-4 h-4 text-muted-foreground" />
-          <span className="text-xs text-muted-foreground font-medium">Advanced Exploits</span>
-        </div>
-        <Toggle label="Speed Hack" value={speedHack} onChange={setSpeedHack} color="amber" />
-        <Toggle label="Wall Hack" value={wallHack} onChange={setWallHack} color="purple" />
       </div>
 
       {/* FOV Circle Overlay */}
       {fovEnabled && (
         <div className="fixed inset-0 z-40 pointer-events-none flex items-center justify-center">
           <div
-            className="rounded-full border-2 border-emerald-400/60"
+            className="rounded-full border-2 border-primary/50"
             style={{
               width: fovSize,
               height: fovSize,
-              boxShadow: "0 0 20px rgba(52,211,153,0.15)",
-              transition: "width 0.2s, height 0.2s",
+              boxShadow: "0 0 20px hsl(var(--primary) / 0.1)",
+              transition: "width 0.3s ease-out, height 0.3s ease-out",
             }}
           />
         </div>
