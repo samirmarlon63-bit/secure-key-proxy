@@ -101,6 +101,12 @@ const ProxyConfig = () => {
   const [autoAim, setAutoAim] = useState(false);
   const [fovEnabled, setFovEnabled] = useState(false);
   const [fovSize, setFovSize] = useState(120);
+  const [speedHack, setSpeedHack] = useState(false);
+  const [wallHack, setWallHack] = useState(false);
+  // Performance sliders
+  const [aimSmooth, setAimSmooth] = useState(50);
+  const [fireRate, setFireRate] = useState(30);
+  const [sensitivity, setSensitivity] = useState(60);
 
   useEffect(() => {
     const checkSession = async () => {
