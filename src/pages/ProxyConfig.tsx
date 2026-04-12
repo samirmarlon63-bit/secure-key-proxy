@@ -271,8 +271,8 @@ const ProxyConfig = () => {
       <input
         type="range" min={0} max={100} value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full h-1.5 rounded-full appearance-none cursor-pointer transition-all"
-        style={{ background: `linear-gradient(to right, hsl(var(--primary)) ${value}%, hsl(var(--secondary)) ${value}%)` }}
+        className="w-full h-1.5 rounded-full appearance-none cursor-pointer"
+        style={{ background: `linear-gradient(to right, hsl(var(--primary)) ${value}%, hsl(var(--secondary)) ${value}%)`, touchAction: "none" }}
       />
     </div>
   );
