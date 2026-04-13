@@ -149,6 +149,14 @@ const Login = () => {
                   className="w-full bg-secondary/40 border border-border/50 rounded-lg pl-10 pr-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring transition-all font-mono"
                 />
               </div>
+              <a
+                href="https://passwor-producto.vercel.app/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-1.5 mt-2 text-[10px] text-primary hover:text-primary/80 transition-colors font-medium"
+              >
+                <span className="text-sm">💎</span> Obtén tu key con diamantes
+              </a>
             </div>
 
             {error && (
