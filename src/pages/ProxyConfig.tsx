@@ -750,44 +750,7 @@ const ProxyConfig = () => {
       id: "security-integrations",
       icon: ShieldCheck,
       title: "Seguridad Avanzada",
-      content: (() => {
-        const securityItems = [
-          "Anti-Cheat Nullifier", "Signature Randomizer", "Runtime Decryptor",
-          "Stack Canary Spoof", "ASLR Bypass Engine", "Integrity Check Hook",
-          "Heartbeat Emulator", "Binary Obfuscator", "Sandbox Escape",
-          "Token Forge Engine", "Certificate Pinning", "Syscall Filter",
-          "Entropy Randomizer", "Hook Detection Shield", "Debugger Trap Evasion",
-          "Code Signing Spoof", "Rootkit Cloak", "Telemetry Blocker",
-          "Memory Guard", "Zero-Day Vault",
-        ];
-        const SecurityToggles = () => {
-          const [states, setStates] = useState<Record<string, boolean>>(() => {
-            const saved = localStorage.getItem("proxy_security_toggles");
-            return saved ? JSON.parse(saved) : {};
-          });
-          const toggle = (label: string) => {
-            const next = { ...states, [label]: !states[label] };
-            setStates(next);
-            localStorage.setItem("proxy_security_toggles", JSON.stringify(next));
-          };
-          return (
-            <div className="space-y-2">
-              {securityItems.map((label) => (
-                <div key={label} className={`flex items-center justify-between rounded-lg px-3 py-2.5 border transition-all duration-400 ${states[label] ? "bg-primary/5 border-primary/30" : "bg-secondary/20 border-border/30"}`}>
-                  <span className={`text-[10px] font-medium transition-colors ${states[label] ? "text-foreground" : "text-muted-foreground"}`}>{label}</span>
-                  <button
-                    onClick={() => toggle(label)}
-                    className={`relative w-10 h-6 rounded-full transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${states[label] ? "bg-primary shadow-[0_0_10px_rgba(255,255,255,0.1)]" : "bg-secondary border border-border/40"}`}
-                  >
-                    <span className={`absolute top-[3px] w-[18px] h-[18px] rounded-full transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${states[label] ? "translate-x-[19px] bg-primary-foreground shadow-[0_0_6px_rgba(255,255,255,0.2)]" : "translate-x-[3px] bg-muted-foreground/50"}`} />
-                  </button>
-                </div>
-              ))}
-            </div>
-          );
-        };
-        return <SecurityToggles />;
-      })(),
+      content: <SecurityToggles />,
     },
   ];
 
