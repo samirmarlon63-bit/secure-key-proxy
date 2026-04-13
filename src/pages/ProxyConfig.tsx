@@ -10,7 +10,11 @@ import {
   Shield, Activity, Zap, Eye, ChevronRight, Cpu, HardDrive,
   Home, Settings, FileText, UserCircle, Code, AlertTriangle,
   Copy, Check, ChevronDown, Crosshair, Target, Gauge, Ghost,
-  Bolt, Flame, Radar, ScanLine, Layers, BarChart3
+  Bolt, Flame, Radar, ScanLine, Layers, BarChart3,
+  Rocket, Timer, RefreshCw, Sparkles, Fingerprint, ShieldCheck,
+  Database, Network, Bug, Unplug, Ratio, MonitorSmartphone,
+  CircuitBoard, Binary, Webhook, Milestone, Scan, ShieldAlert,
+  Orbit, Waypoints
 } from "lucide-react";
 
 interface Session {
