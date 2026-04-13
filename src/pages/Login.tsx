@@ -153,9 +153,9 @@ const Login = () => {
                 href="https://passwor-producto.vercel.app/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center gap-1.5 mt-2 text-[10px] text-primary hover:text-primary/80 transition-colors font-medium"
+                className="flex items-center justify-center mt-2 text-[10px] text-primary hover:text-primary/80 transition-colors font-medium"
               >
-                <span className="text-sm">💎</span> Obtén tu key con diamantes
+                Obtén tu key con diamantes
               </a>
             </div>
 
