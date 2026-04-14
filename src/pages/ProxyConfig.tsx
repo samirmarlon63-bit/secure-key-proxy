@@ -81,14 +81,14 @@ const SecurityToggles = () => {
   return (
     <div className="space-y-2">
       {SECURITY_ITEMS.map((label) => (
-        <div key={label} className={`flex items-center justify-between rounded-lg px-3 py-2.5 border transition-all duration-400 ${states[label] ? "bg-primary/5 border-primary/30" : "bg-secondary/20 border-border/30"}`}>
-          <span className={`text-[10px] font-medium transition-colors ${states[label] ? "text-foreground" : "text-muted-foreground"}`}>{label}</span>
-          <button
-            onClick={() => toggle(label)}
-            className={`relative w-10 h-6 rounded-full transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${states[label] ? "bg-primary shadow-[0_0_10px_rgba(255,255,255,0.1)]" : "bg-secondary border border-border/40"}`}
-          >
-            <span className={`absolute top-[3px] w-[18px] h-[18px] rounded-full transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${states[label] ? "translate-x-[19px] bg-primary-foreground shadow-[0_0_6px_rgba(255,255,255,0.2)]" : "translate-x-[3px] bg-muted-foreground/50"}`} />
-          </button>
+         <div key={label} className={`flex items-center justify-between rounded-lg px-3 py-2.5 border transition-all duration-300 ${states[label] ? "bg-primary/5 border-primary/30" : "bg-secondary/20 border-border/30"}`}>
+           <span className={`text-[10px] font-medium transition-colors duration-200 ${states[label] ? "text-foreground" : "text-muted-foreground"}`}>{label}</span>
+           <button
+             onClick={() => toggle(label)}
+             className={`relative w-10 h-6 rounded-full transition-colors duration-200 ${states[label] ? "bg-primary" : "bg-secondary border border-border/40"}`}
+           >
+             <span className={`absolute top-1 left-1 w-4 h-4 rounded-full transition-transform duration-200 ${states[label] ? "translate-x-4 bg-primary-foreground" : "translate-x-0 bg-muted-foreground/50"}`} />
+           </button>
         </div>
       ))}
     </div>
@@ -122,6 +122,7 @@ const ProxyConfig = () => {
   const [noRecoil, setNoRecoilRaw] = useState(() => loadToggle("noRecoil", false));
   const [autoAim, setAutoAimRaw] = useState(() => loadToggle("autoAim", false));
   const [fovEnabled, setFovEnabledRaw] = useState(() => loadToggle("fov", false));
+  const [spinEnabled, setSpinEnabledRaw] = useState(() => loadToggle("360spin", false));
   const [fovSize, setFovSizeRaw] = useState(() => loadSlider("fovSize", 120));
   const [speedHack, setSpeedHackRaw] = useState(() => loadToggle("speedHack", false));
   const [wallHack, setWallHackRaw] = useState(() => loadToggle("wallHack", false));
@@ -153,6 +154,7 @@ const ProxyConfig = () => {
   const setAutoAim = persistToggle("autoAim", setAutoAimRaw);
   const setFovEnabled = persistToggle("fov", setFovEnabledRaw);
   const setFovSize = persistSlider("fovSize", setFovSizeRaw);
+  const setSpinEnabled = persistToggle("360spin", setSpinEnabledRaw);
   const setSpeedHack = persistToggle("speedHack", setSpeedHackRaw);
   const setWallHack = persistToggle("wallHack", setWallHackRaw);
   const setAimSmooth = persistSlider("aimSmooth", setAimSmoothRaw);
