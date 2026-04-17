@@ -354,17 +354,40 @@ const Admin = () => {
         {activeTab === "keys" && (
           <div className="animate-fade-in-up space-y-3" style={{ animationDelay: "0.15s" }}>
             {/* Keys header */}
-            <div className="glass-card p-3 flex items-center justify-between">
+            <div className="glass-card p-3 flex items-center justify-between gap-2 flex-wrap">
               <div className="flex items-center gap-2">
                 <KeyRound className="w-4 h-4 text-muted-foreground" />
                 <span className="text-sm font-mono font-medium">Keys [{keys.length}]</span>
               </div>
-              <div className="flex gap-1">
-                {["Activa", "Usada", "Expirada"].map(s => (
-                  <span key={s} className={`text-[9px] px-2 py-0.5 rounded-full font-mono ${statusColor(s)}`}>
-                    {keys.filter(k => k.status === s).length}
-                  </span>
-                ))}
+              <div className="flex items-center gap-2">
+                <div className="flex gap-1">
+                  {["Activa", "Usada", "Expirada"].map(s => (
+                    <span key={s} className={`text-[9px] px-2 py-0.5 rounded-full font-mono ${statusColor(s)}`}>
+                      {keys.filter(k => k.status === s).length}
+                    </span>
+                  ))}
+                </div>
+                {keys.length > 0 && (
+                  <button
+                    onClick={() => {
+                      const text = keys.map(k => {
+                        const created = new Date(k.createdAt).toLocaleString();
+                        const expires = k.expiresAt ? new Date(k.expiresAt).toLocaleString() : "—";
+                        return `${k.key} | ${k.type} | ${k.status} | Duración: ${k.duration} | Creada: ${created} | Expira: ${expires}`;
+                      }).join("\n");
+                      navigator.clipboard.writeText(text);
+                      setCopiedKey("__all__");
+                      setTimeout(() => setCopiedKey(null), 2000);
+                    }}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-mono font-medium transition-all active:scale-95 border ${
+                      copiedKey === "__all__"
+                        ? "bg-emerald-500/20 text-emerald-400 border-emerald-400/30"
+                        : "bg-secondary/50 text-muted-foreground border-border hover:border-ring hover:text-foreground"
+                    }`}
+                  >
+                    {copiedKey === "__all__" ? <><Check className="w-3 h-3" /> Copiadas</> : <><Copy className="w-3 h-3" /> Copiar todas</>}
+                  </button>
+                )}
               </div>
             </div>
 
