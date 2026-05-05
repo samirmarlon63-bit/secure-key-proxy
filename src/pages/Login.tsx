@@ -38,20 +38,6 @@ const Login = () => {
     const trimmedKey = key.trim();
     const trimmedName = name.trim();
 
-    if (trimmedKey === "117") {
-      const sessionData = {
-        name: trimmedName,
-        key: "117",
-        type: "Normal",
-        expiresAt: null,
-        duration: "Ilimitada",
-      };
-      localStorage.setItem("proxy_session", JSON.stringify(sessionData));
-      navigate("/proxy");
-      setLoading(false);
-      return;
-    }
-
     const foundKey = await validateKey(trimmedKey);
     if (foundKey) {
       const activated = await activateKey(trimmedKey, trimmedName);
