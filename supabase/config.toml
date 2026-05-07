@@ -1,7 +1,16 @@
 project_id = "exlqskmdgspdxiydczzc"
 
-[functions.binance-create-order]
+[functions.payment-create]
 verify_jwt = false
 
-[functions.binance-check-order]
+[functions.payment-status]
+verify_jwt = false
+
+[functions.payment-upload-receipt]
+verify_jwt = false
+
+[functions.telegram-webhook]
+verify_jwt = false
+
+[functions.telegram-setup]
 verify_jwt = false
