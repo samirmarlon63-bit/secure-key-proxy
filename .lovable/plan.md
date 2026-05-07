@@ -1,0 +1,1 @@
+## Resumen\nReemplazar Binance Pay por un flujo PayPal manual con comprobante, validación por IA, aprobación por bot de Telegram y entrega persistente de la key dentro de la web. También renombrar \
