@@ -157,10 +157,10 @@ const Login = () => {
             <button
               type="button"
               onClick={() => navigate("/pay")}
-              className="w-full bg-card/60 backdrop-blur-xl text-foreground font-semibold py-2.5 rounded-lg text-sm border border-border/40 hover:bg-card/80 active:scale-[0.98] transition-all flex items-center justify-center"
-              style={{ boxShadow: "0 0 20px rgba(255,255,255,0.04), inset 0 0 20px rgba(255,255,255,0.02)" }}
+              className="w-full relative overflow-hidden bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-600 text-white font-bold py-3 rounded-lg text-sm border border-cyan-300/40 hover:opacity-95 active:scale-[0.98] transition-all flex items-center justify-center gap-2 animate-pulse-slow"
+              style={{ boxShadow: "0 0 24px rgba(34,211,238,0.5), 0 0 8px rgba(99,102,241,0.4) inset" }}
             >
-              Comprar Key
+              <KeyRound className="w-4 h-4" /> Comprar Key
             </button>
           </form>
         </div>

@@ -5,106 +5,111 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const RECIPIENT = "ModifaxffLopez";
+async function log(supabase: any, payment_id: string, event: string, detail: any) {
+  try { await supabase.from("payment_logs").insert({ payment_id, event, detail }); } catch {}
+}
 
-async function validateReceiptWithAI(imageBase64: string, mime: string, expectedAmount: number) {
+async function looksLikeReceipt(imageBase64: string, mime: string): Promise<{ ok: boolean; reason: string; raw?: any }> {
   const apiKey = Deno.env.get("LOVABLE_API_KEY");
-  if (!apiKey) return { ok: false, reason: "AI no configurada", raw: null };
+  if (!apiKey) return { ok: true, reason: "AI no configurada (auto-aprobado a revisión)" };
 
-  const prompt = `Analiza esta imagen como comprobante de pago de PayPal. Devuelve estrictamente JSON con esta estructura usando la herramienta validate_receipt.
-Verifica:
-- is_paypal: ¿Es un comprobante real de PayPal? (true/false)
-- recipient_name: Nombre del destinatario que aparece (ej: "Modifaxff Lopez", "ModifaxffLopez", o el que veas)
-- recipient_match: ¿El destinatario coincide con "${RECIPIENT}" o "Modifaxff Lopez"? (true/false)
-- amount_detected: Monto numérico detectado en USD
-- amount_match: ¿El monto detectado es exactamente ${expectedAmount} USD? (true/false)
-- confidence: 0.0 a 1.0
-- notes: notas breves`;
+  // Videos: skip AI, send straight to admin
+  if (mime.startsWith("video/")) return { ok: true, reason: "video - revisión manual" };
 
   const body = {
     model: "google/gemini-2.5-flash",
     messages: [{
       role: "user",
       content: [
-        { type: "text", text: prompt },
+        { type: "text", text: "¿Esta imagen parece un comprobante de pago (PayPal, banco, transferencia, recarga de diamantes, app de pago, etc.)? Responde solo con la herramienta." },
         { type: "image_url", image_url: { url: `data:${mime};base64,${imageBase64}` } },
       ],
     }],
     tools: [{
       type: "function",
       function: {
-        name: "validate_receipt",
-        description: "Devuelve la validación del comprobante",
+        name: "check",
         parameters: {
           type: "object",
           properties: {
-            is_paypal: { type: "boolean" },
-            recipient_name: { type: "string" },
-            recipient_match: { type: "boolean" },
-            amount_detected: { type: "number" },
-            amount_match: { type: "boolean" },
-            confidence: { type: "number" },
-            notes: { type: "string" },
+            is_receipt: { type: "boolean", description: "true si parece un comprobante de pago de cualquier tipo" },
+            reason: { type: "string" },
           },
-          required: ["is_paypal", "recipient_match", "amount_match", "confidence"],
+          required: ["is_receipt"],
         },
       },
     }],
-    tool_choice: { type: "function", function: { name: "validate_receipt" } },
+    tool_choice: { type: "function", function: { name: "check" } },
   };
 
-  const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  if (!r.ok) {
-    const t = await r.text();
-    return { ok: false, reason: `IA error ${r.status}`, raw: t };
+  try {
+    const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (!r.ok) return { ok: true, reason: `IA error ${r.status} - revisión manual` };
+    const j = await r.json();
+    const args = j.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
+    if (!args) return { ok: true, reason: "IA sin respuesta - revisión manual" };
+    const parsed = typeof args === "string" ? JSON.parse(args) : args;
+    return { ok: !!parsed.is_receipt, reason: parsed.reason || (parsed.is_receipt ? "comprobante detectado" : "no parece comprobante"), raw: parsed };
+  } catch (e) {
+    return { ok: true, reason: "IA timeout - revisión manual" };
   }
-  const j = await r.json();
-  const args = j.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
-  if (!args) return { ok: false, reason: "IA sin respuesta", raw: j };
-  const parsed = typeof args === "string" ? JSON.parse(args) : args;
-  return { ok: true, ...parsed };
 }
 
-async function sendTelegramReview(order: any, receiptUrl: string, validation: any) {
+async function sendTelegramWithRetry(supabase: any, order: any, mediaUrl: string, isVideo: boolean, aiReason: string): Promise<number | null> {
   const token = Deno.env.get("TELEGRAM_BOT_TOKEN");
   const adminId = Deno.env.get("TELEGRAM_ADMIN_ID");
-  if (!token || !adminId) return null;
+  if (!token || !adminId) {
+    await log(supabase, order.payment_id, "telegram_skip", { reason: "missing token or admin id" });
+    return null;
+  }
 
+  const method = order.payment_method === "diamonds" ? "Diamantes Free Fire" : "PayPal";
   const caption =
     `<b>Nuevo comprobante</b>\n` +
     `ID: <code>${order.payment_id}</code>\n` +
     `Usuario: ${order.alias}${order.email ? ` (${order.email})` : ""}\n` +
     `Plan: ${order.duration}\n` +
-    `Monto: ${order.amount} USD\n` +
-    `Fecha: ${new Date().toLocaleString("es-ES")}\n\n` +
-    `<b>IA:</b> PayPal=${validation.is_paypal ? "✓" : "✗"} | ` +
-    `Receptor=${validation.recipient_match ? "✓" : "✗"} | ` +
-    `Monto=${validation.amount_match ? "✓" : "✗"} | ` +
-    `Conf=${(validation.confidence ?? 0).toFixed(2)}\n` +
-    `Detectado: ${validation.recipient_name || "?"} / ${validation.amount_detected ?? "?"} USD`;
+    `Método: ${method}\n` +
+    `Monto: ${order.amount_display || order.amount}\n` +
+    `Fecha: ${new Date().toLocaleString("es-ES")}\n` +
+    `IA: ${aiReason}`;
 
-  const r = await fetch(`https://api.telegram.org/bot${token}/sendPhoto`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      chat_id: adminId,
-      photo: receiptUrl,
-      caption,
-      parse_mode: "HTML",
-      reply_markup: {
-        inline_keyboard: [[
-          { text: "✅ Aprobar", callback_data: `approve:${order.payment_id}` },
-          { text: "❌ Rechazar", callback_data: `reject:${order.payment_id}` },
-        ]],
-      },
-    }),
-  });
-  const j = await r.json();
-  return j?.result?.message_id ?? null;
+  const reply_markup = {
+    inline_keyboard: [[
+      { text: "Aprobar", callback_data: `approve:${order.payment_id}` },
+      { text: "Rechazar", callback_data: `reject:${order.payment_id}` },
+    ], [
+      { text: "Ver info", callback_data: `info:${order.payment_id}` },
+    ]],
+  };
+
+  const endpoint = isVideo ? "sendVideo" : "sendPhoto";
+  const payload: any = { chat_id: adminId, caption, parse_mode: "HTML", reply_markup };
+  if (isVideo) payload.video = mediaUrl; else payload.photo = mediaUrl;
+
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const r = await fetch(`https://api.telegram.org/bot${token}/${endpoint}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const j = await r.json();
+      if (j.ok) {
+        await log(supabase, order.payment_id, "telegram_sent", { attempt, message_id: j.result.message_id });
+        return j.result.message_id;
+      }
+      await log(supabase, order.payment_id, "telegram_fail", { attempt, response: j });
+    } catch (e) {
+      await log(supabase, order.payment_id, "telegram_error", { attempt, error: String(e) });
+    }
+    await new Promise((r) => setTimeout(r, 800 * attempt));
+  }
+  return null;
 }
 
 Deno.serve(async (req) => {
@@ -123,48 +128,43 @@ Deno.serve(async (req) => {
     if (oErr || !order) throw new Error("Pedido no encontrado");
     if (order.status === "APPROVED") throw new Error("Pedido ya aprobado");
 
-    // Upload receipt
-    const bytes = Uint8Array.from(atob(image_base64), (c) => c.charCodeAt(0));
-    const ext = (mime || "image/jpeg").split("/")[1] || "jpg";
+    const isVideo = (mime || "").startsWith("video/");
+    const ext = (mime || "image/jpeg").split("/")[1]?.split(";")[0] || (isVideo ? "mp4" : "jpg");
     const path = `${order.payment_id}-${Date.now()}.${ext}`;
+
+    const bytes = Uint8Array.from(atob(image_base64), (c) => c.charCodeAt(0));
     const { error: upErr } = await supabase.storage.from("receipts")
       .upload(path, bytes, { contentType: mime || "image/jpeg", upsert: true });
     if (upErr) throw upErr;
     const { data: pub } = supabase.storage.from("receipts").getPublicUrl(path);
     const receiptUrl = pub.publicUrl;
 
-    // AI validation
-    const validation = await validateReceiptWithAI(image_base64, mime || "image/jpeg", Number(order.amount));
+    const ai = await looksLikeReceipt(image_base64, mime || "image/jpeg");
+    await log(supabase, order.payment_id, "ai_check", { ok: ai.ok, reason: ai.reason });
 
-    const aiOk = validation.ok && validation.is_paypal && validation.recipient_match && validation.amount_match;
-
-    if (!aiOk) {
-      const reason = !validation.ok
-        ? (validation.reason || "Validación IA falló")
-        : `IA rechazó: PayPal=${validation.is_paypal} Receptor=${validation.recipient_match} Monto=${validation.amount_match}`;
+    if (!ai.ok) {
       await supabase.from("payment_orders").update({
         receipt_url: receiptUrl,
-        ai_validation: validation,
+        ai_validation: { ok: false, reason: ai.reason },
         status: "REJECTED",
-        rejection_reason: reason,
+        rejection_reason: "El archivo no parece un comprobante de pago",
       }).eq("id", order.id);
-      return new Response(JSON.stringify({ status: "REJECTED", reason }), {
+      return new Response(JSON.stringify({ status: "REJECTED", reason: "No parece comprobante" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Send to Telegram
-    const msgId = await sendTelegramReview(order, receiptUrl, validation);
+    const msgId = await sendTelegramWithRetry(supabase, order, receiptUrl, isVideo, ai.reason);
 
     await supabase.from("payment_orders").update({
       receipt_url: receiptUrl,
-      ai_validation: validation,
+      ai_validation: { ok: true, reason: ai.reason },
       status: "PENDING",
       telegram_message_id: msgId,
       rejection_reason: null,
     }).eq("id", order.id);
 
-    return new Response(JSON.stringify({ status: "PENDING" }), {
+    return new Response(JSON.stringify({ status: "PENDING", telegram_sent: !!msgId }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
