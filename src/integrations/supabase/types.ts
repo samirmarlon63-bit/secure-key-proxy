@@ -44,17 +44,43 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_logs: {
+        Row: {
+          created_at: string
+          detail: Json | null
+          event: string
+          id: string
+          payment_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          detail?: Json | null
+          event: string
+          id?: string
+          payment_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          detail?: Json | null
+          event?: string
+          id?: string
+          payment_id?: string | null
+        }
+        Relationships: []
+      }
       payment_orders: {
         Row: {
           ai_validation: Json | null
           alias: string
           amount: number
+          amount_display: string | null
           assigned_key: string | null
           created_at: string
           duration: string
           email: string | null
           id: string
           payment_id: string
+          payment_method: string
           plan: string
           receipt_url: string | null
           rejection_reason: string | null
@@ -67,12 +93,14 @@ export type Database = {
           ai_validation?: Json | null
           alias: string
           amount: number
+          amount_display?: string | null
           assigned_key?: string | null
           created_at?: string
           duration: string
           email?: string | null
           id?: string
           payment_id: string
+          payment_method?: string
           plan: string
           receipt_url?: string | null
           rejection_reason?: string | null
@@ -85,12 +113,14 @@ export type Database = {
           ai_validation?: Json | null
           alias?: string
           amount?: number
+          amount_display?: string | null
           assigned_key?: string | null
           created_at?: string
           duration?: string
           email?: string | null
           id?: string
           payment_id?: string
+          payment_method?: string
           plan?: string
           receipt_url?: string | null
           rejection_reason?: string | null
