@@ -21,6 +21,27 @@ const reply = (chat_id: number, text: string) => tg("sendMessage", { chat_id, te
 const ack = (id: string, text = "OK") => tg("answerCallbackQuery", { callback_query_id: id, text });
 const editCaption = (chat_id: number, message_id: number, caption: string) =>
   tg("editMessageCaption", { chat_id, message_id, caption, parse_mode: "HTML" });
+const deleteMessage = (chat_id: number, message_id: number) =>
+  tg("deleteMessage", { chat_id, message_id });
+
+async function deleteReceipt(supabase: any, order: any) {
+  try {
+    if (order?.receipt_url) {
+      const marker = "/receipts/";
+      const idx = order.receipt_url.indexOf(marker);
+      if (idx >= 0) {
+        const path = decodeURIComponent(order.receipt_url.slice(idx + marker.length).split("?")[0]);
+        await supabase.storage.from("receipts").remove([path]);
+      }
+    }
+    await supabase.from("payment_orders").update({ receipt_url: null }).eq("id", order.id);
+    await supabase.from("payment_logs").insert({
+      payment_id: order.payment_id, event: "receipt_deleted", detail: { reason: "rejected" },
+    });
+  } catch (e) {
+    console.error("deleteReceipt error", e);
+  }
+}
 
 function genKey(): string {
   const c = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -127,7 +148,9 @@ async function handleCommand(supabase: any, chat_id: number, text: string, admin
       if (!o) { await reply(chat_id, "No encontrado."); return; }
       await supabase.from("payment_orders").update({ status: "REJECTED", rejection_reason: reason }).eq("id", o.id);
       await supabase.from("payment_logs").insert({ payment_id: id, event: "rejected", detail: { reason } });
-      await reply(chat_id, `Rechazado <code>${id}</code>\nMotivo: ${reason}`);
+      await deleteReceipt(supabase, o);
+      if (o.telegram_message_id) { try { await deleteMessage(Number(adminId), Number(o.telegram_message_id)); } catch {} }
+      await reply(chat_id, `Rechazado <code>${id}</code>\nComprobante eliminado.\nMotivo: ${reason}`);
       return;
     }
     case "/cancelar": {
@@ -220,9 +243,9 @@ Deno.serve(async (req) => {
       await ack(cb.id, "Aprobado");
     } else if (action === "reject") {
       await supabase.from("payment_orders").update({ status: "REJECTED", rejection_reason: "Rechazado por administrador" }).eq("id", order.id);
-      await editCaption(chat_id, message_id,
-        `<b>RECHAZADO</b>\nID: <code>${order.payment_id}</code>\nUsuario: ${order.alias}`);
+      await deleteReceipt(supabase, order);
       await ack(cb.id, "Rechazado");
+      try { await deleteMessage(chat_id, message_id); } catch {}
     } else if (action === "info") {
       await ack(cb.id,
         `${order.alias} · ${order.duration} · ${order.amount_display || order.amount} · ${order.email || "sin email"}`);
