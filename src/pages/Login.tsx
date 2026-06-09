@@ -1,64 +1,56 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import VideoBackground from "@/components/VideoBackground";
 import VerifiedBadge from "@/components/VerifiedBadge";
-import { Shield, KeyRound, User, Lock, Fingerprint } from "lucide-react";
-import { validateKey, activateKey, registerActiveUser } from "@/lib/keys";
+import { Shield, Lock, Fingerprint } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable";
 import defaultAvatar from "@/assets/profile-avatar.jpeg";
 
 const Login = () => {
-  const [name, setName] = useState("");
-  const [key, setKey] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const raw = localStorage.getItem("proxy_session");
-    if (raw) {
-      const s = JSON.parse(raw);
-      if (!s.expiresAt || new Date(s.expiresAt).getTime() > Date.now()) {
-        navigate("/proxy");
-      } else {
-        localStorage.removeItem("proxy_session");
-      }
-    }
-  }, [navigate]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-
-    if (!name.trim() || !key.trim()) {
-      setError("Por favor completa todos los campos.");
-      return;
-    }
-
-    setLoading(true);
-    const trimmedKey = key.trim();
-    const trimmedName = name.trim();
-
-    const foundKey = await validateKey(trimmedKey);
-    if (foundKey) {
-      const activated = await activateKey(trimmedKey, trimmedName);
-      if (activated) {
-        await registerActiveUser(trimmedName, activated.key, activated.type, activated.expiresAt || "");
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      if (session?.user) {
+        const u = session.user;
+        const name = (u.user_metadata?.full_name as string) || (u.user_metadata?.name as string) || u.email || "Usuario";
         const sessionData = {
-          name: trimmedName,
-          key: activated.key,
-          type: activated.type,
-          expiresAt: activated.expiresAt,
-          duration: activated.duration,
+          name,
+          key: "google-auth",
+          type: "google",
+          expiresAt: null,
+          duration: null,
         };
         localStorage.setItem("proxy_session", JSON.stringify(sessionData));
         navigate("/proxy");
-      } else {
-        setError("Error al activar la key. Intenta de nuevo.");
       }
-    } else {
-      setError("Key no encontrada, ya usada o expirada.");
+    });
+
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session?.user) navigate("/proxy");
+    });
+
+    return () => sub.subscription.unsubscribe();
+  }, [navigate]);
+
+  const handleGoogle = async () => {
+    setError("");
+    setLoading(true);
+    try {
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
+      });
+      if (result.error) {
+        setError("No se pudo iniciar sesión con Google.");
+        setLoading(false);
+      }
+    } catch {
+      setError("Error de conexión con Google.");
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
@@ -66,11 +58,21 @@ const Login = () => {
       <VideoBackground />
 
       <div className="relative z-10 w-full max-w-sm animate-fade-in-up">
-        {/* Avatar + Title */}
+        {/* Avatar with TikTok-style red story ring */}
         <div className="flex flex-col items-center mb-6">
           <div className="relative mb-3">
-            <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-border shadow-[0_0_40px_rgba(255,255,255,0.06)]">
-              <img src={defaultAvatar} alt="Profile" className="w-full h-full object-cover" />
+            <div
+              className="p-[3px] rounded-full"
+              style={{
+                background: "conic-gradient(from 0deg, #ff0050, #ff4d6d, #ff0050, #c9184a, #ff0050)",
+                boxShadow: "0 0 24px rgba(255,0,80,0.55), 0 0 8px rgba(255,77,109,0.6)",
+              }}
+            >
+              <div className="p-[2px] rounded-full bg-background">
+                <div className="w-24 h-24 rounded-full overflow-hidden">
+                  <img src={defaultAvatar} alt="Profile" className="w-full h-full object-cover" />
+                </div>
+              </div>
             </div>
           </div>
           <div className="flex items-center gap-1.5 mb-1">
@@ -102,64 +104,37 @@ const Login = () => {
             </div>
             <div>
               <span className="text-xs text-foreground font-semibold block">Acceso Seguro</span>
-              <span className="text-[9px] text-muted-foreground/60">Ingresa tus credenciales</span>
+              <span className="text-[9px] text-muted-foreground/60">Inicia sesión con tu cuenta de Google</span>
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-3">
-            <div>
-              <label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider font-medium mb-1 block">Nombre de usuario</label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/60" />
-                <input
-                  type="text"
-                  placeholder="Tu nombre"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full bg-secondary/40 border border-border/50 rounded-lg pl-10 pr-4 py-2.5 text-base text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring transition-all"
-                />
-              </div>
-            </div>
-            <div>
-              <label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider font-medium mb-1 block">Key de acceso</label>
-              <div className="relative">
-                <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/60" />
-                <input
-                  type="text"
-                  placeholder="Ingresa tu key"
-                  value={key}
-                  onChange={(e) => setKey(e.target.value)}
-                  className="w-full bg-secondary/40 border border-border/50 rounded-lg pl-10 pr-4 py-2.5 text-base text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring transition-all font-mono"
-                />
-              </div>
-            </div>
+          {error && (
+            <p className="text-xs text-destructive bg-destructive/10 border border-destructive/20 rounded-lg p-2.5 mb-3">{error}</p>
+          )}
 
-            {error && (
-              <p className="text-xs text-destructive bg-destructive/10 border border-destructive/20 rounded-lg p-2.5">{error}</p>
+          <button
+            type="button"
+            onClick={handleGoogle}
+            disabled={loading}
+            className="w-full bg-white text-gray-800 font-semibold py-3 rounded-lg text-sm hover:bg-gray-100 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-3 border border-border/40"
+          >
+            {loading ? (
+              <span className="flex items-center justify-center gap-2">
+                <span className="w-4 h-4 border-2 border-gray-400 border-t-gray-800 rounded-full animate-spin" />
+                Conectando...
+              </span>
+            ) : (
+              <>
+                <svg className="w-5 h-5" viewBox="0 0 24 24">
+                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+                Continuar con Google
+              </>
             )}
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-foreground text-background font-semibold py-2.5 rounded-lg text-sm hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 mt-1"
-            >
-              {loading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <span className="w-4 h-4 border-2 border-background/30 border-t-background rounded-full animate-spin" />
-                  Verificando...
-                </span>
-              ) : "Conectar"}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => navigate("/pay")}
-              className="w-full relative overflow-hidden bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-600 text-white font-bold py-3 rounded-lg text-sm border border-cyan-300/40 hover:opacity-95 active:scale-[0.98] transition-all flex items-center justify-center gap-2 animate-pulse-slow"
-              style={{ boxShadow: "0 0 24px rgba(34,211,238,0.5), 0 0 8px rgba(99,102,241,0.4) inset" }}
-            >
-              <KeyRound className="w-4 h-4" /> Comprar Key
-            </button>
-          </form>
+          </button>
         </div>
 
         {/* Footer */}
