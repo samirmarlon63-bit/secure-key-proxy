@@ -261,6 +261,11 @@ async function handleTextOrCommand(
   const p = pending.get(cid);
   if (p?.type === "gen_type") {
     const t = trimmed.toLowerCase();
+    if (t.includes("cancelar")) {
+      pending.delete(cid);
+      await reply(chat_id, "Cancelado.");
+      return;
+    }
     if (t !== "normal" && t !== "premium") {
       await reply(chat_id, "Elige <b>Normal</b> o <b>Premium</b>.");
       return;
@@ -290,10 +295,29 @@ async function handleTextOrCommand(
       await reply(chat_id, "Duración inválida.");
       return;
     }
-    const key = await createKey(supabase, p.data.type, trimmed);
+    pending.set(cid, { type: "gen_quantity", data: { type: p.data.type, duration: trimmed } });
+    await tg("sendMessage", {
+      chat_id, parse_mode: "HTML",
+      text: "Cantidad de keys (1-100):",
+      reply_markup: { keyboard: [[{ text: "1" }, { text: "5" }, { text: "10" }], [{ text: "Cancelar" }]], resize_keyboard: true },
+    });
+    return;
+  }
+  if (p?.type === "gen_quantity") {
+    if (trimmed.includes("Cancelar")) {
+      pending.delete(cid);
+      await reply(chat_id, "Cancelado.");
+      return;
+    }
+    const quantity = Number(trimmed);
+    if (!Number.isInteger(quantity) || quantity < 1 || quantity > 100) {
+      await reply(chat_id, "Cantidad inválida. Escribe un número entre 1 y 100.");
+      return;
+    }
+    const keys = await createKeys(supabase, p.data.type, p.data.duration, quantity);
     pending.delete(cid);
     await reply(chat_id,
-      `<b>Key generada</b>\n\nTipo: ${p.data.type}\nDuración: ${trimmed}\n<code>${key}</code>`);
+      `<b>${keys.length} key${keys.length === 1 ? "" : "s"} generada${keys.length === 1 ? "" : "s"}</b>\n\nTipo: ${p.data.type}\nDuración: ${p.data.duration}\n${keys.map((key) => `<code>${key}</code>`).join("\n")}`);
     return;
   }
 
