@@ -1,4 +1,4 @@
-import { useState, FormEvent } from "react";
+import { useEffect, useState, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import VideoBackground from "@/components/VideoBackground";
 import VerifiedBadge from "@/components/VerifiedBadge";
@@ -12,6 +12,18 @@ const Login = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const raw = localStorage.getItem("proxy_session");
+    if (!raw) return;
+    try {
+      const session = JSON.parse(raw);
+      if (session?.expiresAt && new Date(session.expiresAt).getTime() > Date.now()) navigate("/proxy", { replace: true });
+      else localStorage.removeItem("proxy_session");
+    } catch {
+      localStorage.removeItem("proxy_session");
+    }
+  }, [navigate]);
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -30,7 +42,7 @@ const Login = () => {
       }
       const k = await activateKey(cleanKey, cleanName);
       if (!k) {
-        setError("Key inválida, ya usada o expirada.");
+        setError("Key inválida. Solo entran keys nuevas generadas desde el bot.");
         setLoading(false);
         return;
       }
@@ -125,7 +137,7 @@ const Login = () => {
               <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/60" />
               <input
                 type="text"
-                placeholder="PROXY-XXXX-XXXX"
+                placeholder="FFV-XXXX-XXXX"
                 value={key}
                 onChange={(e) => setKey(e.target.value.toUpperCase())}
                 autoComplete="off"
