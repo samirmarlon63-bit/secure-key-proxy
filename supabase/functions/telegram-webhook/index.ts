@@ -16,10 +16,10 @@ const DURATION_MS: Record<string, number> = {
 
 const MAIN_KEYBOARD = {
   keyboard: [
-    [{ text: "🔑 Generar Key" }, { text: "📋 Keys activas" }],
-    [{ text: "⏳ Pendientes" }, { text: "🕒 Últimos" }],
-    [{ text: "📊 Stats" }, { text: "❓ Ayuda" }],
-    [{ text: "🏠 Inicio" }],
+    [{ text: "Generar Key" }, { text: "Keys activas" }],
+    [{ text: "Pendientes" }, { text: "Últimos" }],
+    [{ text: "Stats" }, { text: "Ayuda" }],
+    [{ text: "Inicio" }],
   ],
   resize_keyboard: true,
   is_persistent: true,
@@ -27,12 +27,18 @@ const MAIN_KEYBOARD = {
 
 async function tg(method: string, body: any) {
   const token = Deno.env.get("TELEGRAM_BOT_TOKEN");
+  if (!token) {
+    console.error("TELEGRAM_BOT_TOKEN is not configured");
+    return null;
+  }
   try {
-    return await fetch(`https://api.telegram.org/bot${token}/${method}`, {
+    const response = await fetch(`https://api.telegram.org/bot${token}/${method}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
+    if (!response.ok) console.error("tg api error", method, response.status, await response.text());
+    return response;
   } catch (e) {
     console.error("tg error", method, e);
     return null;
@@ -57,7 +63,6 @@ const authed = new Set<string>();
 const pending = new Map<string, any>();
 
 function isAuthed(chatId: number, adminId: string): boolean {
-  if (String(chatId) === String(adminId)) return true;
   return authed.has(String(chatId));
 }
 
@@ -83,7 +88,7 @@ async function deleteReceipt(supabase: any, order: any) {
 function genKey(): string {
   const c = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   const seg = () => Array.from({ length: 4 }, () => c[Math.floor(Math.random() * c.length)]).join("");
-  return `PROXY-${seg()}-${seg()}`;
+  return `FFV-${seg()}-${seg()}`;
 }
 
 async function createKey(supabase: any, type: string, duration: string): Promise<string> {
@@ -135,24 +140,24 @@ async function handleTextOrCommand(
 
   // Auth gate
   if (!isAuthed(chat_id, adminId)) {
-    if (trimmed === "/start") {
+    if (trimmed === "/start" || trimmed === "Inicio") {
       pending.set(cid, { type: "auth" });
       await tg("sendMessage", {
         chat_id, parse_mode: "HTML",
-        text: "🔒 <b>FFVALHALLA Admin</b>\nIngresa la contraseña secreta para continuar:",
+        text: "<b>FFVALHALLA Admin</b>\nIngresa la contraseña secreta para continuar:",
         reply_markup: { remove_keyboard: true },
       });
       return;
     }
-    if (pending.get(cid)?.type === "auth") {
+    if (pending.get(cid)?.type === "auth" || trimmed === ADMIN_PASSWORD) {
       if (trimmed === ADMIN_PASSWORD) {
         authed.add(cid);
         pending.delete(cid);
         await reply(chat_id,
-          "✅ <b>Acceso concedido</b>\n\nBienvenido al panel de FFVALHALLA.\nUsa la barra inferior para todas las funciones.");
+          "<b>Acceso concedido</b>\n\nBienvenido al panel de FFVALHALLA.\nUsa la barra inferior para todas las funciones.");
         return;
       }
-      await tg("sendMessage", { chat_id, text: "❌ Contraseña incorrecta. Intenta de nuevo:" });
+      await tg("sendMessage", { chat_id, text: "Contraseña incorrecta. Intenta de nuevo:" });
       return;
     }
     await tg("sendMessage", {
@@ -178,7 +183,7 @@ async function handleTextOrCommand(
         keyboard: [
           [{ text: "1 día" }, { text: "7 días" }],
           [{ text: "30 días" }, { text: "1 minuto" }],
-          [{ text: "❌ Cancelar" }],
+          [{ text: "Cancelar" }],
         ],
         resize_keyboard: true,
       },
@@ -198,35 +203,35 @@ async function handleTextOrCommand(
     const key = await createKey(supabase, p.data.type, trimmed);
     pending.delete(cid);
     await reply(chat_id,
-      `✅ <b>Key generada</b>\n\nTipo: ${p.data.type}\nDuración: ${trimmed}\n<code>${key}</code>`);
+      `<b>Key generada</b>\n\nTipo: ${p.data.type}\nDuración: ${trimmed}\n<code>${key}</code>`);
     return;
   }
 
   // Button shortcuts
   switch (trimmed) {
-    case "🏠 Inicio":
+    case "Inicio":
     case "/inicio":
       await reply(chat_id, "<b>FFVALHALLA — Panel principal</b>\nElige una opción de la barra inferior.");
       return;
-    case "❓ Ayuda":
+    case "Ayuda":
     case "/help":
     case "/start":
       await reply(chat_id, helpText());
       return;
-    case "🔑 Generar Key":
+    case "Generar Key":
     case "/generar": {
       pending.set(cid, { type: "gen_type" });
       await tg("sendMessage", {
         chat_id, parse_mode: "HTML",
         text: "Tipo de key:",
         reply_markup: {
-          keyboard: [[{ text: "Normal" }, { text: "Premium" }], [{ text: "❌ Cancelar" }]],
+          keyboard: [[{ text: "Normal" }, { text: "Premium" }], [{ text: "Cancelar" }]],
           resize_keyboard: true,
         },
       });
       return;
     }
-    case "📋 Keys activas":
+    case "Keys activas":
     case "/keys": {
       const { data } = await supabase.from("proxy_keys").select("duration,type").eq("status", "Activa");
       const counts: Record<string, number> = {};
@@ -235,31 +240,31 @@ async function handleTextOrCommand(
         counts[label] = (counts[label] || 0) + 1;
       });
       const txt = Object.entries(counts).map(([d, n]) => `• ${d}: <b>${n}</b>`).join("\n") || "Sin keys disponibles.";
-      await reply(chat_id, `<b>📋 Keys disponibles</b>\n${txt}`);
+      await reply(chat_id, `<b>Keys disponibles</b>\n${txt}`);
       return;
     }
-    case "⏳ Pendientes":
+    case "Pendientes":
     case "/pendientes": {
       const { data } = await supabase.from("payment_orders").select("*")
         .eq("status", "PENDING").order("created_at", { ascending: false }).limit(15);
-      if (!data?.length) { await reply(chat_id, "✅ Sin pedidos pendientes."); return; }
+      if (!data?.length) { await reply(chat_id, "Sin pedidos pendientes."); return; }
       const txt = data.map((o: any) =>
         `<code>${o.payment_id}</code> · ${o.alias} · ${o.duration} · ${o.amount_display || o.amount}`
       ).join("\n");
-      await reply(chat_id, `<b>⏳ Pendientes (${data.length})</b>\n${txt}`);
+      await reply(chat_id, `<b>Pendientes (${data.length})</b>\n${txt}`);
       return;
     }
-    case "🕒 Últimos":
+    case "Últimos":
     case "/ultimos": {
       const { data } = await supabase.from("payment_orders").select("*")
         .order("created_at", { ascending: false }).limit(10);
       const txt = (data || []).map((o: any) =>
         `<code>${o.payment_id}</code> [${o.status}] ${o.alias} ${o.duration}`
       ).join("\n") || "Sin pedidos.";
-      await reply(chat_id, `<b>🕒 Últimos pedidos</b>\n${txt}`);
+      await reply(chat_id, `<b>Últimos pedidos</b>\n${txt}`);
       return;
     }
-    case "📊 Stats":
+    case "Stats":
     case "/stats": {
       const { data } = await supabase.from("payment_orders").select("status, amount, payment_method");
       const all = data || [];
@@ -269,7 +274,7 @@ async function handleTextOrCommand(
       const totalDia = all.filter((o: any) => o.status === "APPROVED" && o.payment_method === "diamonds")
         .reduce((s: number, o: any) => s + Number(o.amount), 0);
       await reply(chat_id,
-        `<b>📊 Estadísticas</b>\n` +
+        `<b>Estadísticas</b>\n` +
         `Aprobados: ${by("APPROVED")}\nPendientes: ${by("PENDING")}\n` +
         `Rechazados: ${by("REJECTED")}\nEsperando: ${by("AWAITING_RECEIPT")}\n` +
         `Total: ${all.length}\n\nIngresos PayPal: $${totalUsd}\nDiamantes: ${totalDia}`);
@@ -278,7 +283,7 @@ async function handleTextOrCommand(
     case "/logout":
       authed.delete(cid);
       pending.delete(cid);
-      await tg("sendMessage", { chat_id, text: "🔒 Sesión cerrada.", reply_markup: { remove_keyboard: true } });
+      await tg("sendMessage", { chat_id, text: "Sesión cerrada.", reply_markup: { remove_keyboard: true } });
       return;
   }
 
@@ -315,7 +320,7 @@ async function handleTextOrCommand(
       if (o.status === "APPROVED") { await reply(chat_id, `Ya aprobado. Key: <code>${o.assigned_key}</code>`); return; }
       const key = await generateKeyForOrder(supabase, o);
       await supabase.from("payment_orders").update({ status: "APPROVED", assigned_key: key, rejection_reason: null }).eq("id", o.id);
-      await reply(chat_id, `✅ Aprobado <code>${o.payment_id}</code>\nKey: <code>${key}</code>`);
+      await reply(chat_id, `Aprobado <code>${o.payment_id}</code>\nKey: <code>${key}</code>`);
       return;
     }
     case "/rechazar": {
@@ -327,7 +332,7 @@ async function handleTextOrCommand(
       await supabase.from("payment_logs").insert({ payment_id: id, event: "rejected", detail: { reason } });
       await deleteReceipt(supabase, o);
       if (o.telegram_message_id) { try { await deleteMessage(Number(adminId), Number(o.telegram_message_id)); } catch {} }
-      await reply(chat_id, `❌ Rechazado <code>${id}</code>\nComprobante eliminado.\nMotivo: ${reason}`);
+      await reply(chat_id, `Rechazado <code>${id}</code>\nComprobante eliminado.\nMotivo: ${reason}`);
       return;
     }
     case "/cancelar": {
@@ -356,7 +361,10 @@ Deno.serve(async (req) => {
 
   const expected = Deno.env.get("TELEGRAM_WEBHOOK_SECRET");
   const got = req.headers.get("x-telegram-bot-api-secret-token");
-  if (!expected || got !== expected) return new Response("Unauthorized", { status: 401, headers: corsHeaders });
+  if (!expected || got !== expected) {
+    console.error("Invalid Telegram webhook secret");
+    return new Response("Unauthorized", { status: 401, headers: corsHeaders });
+  }
 
   const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
   const adminId = Deno.env.get("TELEGRAM_ADMIN_ID") || "";
@@ -369,52 +377,49 @@ Deno.serve(async (req) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
-  // Fire-and-forget processing so /start never freezes.
-  (async () => {
-    try {
-      if (update.message?.text) {
-        const text = update.message.text;
-        const chat_id = update.message.chat.id;
-        await handleTextOrCommand(supabase, chat_id, text, adminId);
-        return;
-      }
+  try {
+    if (update.message?.text) {
+      const text = update.message.text;
+      const chat_id = update.message.chat.id;
+      await handleTextOrCommand(supabase, chat_id, text, adminId);
+      return new Response("ok", { headers: corsHeaders });
+    }
 
-      const cb = update.callback_query;
-      if (!cb) return;
+    const cb = update.callback_query;
+    if (!cb) return new Response("ok", { headers: corsHeaders });
 
-      const data: string = cb.data || "";
-      const [action, paymentId] = data.split(":");
-      const chat_id = cb.message?.chat?.id;
-      const message_id = cb.message?.message_id;
+    const data: string = cb.data || "";
+    const [action, paymentId] = data.split(":");
+    const chat_id = cb.message?.chat?.id;
+    const message_id = cb.message?.message_id;
 
-      if (!isAuthed(Number(cb.from?.id), adminId)) {
-        await ack(cb.id, "Envía /start y autentícate primero.");
-        return;
-      }
+    if (!isAuthed(Number(chat_id), adminId)) {
+      await ack(cb.id, "Envía /start y autentícate primero.");
+      return new Response("ok", { headers: corsHeaders });
+    }
 
-      const { data: order } = await supabase.from("payment_orders").select("*").eq("payment_id", paymentId).maybeSingle();
-      if (!order) { await ack(cb.id, "No encontrado"); return; }
+    const { data: order } = await supabase.from("payment_orders").select("*").eq("payment_id", paymentId).maybeSingle();
+    if (!order) { await ack(cb.id, "No encontrado"); return new Response("ok", { headers: corsHeaders }); }
 
-      if (action === "approve") {
-        if (order.status === "APPROVED") { await ack(cb.id, "Ya aprobado"); return; }
+    if (action === "approve") {
+        if (order.status === "APPROVED") { await ack(cb.id, "Ya aprobado"); return new Response("ok", { headers: corsHeaders }); }
         const key = await generateKeyForOrder(supabase, order);
         await supabase.from("payment_orders").update({ status: "APPROVED", assigned_key: key, rejection_reason: null }).eq("id", order.id);
         await editCaption(chat_id, message_id,
-          `<b>✅ APROBADO</b>\nID: <code>${order.payment_id}</code>\nUsuario: ${order.alias}\nPlan: ${order.duration}\nKey: <code>${key}</code>`);
+          `<b>APROBADO</b>\nID: <code>${order.payment_id}</code>\nUsuario: ${order.alias}\nPlan: ${order.duration}\nKey: <code>${key}</code>`);
         await ack(cb.id, "Aprobado");
-      } else if (action === "reject") {
+    } else if (action === "reject") {
         await supabase.from("payment_orders").update({ status: "REJECTED", rejection_reason: "Rechazado por administrador" }).eq("id", order.id);
         await deleteReceipt(supabase, order);
         await ack(cb.id, "Rechazado");
         try { await deleteMessage(chat_id, message_id); } catch {}
-      } else if (action === "info") {
+    } else if (action === "info") {
         await ack(cb.id,
           `${order.alias} · ${order.duration} · ${order.amount_display || order.amount} · ${order.email || "sin email"}`);
-      }
-    } catch (e) {
-      console.error("processing error", e);
     }
-  })();
+  } catch (e) {
+    console.error("processing error", e);
+  }
 
   return new Response("ok", { headers: corsHeaders });
 });

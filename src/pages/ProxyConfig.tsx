@@ -206,7 +206,12 @@ const ProxyConfig = () => {
     if (!session?.expiresAt) return;
     const interval = setInterval(() => {
       const diff = new Date(session.expiresAt!).getTime() - Date.now();
-      if (diff <= 0) { setTimeLeft("Expirada"); return; }
+      if (diff <= 0) {
+        setTimeLeft("Expirada");
+        localStorage.removeItem("proxy_session");
+        navigate("/", { replace: true });
+        return;
+      }
       const d = Math.floor(diff / 86400000);
       const h = Math.floor((diff % 86400000) / 3600000);
       const m = Math.floor((diff % 3600000) / 60000);

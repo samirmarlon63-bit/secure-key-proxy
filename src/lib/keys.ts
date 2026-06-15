@@ -185,8 +185,9 @@ export async function validateKey(inputKey: string): Promise<ProxyKey | null> {
 
 export async function activateKey(inputKey: string, userName: string): Promise<ProxyKey | null> {
   const clean = inputKey.trim().toUpperCase();
+  if (!clean.startsWith('FFV-')) return null;
   const { data } = await supabase.from('proxy_keys').select('*').ilike('key', clean).eq('status', 'Activa').single();
-  if (!data) return null;
+  if (!data || !data.duration_ms || data.duration_ms <= 0) return null;
 
   const now = new Date();
   const expiresAt = new Date(now.getTime() + data.duration_ms).toISOString();
@@ -199,6 +200,8 @@ export async function activateKey(inputKey: string, userName: string): Promise<P
   }).eq('key', data.key);
 
   if (error) return null;
+
+  await registerActiveUser(userName, data.key, data.type, expiresAt);
 
   return {
     key: data.key,
