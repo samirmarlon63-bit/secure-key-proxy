@@ -170,6 +170,24 @@ export type Database = {
         }
         Relationships: []
       }
+      telegram_admin_sessions: {
+        Row: {
+          authenticated_at: string
+          chat_id: string
+          last_seen_at: string
+        }
+        Insert: {
+          authenticated_at?: string
+          chat_id: string
+          last_seen_at?: string
+        }
+        Update: {
+          authenticated_at?: string
+          chat_id?: string
+          last_seen_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
