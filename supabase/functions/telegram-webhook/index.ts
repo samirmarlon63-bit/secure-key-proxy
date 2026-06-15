@@ -240,7 +240,7 @@ async function handleTextOrCommand(
         counts[label] = (counts[label] || 0) + 1;
       });
       const txt = Object.entries(counts).map(([d, n]) => `• ${d}: <b>${n}</b>`).join("\n") || "Sin keys disponibles.";
-      await reply(chat_id, `<b>📋 Keys disponibles</b>\n${txt}`);
+      await reply(chat_id, `<b>Keys disponibles</b>\n${txt}`);
       return;
     }
     case "Pendientes":
@@ -251,7 +251,7 @@ async function handleTextOrCommand(
       const txt = data.map((o: any) =>
         `<code>${o.payment_id}</code> · ${o.alias} · ${o.duration} · ${o.amount_display || o.amount}`
       ).join("\n");
-      await reply(chat_id, `<b>⏳ Pendientes (${data.length})</b>\n${txt}`);
+      await reply(chat_id, `<b>Pendientes (${data.length})</b>\n${txt}`);
       return;
     }
     case "Últimos":
@@ -261,7 +261,7 @@ async function handleTextOrCommand(
       const txt = (data || []).map((o: any) =>
         `<code>${o.payment_id}</code> [${o.status}] ${o.alias} ${o.duration}`
       ).join("\n") || "Sin pedidos.";
-      await reply(chat_id, `<b>🕒 Últimos pedidos</b>\n${txt}`);
+      await reply(chat_id, `<b>Últimos pedidos</b>\n${txt}`);
       return;
     }
     case "Stats":
@@ -274,7 +274,7 @@ async function handleTextOrCommand(
       const totalDia = all.filter((o: any) => o.status === "APPROVED" && o.payment_method === "diamonds")
         .reduce((s: number, o: any) => s + Number(o.amount), 0);
       await reply(chat_id,
-        `<b>📊 Estadísticas</b>\n` +
+        `<b>Estadísticas</b>\n` +
         `Aprobados: ${by("APPROVED")}\nPendientes: ${by("PENDING")}\n` +
         `Rechazados: ${by("REJECTED")}\nEsperando: ${by("AWAITING_RECEIPT")}\n` +
         `Total: ${all.length}\n\nIngresos PayPal: $${totalUsd}\nDiamantes: ${totalDia}`);
@@ -283,7 +283,7 @@ async function handleTextOrCommand(
     case "/logout":
       authed.delete(cid);
       pending.delete(cid);
-      await tg("sendMessage", { chat_id, text: "🔒 Sesión cerrada.", reply_markup: { remove_keyboard: true } });
+      await tg("sendMessage", { chat_id, text: "Sesión cerrada.", reply_markup: { remove_keyboard: true } });
       return;
   }
 
