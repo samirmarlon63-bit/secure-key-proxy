@@ -356,11 +356,19 @@ async function handleTextOrCommand(
   }
 }
 
+async function deriveSecret(token: string): Promise<string> {
+  const data = new TextEncoder().encode(`telegram-webhook:${token}`);
+  const digest = await crypto.subtle.digest("SHA-256", data);
+  return btoa(String.fromCharCode(...new Uint8Array(digest)))
+    .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
-  const expected = Deno.env.get("TELEGRAM_WEBHOOK_SECRET");
-  const got = req.headers.get("x-telegram-bot-api-secret-token");
+  const token = Deno.env.get("TELEGRAM_BOT_TOKEN") || "";
+  const expected = token ? await deriveSecret(token) : "";
+  const got = req.headers.get("x-telegram-bot-api-secret-token") || "";
   if (!expected || got !== expected) {
     console.error("Invalid Telegram webhook secret");
     return new Response("Unauthorized", { status: 401, headers: corsHeaders });
