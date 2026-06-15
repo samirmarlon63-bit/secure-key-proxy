@@ -125,12 +125,57 @@ function genKey(): string {
 async function createKey(supabase: any, type: string, duration: string): Promise<string> {
   const durationMs = DURATION_MS[duration] || 0;
   const key = genKey();
-  await supabase.from("proxy_keys").insert({
+  const { error } = await supabase.from("proxy_keys").insert({
     key, type, status: "Activa",
     duration, duration_ms: durationMs,
     created_at: new Date().toISOString(),
   });
+  if (error) throw new Error(`createKey failed: ${error.message}`);
   return key;
+}
+
+async function createKeys(supabase: any, type: string, duration: string, quantity: number): Promise<string[]> {
+  const count = Math.max(1, Math.min(100, Number(quantity) || 1));
+  const durationMs = DURATION_MS[duration] || 0;
+  const rows = Array.from({ length: count }, () => ({
+    key: genKey(),
+    type,
+    status: "Activa",
+    duration,
+    duration_ms: durationMs,
+    created_at: new Date().toISOString(),
+  }));
+  const { error } = await supabase.from("proxy_keys").insert(rows);
+  if (error) throw new Error(`createKeys failed: ${error.message}`);
+  return rows.map((r) => r.key);
+}
+
+function cleanKey(value = ""): string {
+  return value.trim().toUpperCase();
+}
+
+function timeLeft(expiresAt?: string): string {
+  if (!expiresAt) return "—";
+  const diff = new Date(expiresAt).getTime() - Date.now();
+  if (diff <= 0) return "Expirada";
+  const d = Math.floor(diff / 86400000);
+  const h = Math.floor((diff % 86400000) / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  if (d > 0) return `${d}d ${h}h`;
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m`;
+}
+
+async function changeKeyTime(supabase: any, key: string, deltaMs: number): Promise<string> {
+  const { data, error } = await supabase.from("proxy_keys")
+    .select("key,expires_at,status").ilike("key", cleanKey(key)).maybeSingle();
+  if (error || !data || !data.expires_at) return "Key no encontrada o sin expiración activa.";
+  const next = new Date(new Date(data.expires_at).getTime() + deltaMs);
+  const status = next.getTime() <= Date.now() ? "Expirada" : "Usada";
+  const expires_at = next.toISOString();
+  await supabase.from("proxy_keys").update({ expires_at, status }).eq("key", data.key);
+  await supabase.from("active_users").update({ expires_at }).eq("key", data.key);
+  return `Tiempo actualizado para <code>${data.key}</code>\nExpira: ${next.toLocaleString("es-ES")}\nRestante: ${timeLeft(expires_at)}`;
 }
 
 async function generateKeyForOrder(supabase: any, order: any): Promise<string> {
