@@ -14,12 +14,21 @@ const DURATION_MS: Record<string, number> = {
   "30 días": 30 * 24 * 60 * 60 * 1000,
 };
 
+const ADD_TIME_MS: Record<string, number> = {
+  "30m": 30 * 60 * 1000,
+  "1h": 60 * 60 * 1000,
+  "6h": 6 * 60 * 60 * 1000,
+  "12h": 12 * 60 * 60 * 1000,
+  "1d": 24 * 60 * 60 * 1000,
+  "7d": 7 * 24 * 60 * 60 * 1000,
+};
+
 const MAIN_KEYBOARD = {
   keyboard: [
     [{ text: "Generar Key" }, { text: "Keys activas" }],
-    [{ text: "Pendientes" }, { text: "Últimos" }],
-    [{ text: "Stats" }, { text: "Ayuda" }],
-    [{ text: "Inicio" }],
+    [{ text: "Usuarios" }, { text: "Pendientes" }],
+    [{ text: "Últimos" }, { text: "Stats" }],
+    [{ text: "Ayuda" }, { text: "Inicio" }],
   ],
   resize_keyboard: true,
   is_persistent: true,
@@ -57,13 +66,34 @@ const editCaption = (chat_id: number, message_id: number, caption: string) =>
 const deleteMessage = (chat_id: number, message_id: number) =>
   tg("deleteMessage", { chat_id, message_id });
 
-// In-memory auth (per cold start). Persists during function lifetime.
-const authed = new Set<string>();
 // Pending interactive flows: chat_id -> { type, step, data }
 const pending = new Map<string, any>();
 
-function isAuthed(chatId: number, adminId: string): boolean {
-  return authed.has(String(chatId));
+function isAllowedAdmin(chatId: number, adminId: string): boolean {
+  return !adminId || String(chatId) === String(adminId);
+}
+
+async function isAuthed(supabase: any, chatId: number, adminId: string): Promise<boolean> {
+  if (!isAllowedAdmin(chatId, adminId)) return false;
+  const { data } = await supabase.from("telegram_admin_sessions")
+    .select("chat_id").eq("chat_id", String(chatId)).maybeSingle();
+  if (data) {
+    await supabase.from("telegram_admin_sessions")
+      .update({ last_seen_at: new Date().toISOString() }).eq("chat_id", String(chatId));
+  }
+  return !!data;
+}
+
+async function saveAuth(supabase: any, chatId: number) {
+  await supabase.from("telegram_admin_sessions").upsert({
+    chat_id: String(chatId),
+    authenticated_at: new Date().toISOString(),
+    last_seen_at: new Date().toISOString(),
+  }, { onConflict: "chat_id" });
+}
+
+async function clearAuth(supabase: any, chatId: number) {
+  await supabase.from("telegram_admin_sessions").delete().eq("chat_id", String(chatId));
 }
 
 async function deleteReceipt(supabase: any, order: any) {
@@ -94,12 +124,57 @@ function genKey(): string {
 async function createKey(supabase: any, type: string, duration: string): Promise<string> {
   const durationMs = DURATION_MS[duration] || 0;
   const key = genKey();
-  await supabase.from("proxy_keys").insert({
+  const { error } = await supabase.from("proxy_keys").insert({
     key, type, status: "Activa",
     duration, duration_ms: durationMs,
     created_at: new Date().toISOString(),
   });
+  if (error) throw new Error(`createKey failed: ${error.message}`);
   return key;
+}
+
+async function createKeys(supabase: any, type: string, duration: string, quantity: number): Promise<string[]> {
+  const count = Math.max(1, Math.min(100, Number(quantity) || 1));
+  const durationMs = DURATION_MS[duration] || 0;
+  const rows = Array.from({ length: count }, () => ({
+    key: genKey(),
+    type,
+    status: "Activa",
+    duration,
+    duration_ms: durationMs,
+    created_at: new Date().toISOString(),
+  }));
+  const { error } = await supabase.from("proxy_keys").insert(rows);
+  if (error) throw new Error(`createKeys failed: ${error.message}`);
+  return rows.map((r) => r.key);
+}
+
+function cleanKey(value = ""): string {
+  return value.trim().toUpperCase();
+}
+
+function timeLeft(expiresAt?: string): string {
+  if (!expiresAt) return "—";
+  const diff = new Date(expiresAt).getTime() - Date.now();
+  if (diff <= 0) return "Expirada";
+  const d = Math.floor(diff / 86400000);
+  const h = Math.floor((diff % 86400000) / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  if (d > 0) return `${d}d ${h}h`;
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m`;
+}
+
+async function changeKeyTime(supabase: any, key: string, deltaMs: number): Promise<string> {
+  const { data, error } = await supabase.from("proxy_keys")
+    .select("key,expires_at,status").ilike("key", cleanKey(key)).maybeSingle();
+  if (error || !data || !data.expires_at) return "Key no encontrada o sin expiración activa.";
+  const next = new Date(new Date(data.expires_at).getTime() + deltaMs);
+  const status = next.getTime() <= Date.now() ? "Expirada" : "Usada";
+  const expires_at = next.toISOString();
+  await supabase.from("proxy_keys").update({ expires_at, status }).eq("key", data.key);
+  await supabase.from("active_users").update({ expires_at }).eq("key", data.key);
+  return `Tiempo actualizado para <code>${data.key}</code>\nExpira: ${next.toLocaleString("es-ES")}\nRestante: ${timeLeft(expires_at)}`;
 }
 
 async function generateKeyForOrder(supabase: any, order: any): Promise<string> {
@@ -115,7 +190,16 @@ function helpText(): string {
     "<b>FFVALHALLA — Admin Bot</b>\n\n" +
     "Usa los botones de abajo o estos comandos:\n\n" +
     "/generar — generar nueva key (interactivo)\n" +
+    "/generar Normal 7 días 5 — generar varias keys\n" +
     "/keys — keys activas disponibles\n" +
+    "/usuarios — usuarios activos\n" +
+    "/bloquear KEY — bloquear usuario\n" +
+    "/desbloquear KEY — desbloquear usuario\n" +
+    "/sacar KEY — sacar sesión activa\n" +
+    "/eliminarusuario KEY — eliminar usuario y key\n" +
+    "/sumar KEY 1h — agregar tiempo: 30m, 1h, 6h, 12h, 1d, 7d\n" +
+    "/reducir KEY 6h — reducir tiempo\n" +
+    "/eliminarkey KEY — eliminar key\n" +
     "/pendientes — pedidos en revisión\n" +
     "/ultimos — últimos 10 pedidos\n" +
     "/buscar HG-XXXX — buscar pedido\n" +
@@ -139,7 +223,12 @@ async function handleTextOrCommand(
   const trimmed = text.trim();
 
   // Auth gate
-  if (!isAuthed(chat_id, adminId)) {
+  const authed = await isAuthed(supabase, chat_id, adminId);
+  if (!authed) {
+    if (!isAllowedAdmin(chat_id, adminId)) {
+      await tg("sendMessage", { chat_id, text: "Acceso denegado.", reply_markup: { remove_keyboard: true } });
+      return;
+    }
     if (trimmed === "/start" || trimmed === "Inicio") {
       pending.set(cid, { type: "auth" });
       await tg("sendMessage", {
@@ -151,7 +240,7 @@ async function handleTextOrCommand(
     }
     if (pending.get(cid)?.type === "auth" || trimmed === ADMIN_PASSWORD) {
       if (trimmed === ADMIN_PASSWORD) {
-        authed.add(cid);
+        await saveAuth(supabase, chat_id);
         pending.delete(cid);
         await reply(chat_id,
           "<b>Acceso concedido</b>\n\nBienvenido al panel de FFVALHALLA.\nUsa la barra inferior para todas las funciones.");
@@ -171,6 +260,11 @@ async function handleTextOrCommand(
   const p = pending.get(cid);
   if (p?.type === "gen_type") {
     const t = trimmed.toLowerCase();
+    if (t.includes("cancelar")) {
+      pending.delete(cid);
+      await reply(chat_id, "Cancelado.");
+      return;
+    }
     if (t !== "normal" && t !== "premium") {
       await reply(chat_id, "Elige <b>Normal</b> o <b>Premium</b>.");
       return;
@@ -200,10 +294,29 @@ async function handleTextOrCommand(
       await reply(chat_id, "Duración inválida.");
       return;
     }
-    const key = await createKey(supabase, p.data.type, trimmed);
+    pending.set(cid, { type: "gen_quantity", data: { type: p.data.type, duration: trimmed } });
+    await tg("sendMessage", {
+      chat_id, parse_mode: "HTML",
+      text: "Cantidad de keys (1-100):",
+      reply_markup: { keyboard: [[{ text: "1" }, { text: "5" }, { text: "10" }], [{ text: "Cancelar" }]], resize_keyboard: true },
+    });
+    return;
+  }
+  if (p?.type === "gen_quantity") {
+    if (trimmed.includes("Cancelar")) {
+      pending.delete(cid);
+      await reply(chat_id, "Cancelado.");
+      return;
+    }
+    const quantity = Number(trimmed);
+    if (!Number.isInteger(quantity) || quantity < 1 || quantity > 100) {
+      await reply(chat_id, "Cantidad inválida. Escribe un número entre 1 y 100.");
+      return;
+    }
+    const keys = await createKeys(supabase, p.data.type, p.data.duration, quantity);
     pending.delete(cid);
     await reply(chat_id,
-      `<b>Key generada</b>\n\nTipo: ${p.data.type}\nDuración: ${trimmed}\n<code>${key}</code>`);
+      `<b>${keys.length} key${keys.length === 1 ? "" : "s"} generada${keys.length === 1 ? "" : "s"}</b>\n\nTipo: ${p.data.type}\nDuración: ${p.data.duration}\n${keys.map((key) => `<code>${key}</code>`).join("\n")}`);
     return;
   }
 
@@ -220,6 +333,16 @@ async function handleTextOrCommand(
       return;
     case "Generar Key":
     case "/generar": {
+      const direct = trimmed.match(/^\/generar\s+(Normal|Premium)\s+(.+?)\s+(\d+)$/i);
+      if (direct) {
+        const type = direct[1].toLowerCase() === "premium" ? "Premium" : "Normal";
+        const duration = direct[2].trim();
+        const quantity = Number(direct[3]);
+        if (!DURATION_MS[duration]) { await reply(chat_id, "Duración inválida. Usa: 1 minuto, 1 día, 7 días o 30 días."); return; }
+        const keys = await createKeys(supabase, type, duration, quantity);
+        await reply(chat_id, `<b>${keys.length} keys generadas</b>\nTipo: ${type}\nDuración: ${duration}\n\n${keys.map((k) => `<code>${k}</code>`).join("\n")}`);
+        return;
+      }
       pending.set(cid, { type: "gen_type" });
       await tg("sendMessage", {
         chat_id, parse_mode: "HTML",
@@ -233,14 +356,24 @@ async function handleTextOrCommand(
     }
     case "Keys activas":
     case "/keys": {
-      const { data } = await supabase.from("proxy_keys").select("duration,type").eq("status", "Activa");
+      const { data } = await supabase.from("proxy_keys").select("key,duration,type,status,used_by,expires_at").order("created_at", { ascending: false }).limit(80);
       const counts: Record<string, number> = {};
-      (data || []).forEach((k: any) => {
+      (data || []).filter((k: any) => k.status === "Activa").forEach((k: any) => {
         const label = `${k.type} · ${k.duration}`;
         counts[label] = (counts[label] || 0) + 1;
       });
-      const txt = Object.entries(counts).map(([d, n]) => `• ${d}: <b>${n}</b>`).join("\n") || "Sin keys disponibles.";
-      await reply(chat_id, `<b>Keys disponibles</b>\n${txt}`);
+      const summary = Object.entries(counts).map(([d, n]) => `• ${d}: <b>${n}</b>`).join("\n") || "Sin keys disponibles.";
+      const latest = (data || []).slice(0, 20).map((k: any) => `<code>${k.key}</code> · ${k.type} · ${k.duration} · ${k.status}${k.used_by ? ` · ${k.used_by}` : ""}`).join("\n");
+      await reply(chat_id, `<b>Keys disponibles</b>\n${summary}\n\n<b>Últimas keys</b>\n${latest || "Sin keys."}`);
+      return;
+    }
+    case "Usuarios":
+    case "/usuarios": {
+      const { data } = await supabase.from("active_users").select("*").order("login_at", { ascending: false }).limit(30);
+      const txt = (data || []).map((u: any) =>
+        `<b>${u.name}</b> ${u.blocked ? "[BLOQUEADO]" : "[ONLINE]"}\n<code>${u.key}</code> · ${u.type} · ${timeLeft(u.expires_at)}`
+      ).join("\n\n") || "Sin sesiones activas.";
+      await reply(chat_id, `<b>Usuarios activos (${data?.length || 0})</b>\n${txt}`);
       return;
     }
     case "Pendientes":
@@ -266,22 +399,31 @@ async function handleTextOrCommand(
     }
     case "Stats":
     case "/stats": {
-      const { data } = await supabase.from("payment_orders").select("status, amount, payment_method");
+      const [{ data }, { data: keyRows }, { data: userRows }] = await Promise.all([
+        supabase.from("payment_orders").select("status, amount, payment_method"),
+        supabase.from("proxy_keys").select("status"),
+        supabase.from("active_users").select("blocked"),
+      ]);
       const all = data || [];
+      const keys = keyRows || [];
+      const users = userRows || [];
       const by = (s: string) => all.filter((o: any) => o.status === s).length;
+      const keyBy = (s: string) => keys.filter((k: any) => k.status === s).length;
       const totalUsd = all.filter((o: any) => o.status === "APPROVED" && o.payment_method === "paypal")
         .reduce((s: number, o: any) => s + Number(o.amount), 0);
       const totalDia = all.filter((o: any) => o.status === "APPROVED" && o.payment_method === "diamonds")
         .reduce((s: number, o: any) => s + Number(o.amount), 0);
       await reply(chat_id,
         `<b>Estadísticas</b>\n` +
+        `Keys: ${keys.length} · Activas: ${keyBy("Activa")} · Usadas: ${keyBy("Usada")} · Expiradas: ${keyBy("Expirada")}\n` +
+        `Usuarios: ${users.length} · Online: ${users.filter((u: any) => !u.blocked).length} · Bloqueados: ${users.filter((u: any) => u.blocked).length}\n\n` +
         `Aprobados: ${by("APPROVED")}\nPendientes: ${by("PENDING")}\n` +
         `Rechazados: ${by("REJECTED")}\nEsperando: ${by("AWAITING_RECEIPT")}\n` +
         `Total: ${all.length}\n\nIngresos PayPal: $${totalUsd}\nDiamantes: ${totalDia}`);
       return;
     }
     case "/logout":
-      authed.delete(cid);
+      await clearAuth(supabase, chat_id);
       pending.delete(cid);
       await tg("sendMessage", { chat_id, text: "Sesión cerrada.", reply_markup: { remove_keyboard: true } });
       return;
@@ -290,10 +432,69 @@ async function handleTextOrCommand(
   // Parameterized commands
   const [cmd, ...args] = trimmed.split(/\s+/);
   switch (cmd.toLowerCase()) {
+    case "/generar": {
+      const typeArg = args[0]?.toLowerCase();
+      const quantityArg = args[args.length - 1];
+      const duration = args.slice(1, -1).join(" ");
+      const type = typeArg === "premium" ? "Premium" : typeArg === "normal" ? "Normal" : "";
+      const quantity = Number(quantityArg);
+      if (!type || !DURATION_MS[duration] || !Number.isInteger(quantity)) {
+        await reply(chat_id, "Uso: /generar Normal 7 días 5");
+        return;
+      }
+      const keys = await createKeys(supabase, type, duration, quantity);
+      await reply(chat_id, `<b>${keys.length} keys generadas</b>\nTipo: ${type}\nDuración: ${duration}\n\n${keys.map((k) => `<code>${k}</code>`).join("\n")}`);
+      return;
+    }
+    case "/eliminarkey": {
+      const key = cleanKey(args[0]); if (!key) { await reply(chat_id, "Uso: /eliminarkey KEY"); return; }
+      await supabase.from("proxy_keys").delete().ilike("key", key);
+      await reply(chat_id, `Key eliminada: <code>${key}</code>`);
+      return;
+    }
+    case "/bloquear": {
+      const key = cleanKey(args[0]); if (!key) { await reply(chat_id, "Uso: /bloquear KEY"); return; }
+      await supabase.from("active_users").update({ blocked: true }).ilike("key", key);
+      await reply(chat_id, `Usuario bloqueado: <code>${key}</code>`);
+      return;
+    }
+    case "/desbloquear": {
+      const key = cleanKey(args[0]); if (!key) { await reply(chat_id, "Uso: /desbloquear KEY"); return; }
+      await supabase.from("active_users").update({ blocked: false }).ilike("key", key);
+      await reply(chat_id, `Usuario desbloqueado: <code>${key}</code>`);
+      return;
+    }
+    case "/sacar": {
+      const key = cleanKey(args[0]); if (!key) { await reply(chat_id, "Uso: /sacar KEY"); return; }
+      await supabase.from("active_users").delete().ilike("key", key);
+      await reply(chat_id, `Sesión removida: <code>${key}</code>`);
+      return;
+    }
+    case "/eliminarusuario": {
+      const key = cleanKey(args[0]); if (!key) { await reply(chat_id, "Uso: /eliminarusuario KEY"); return; }
+      await supabase.from("active_users").delete().ilike("key", key);
+      await supabase.from("proxy_keys").delete().ilike("key", key);
+      await reply(chat_id, `Usuario y key eliminados: <code>${key}</code>`);
+      return;
+    }
+    case "/sumar":
+    case "/reducir": {
+      const key = cleanKey(args[0]);
+      const amount = args[1]?.toLowerCase();
+      const ms = ADD_TIME_MS[amount];
+      if (!key || !ms) { await reply(chat_id, `Uso: ${cmd.toLowerCase()} KEY 1h\nOpciones: 30m, 1h, 6h, 12h, 1d, 7d`); return; }
+      await reply(chat_id, await changeKeyTime(supabase, key, cmd.toLowerCase() === "/reducir" ? -ms : ms));
+      return;
+    }
     case "/buscar": {
       const id = args[0]; if (!id) { await reply(chat_id, "Uso: /buscar HG-XXXX"); return; }
       const { data: o } = await supabase.from("payment_orders").select("*").eq("payment_id", id).maybeSingle();
-      if (!o) { await reply(chat_id, "No encontrado."); return; }
+      if (!o) {
+        const { data: k } = await supabase.from("proxy_keys").select("*").ilike("key", cleanKey(id)).maybeSingle();
+        if (!k) { await reply(chat_id, "No encontrado."); return; }
+        await reply(chat_id, `<b>Key</b>\n<code>${k.key}</code>\nTipo: ${k.type}\nEstado: <b>${k.status}</b>\nDuración: ${k.duration}\nUsuario: ${k.used_by || "—"}\nRestante: ${timeLeft(k.expires_at)}`);
+        return;
+      }
       await reply(chat_id,
         `<b>${o.payment_id}</b>\nUsuario: ${o.alias}\nEmail: ${o.email || "—"}\n` +
         `Plan: ${o.duration} · ${o.amount_display || o.amount}\nMétodo: ${o.payment_method}\n` +
@@ -401,7 +602,7 @@ Deno.serve(async (req) => {
     const chat_id = cb.message?.chat?.id;
     const message_id = cb.message?.message_id;
 
-    if (!isAuthed(Number(chat_id), adminId)) {
+    if (!(await isAuthed(supabase, Number(chat_id), adminId))) {
       await ack(cb.id, "Envía /start y autentícate primero.");
       return new Response("ok", { headers: corsHeaders });
     }
