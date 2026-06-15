@@ -399,15 +399,24 @@ async function handleTextOrCommand(
     }
     case "Stats":
     case "/stats": {
-      const { data } = await supabase.from("payment_orders").select("status, amount, payment_method");
+      const [{ data }, { data: keyRows }, { data: userRows }] = await Promise.all([
+        supabase.from("payment_orders").select("status, amount, payment_method"),
+        supabase.from("proxy_keys").select("status"),
+        supabase.from("active_users").select("blocked"),
+      ]);
       const all = data || [];
+      const keys = keyRows || [];
+      const users = userRows || [];
       const by = (s: string) => all.filter((o: any) => o.status === s).length;
+      const keyBy = (s: string) => keys.filter((k: any) => k.status === s).length;
       const totalUsd = all.filter((o: any) => o.status === "APPROVED" && o.payment_method === "paypal")
         .reduce((s: number, o: any) => s + Number(o.amount), 0);
       const totalDia = all.filter((o: any) => o.status === "APPROVED" && o.payment_method === "diamonds")
         .reduce((s: number, o: any) => s + Number(o.amount), 0);
       await reply(chat_id,
         `<b>Estadísticas</b>\n` +
+        `Keys: ${keys.length} · Activas: ${keyBy("Activa")} · Usadas: ${keyBy("Usada")} · Expiradas: ${keyBy("Expirada")}\n` +
+        `Usuarios: ${users.length} · Online: ${users.filter((u: any) => !u.blocked).length} · Bloqueados: ${users.filter((u: any) => u.blocked).length}\n\n` +
         `Aprobados: ${by("APPROVED")}\nPendientes: ${by("PENDING")}\n` +
         `Rechazados: ${by("REJECTED")}\nEsperando: ${by("AWAITING_RECEIPT")}\n` +
         `Total: ${all.length}\n\nIngresos PayPal: $${totalUsd}\nDiamantes: ${totalDia}`);
