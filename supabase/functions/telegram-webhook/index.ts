@@ -14,9 +14,19 @@ const DURATION_MS: Record<string, number> = {
   "30 días": 30 * 24 * 60 * 60 * 1000,
 };
 
+const ADD_TIME_MS: Record<string, number> = {
+  "30m": 30 * 60 * 1000,
+  "1h": 60 * 60 * 1000,
+  "6h": 6 * 60 * 60 * 1000,
+  "12h": 12 * 60 * 60 * 1000,
+  "1d": 24 * 60 * 60 * 1000,
+  "7d": 7 * 24 * 60 * 60 * 1000,
+};
+
 const MAIN_KEYBOARD = {
   keyboard: [
     [{ text: "Generar Key" }, { text: "Keys activas" }],
+    [{ text: "Usuarios" }, { text: "Stats" }],
     [{ text: "Pendientes" }, { text: "Últimos" }],
     [{ text: "Stats" }, { text: "Ayuda" }],
     [{ text: "Inicio" }],
@@ -57,13 +67,34 @@ const editCaption = (chat_id: number, message_id: number, caption: string) =>
 const deleteMessage = (chat_id: number, message_id: number) =>
   tg("deleteMessage", { chat_id, message_id });
 
-// In-memory auth (per cold start). Persists during function lifetime.
-const authed = new Set<string>();
 // Pending interactive flows: chat_id -> { type, step, data }
 const pending = new Map<string, any>();
 
-function isAuthed(chatId: number, adminId: string): boolean {
-  return authed.has(String(chatId));
+function isAllowedAdmin(chatId: number, adminId: string): boolean {
+  return !adminId || String(chatId) === String(adminId);
+}
+
+async function isAuthed(supabase: any, chatId: number, adminId: string): Promise<boolean> {
+  if (!isAllowedAdmin(chatId, adminId)) return false;
+  const { data } = await supabase.from("telegram_admin_sessions")
+    .select("chat_id").eq("chat_id", String(chatId)).maybeSingle();
+  if (data) {
+    await supabase.from("telegram_admin_sessions")
+      .update({ last_seen_at: new Date().toISOString() }).eq("chat_id", String(chatId));
+  }
+  return !!data;
+}
+
+async function saveAuth(supabase: any, chatId: number) {
+  await supabase.from("telegram_admin_sessions").upsert({
+    chat_id: String(chatId),
+    authenticated_at: new Date().toISOString(),
+    last_seen_at: new Date().toISOString(),
+  }, { onConflict: "chat_id" });
+}
+
+async function clearAuth(supabase: any, chatId: number) {
+  await supabase.from("telegram_admin_sessions").delete().eq("chat_id", String(chatId));
 }
 
 async function deleteReceipt(supabase: any, order: any) {
