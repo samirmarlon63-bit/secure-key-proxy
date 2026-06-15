@@ -320,7 +320,7 @@ async function handleTextOrCommand(
       if (o.status === "APPROVED") { await reply(chat_id, `Ya aprobado. Key: <code>${o.assigned_key}</code>`); return; }
       const key = await generateKeyForOrder(supabase, o);
       await supabase.from("payment_orders").update({ status: "APPROVED", assigned_key: key, rejection_reason: null }).eq("id", o.id);
-      await reply(chat_id, `✅ Aprobado <code>${o.payment_id}</code>\nKey: <code>${key}</code>`);
+      await reply(chat_id, `Aprobado <code>${o.payment_id}</code>\nKey: <code>${key}</code>`);
       return;
     }
     case "/rechazar": {
@@ -332,7 +332,7 @@ async function handleTextOrCommand(
       await supabase.from("payment_logs").insert({ payment_id: id, event: "rejected", detail: { reason } });
       await deleteReceipt(supabase, o);
       if (o.telegram_message_id) { try { await deleteMessage(Number(adminId), Number(o.telegram_message_id)); } catch {} }
-      await reply(chat_id, `❌ Rechazado <code>${id}</code>\nComprobante eliminado.\nMotivo: ${reason}`);
+      await reply(chat_id, `Rechazado <code>${id}</code>\nComprobante eliminado.\nMotivo: ${reason}`);
       return;
     }
     case "/cancelar": {
