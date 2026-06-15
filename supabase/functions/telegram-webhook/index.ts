@@ -191,7 +191,16 @@ function helpText(): string {
     "<b>FFVALHALLA — Admin Bot</b>\n\n" +
     "Usa los botones de abajo o estos comandos:\n\n" +
     "/generar — generar nueva key (interactivo)\n" +
+    "/generar Normal 7 días 5 — generar varias keys\n" +
     "/keys — keys activas disponibles\n" +
+    "/usuarios — usuarios activos\n" +
+    "/bloquear KEY — bloquear usuario\n" +
+    "/desbloquear KEY — desbloquear usuario\n" +
+    "/sacar KEY — sacar sesión activa\n" +
+    "/eliminarusuario KEY — eliminar usuario y key\n" +
+    "/sumar KEY 1h — agregar tiempo: 30m, 1h, 6h, 12h, 1d, 7d\n" +
+    "/reducir KEY 6h — reducir tiempo\n" +
+    "/eliminarkey KEY — eliminar key\n" +
     "/pendientes — pedidos en revisión\n" +
     "/ultimos — últimos 10 pedidos\n" +
     "/buscar HG-XXXX — buscar pedido\n" +
@@ -215,7 +224,12 @@ async function handleTextOrCommand(
   const trimmed = text.trim();
 
   // Auth gate
-  if (!isAuthed(chat_id, adminId)) {
+  const authed = await isAuthed(supabase, chat_id, adminId);
+  if (!authed) {
+    if (!isAllowedAdmin(chat_id, adminId)) {
+      await tg("sendMessage", { chat_id, text: "Acceso denegado.", reply_markup: { remove_keyboard: true } });
+      return;
+    }
     if (trimmed === "/start" || trimmed === "Inicio") {
       pending.set(cid, { type: "auth" });
       await tg("sendMessage", {
@@ -227,7 +241,7 @@ async function handleTextOrCommand(
     }
     if (pending.get(cid)?.type === "auth" || trimmed === ADMIN_PASSWORD) {
       if (trimmed === ADMIN_PASSWORD) {
-        authed.add(cid);
+        await saveAuth(supabase, chat_id);
         pending.delete(cid);
         await reply(chat_id,
           "<b>Acceso concedido</b>\n\nBienvenido al panel de FFVALHALLA.\nUsa la barra inferior para todas las funciones.");
@@ -296,6 +310,16 @@ async function handleTextOrCommand(
       return;
     case "Generar Key":
     case "/generar": {
+      const direct = trimmed.match(/^\/generar\s+(Normal|Premium)\s+(.+?)\s+(\d+)$/i);
+      if (direct) {
+        const type = direct[1].toLowerCase() === "premium" ? "Premium" : "Normal";
+        const duration = direct[2].trim();
+        const quantity = Number(direct[3]);
+        if (!DURATION_MS[duration]) { await reply(chat_id, "Duración inválida. Usa: 1 minuto, 1 día, 7 días o 30 días."); return; }
+        const keys = await createKeys(supabase, type, duration, quantity);
+        await reply(chat_id, `<b>${keys.length} keys generadas</b>\nTipo: ${type}\nDuración: ${duration}\n\n${keys.map((k) => `<code>${k}</code>`).join("\n")}`);
+        return;
+      }
       pending.set(cid, { type: "gen_type" });
       await tg("sendMessage", {
         chat_id, parse_mode: "HTML",
@@ -309,14 +333,24 @@ async function handleTextOrCommand(
     }
     case "Keys activas":
     case "/keys": {
-      const { data } = await supabase.from("proxy_keys").select("duration,type").eq("status", "Activa");
+      const { data } = await supabase.from("proxy_keys").select("key,duration,type,status,used_by,expires_at").order("created_at", { ascending: false }).limit(80);
       const counts: Record<string, number> = {};
-      (data || []).forEach((k: any) => {
+      (data || []).filter((k: any) => k.status === "Activa").forEach((k: any) => {
         const label = `${k.type} · ${k.duration}`;
         counts[label] = (counts[label] || 0) + 1;
       });
-      const txt = Object.entries(counts).map(([d, n]) => `• ${d}: <b>${n}</b>`).join("\n") || "Sin keys disponibles.";
-      await reply(chat_id, `<b>Keys disponibles</b>\n${txt}`);
+      const summary = Object.entries(counts).map(([d, n]) => `• ${d}: <b>${n}</b>`).join("\n") || "Sin keys disponibles.";
+      const latest = (data || []).slice(0, 20).map((k: any) => `<code>${k.key}</code> · ${k.type} · ${k.duration} · ${k.status}${k.used_by ? ` · ${k.used_by}` : ""}`).join("\n");
+      await reply(chat_id, `<b>Keys disponibles</b>\n${summary}\n\n<b>Últimas keys</b>\n${latest || "Sin keys."}`);
+      return;
+    }
+    case "Usuarios":
+    case "/usuarios": {
+      const { data } = await supabase.from("active_users").select("*").order("login_at", { ascending: false }).limit(30);
+      const txt = (data || []).map((u: any) =>
+        `<b>${u.name}</b> ${u.blocked ? "[BLOQUEADO]" : "[ONLINE]"}\n<code>${u.key}</code> · ${u.type} · ${timeLeft(u.expires_at)}`
+      ).join("\n\n") || "Sin sesiones activas.";
+      await reply(chat_id, `<b>Usuarios activos (${data?.length || 0})</b>\n${txt}`);
       return;
     }
     case "Pendientes":
@@ -357,7 +391,7 @@ async function handleTextOrCommand(
       return;
     }
     case "/logout":
-      authed.delete(cid);
+      await clearAuth(supabase, chat_id);
       pending.delete(cid);
       await tg("sendMessage", { chat_id, text: "Sesión cerrada.", reply_markup: { remove_keyboard: true } });
       return;
