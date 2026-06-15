@@ -183,7 +183,7 @@ async function handleTextOrCommand(
         keyboard: [
           [{ text: "1 día" }, { text: "7 días" }],
           [{ text: "30 días" }, { text: "1 minuto" }],
-          [{ text: "❌ Cancelar" }],
+          [{ text: "Cancelar" }],
         ],
         resize_keyboard: true,
       },
@@ -203,7 +203,7 @@ async function handleTextOrCommand(
     const key = await createKey(supabase, p.data.type, trimmed);
     pending.delete(cid);
     await reply(chat_id,
-      `✅ <b>Key generada</b>\n\nTipo: ${p.data.type}\nDuración: ${trimmed}\n<code>${key}</code>`);
+      `<b>Key generada</b>\n\nTipo: ${p.data.type}\nDuración: ${trimmed}\n<code>${key}</code>`);
     return;
   }
 
@@ -225,7 +225,7 @@ async function handleTextOrCommand(
         chat_id, parse_mode: "HTML",
         text: "Tipo de key:",
         reply_markup: {
-          keyboard: [[{ text: "Normal" }, { text: "Premium" }], [{ text: "❌ Cancelar" }]],
+          keyboard: [[{ text: "Normal" }, { text: "Premium" }], [{ text: "Cancelar" }]],
           resize_keyboard: true,
         },
       });
