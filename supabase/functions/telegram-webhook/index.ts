@@ -26,10 +26,9 @@ const ADD_TIME_MS: Record<string, number> = {
 const MAIN_KEYBOARD = {
   keyboard: [
     [{ text: "Generar Key" }, { text: "Keys activas" }],
-    [{ text: "Usuarios" }, { text: "Stats" }],
-    [{ text: "Pendientes" }, { text: "Últimos" }],
-    [{ text: "Stats" }, { text: "Ayuda" }],
-    [{ text: "Inicio" }],
+    [{ text: "Usuarios" }, { text: "Pendientes" }],
+    [{ text: "Últimos" }, { text: "Stats" }],
+    [{ text: "Ayuda" }, { text: "Inicio" }],
   ],
   resize_keyboard: true,
   is_persistent: true,
@@ -594,7 +593,7 @@ Deno.serve(async (req) => {
     const chat_id = cb.message?.chat?.id;
     const message_id = cb.message?.message_id;
 
-    if (!isAuthed(Number(chat_id), adminId)) {
+    if (!(await isAuthed(supabase, Number(chat_id), adminId))) {
       await ack(cb.id, "Envía /start y autentícate primero.");
       return new Response("ok", { headers: corsHeaders });
     }
