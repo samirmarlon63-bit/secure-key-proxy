@@ -16,10 +16,10 @@ const DURATION_MS: Record<string, number> = {
 
 const MAIN_KEYBOARD = {
   keyboard: [
-    [{ text: "🔑 Generar Key" }, { text: "📋 Keys activas" }],
-    [{ text: "⏳ Pendientes" }, { text: "🕒 Últimos" }],
-    [{ text: "📊 Stats" }, { text: "❓ Ayuda" }],
-    [{ text: "🏠 Inicio" }],
+    [{ text: "Generar Key" }, { text: "Keys activas" }],
+    [{ text: "Pendientes" }, { text: "Últimos" }],
+    [{ text: "Stats" }, { text: "Ayuda" }],
+    [{ text: "Inicio" }],
   ],
   resize_keyboard: true,
   is_persistent: true,
@@ -27,12 +27,18 @@ const MAIN_KEYBOARD = {
 
 async function tg(method: string, body: any) {
   const token = Deno.env.get("TELEGRAM_BOT_TOKEN");
+  if (!token) {
+    console.error("TELEGRAM_BOT_TOKEN is not configured");
+    return null;
+  }
   try {
-    return await fetch(`https://api.telegram.org/bot${token}/${method}`, {
+    const response = await fetch(`https://api.telegram.org/bot${token}/${method}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
+    if (!response.ok) console.error("tg api error", method, response.status, await response.text());
+    return response;
   } catch (e) {
     console.error("tg error", method, e);
     return null;
@@ -57,7 +63,6 @@ const authed = new Set<string>();
 const pending = new Map<string, any>();
 
 function isAuthed(chatId: number, adminId: string): boolean {
-  if (String(chatId) === String(adminId)) return true;
   return authed.has(String(chatId));
 }
 
@@ -83,7 +88,7 @@ async function deleteReceipt(supabase: any, order: any) {
 function genKey(): string {
   const c = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   const seg = () => Array.from({ length: 4 }, () => c[Math.floor(Math.random() * c.length)]).join("");
-  return `PROXY-${seg()}-${seg()}`;
+  return `FFV-${seg()}-${seg()}`;
 }
 
 async function createKey(supabase: any, type: string, duration: string): Promise<string> {
