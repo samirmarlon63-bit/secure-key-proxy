@@ -1,16 +1,1 @@
-project_id = "exlqskmdgspdxiydczzc"
-
-[functions.payment-create]
-verify_jwt = false
-
-[functions.payment-status]
-verify_jwt = false
-
-[functions.payment-upload-receipt]
-verify_jwt = false
-
-[functions.telegram-webhook]
-verify_jwt = false
-
-[functions.telegram-setup]
-verify_jwt = false
+project_id = "xcagqmiyzbjhpuubjroy"

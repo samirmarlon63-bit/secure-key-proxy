@@ -1,11 +1,11 @@
 {
-  "version": 1,
   "asset_id": "ac41ae5b-536e-424b-872a-673e860ad47c",
-  "project_id": "2218d2c3-2e47-4a3b-9789-1f118cd3a676",
-  "url": "/__l5e/assets-v1/ac41ae5b-536e-424b-872a-673e860ad47c/ffvalhalla-avatar.jpeg",
-  "r2_key": "a/v1/2218d2c3-2e47-4a3b-9789-1f118cd3a676/ac41ae5b-536e-424b-872a-673e860ad47c/ffvalhalla-avatar.jpeg",
-  "original_filename": "ffvalhalla-avatar.jpeg",
-  "size": 134883,
   "content_type": "image/jpeg",
-  "created_at": "2026-06-15T21:05:01Z"
+  "created_at": "2026-06-15T21:05:01Z",
+  "original_filename": "ffvalhalla-avatar.jpeg",
+  "project_id": "c4f22ff8-59f3-4b81-9f07-6c6cc30f4e6b",
+  "r2_key": "a/v1/c4f22ff8-59f3-4b81-9f07-6c6cc30f4e6b/ac41ae5b-536e-424b-872a-673e860ad47c/ffvalhalla-avatar.jpeg",
+  "size": 134883,
+  "url": "/__l5e/assets-v1/ac41ae5b-536e-424b-872a-673e860ad47c/ffvalhalla-avatar.jpeg",
+  "version": 1
 }
