@@ -6,8 +6,11 @@ const corsHeaders = {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
-  const token = Deno.env.get("TELEGRAM_BOT_TOKEN");
-  const secret = Deno.env.get("TELEGRAM_WEBHOOK_SECRET");
+  const token = Deno.env.get("TELEGRAM_BOT_TOKEN")!;
+  const data = new TextEncoder().encode(`telegram-webhook:${token}`);
+  const digest = await crypto.subtle.digest("SHA-256", data);
+  const secret = btoa(String.fromCharCode(...new Uint8Array(digest)))
+    .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
   const url = `${Deno.env.get("SUPABASE_URL")}/functions/v1/telegram-webhook`;
 
   const out: any = {};
@@ -15,7 +18,7 @@ Deno.serve(async (req) => {
   // Webhook
   const wh = await fetch(`https://api.telegram.org/bot${token}/setWebhook`, {
     method: "POST", headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ url, secret_token: secret, allowed_updates: ["callback_query", "message"] }),
+    body: JSON.stringify({ url, secret_token: secret, allowed_updates: ["callback_query", "message"], drop_pending_updates: true }),
   });
   out.webhook = await wh.json();
 
