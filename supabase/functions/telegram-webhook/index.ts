@@ -361,7 +361,7 @@ Deno.serve(async (req) => {
 
   const expected = Deno.env.get("TELEGRAM_WEBHOOK_SECRET");
   const got = req.headers.get("x-telegram-bot-api-secret-token");
-  if (expected && got && got !== expected) {
+  if (!expected || got !== expected) {
     console.error("Invalid Telegram webhook secret");
     return new Response("Unauthorized", { status: 401, headers: corsHeaders });
   }
