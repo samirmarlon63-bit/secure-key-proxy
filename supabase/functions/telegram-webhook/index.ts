@@ -149,7 +149,7 @@ async function handleTextOrCommand(
       });
       return;
     }
-    if (pending.get(cid)?.type === "auth") {
+    if (pending.get(cid)?.type === "auth" || trimmed === ADMIN_PASSWORD) {
       if (trimmed === ADMIN_PASSWORD) {
         authed.add(cid);
         pending.delete(cid);
