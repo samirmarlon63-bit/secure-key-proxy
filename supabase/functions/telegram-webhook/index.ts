@@ -424,10 +424,69 @@ async function handleTextOrCommand(
   // Parameterized commands
   const [cmd, ...args] = trimmed.split(/\s+/);
   switch (cmd.toLowerCase()) {
+    case "/generar": {
+      const typeArg = args[0]?.toLowerCase();
+      const quantityArg = args[args.length - 1];
+      const duration = args.slice(1, -1).join(" ");
+      const type = typeArg === "premium" ? "Premium" : typeArg === "normal" ? "Normal" : "";
+      const quantity = Number(quantityArg);
+      if (!type || !DURATION_MS[duration] || !Number.isInteger(quantity)) {
+        await reply(chat_id, "Uso: /generar Normal 7 días 5");
+        return;
+      }
+      const keys = await createKeys(supabase, type, duration, quantity);
+      await reply(chat_id, `<b>${keys.length} keys generadas</b>\nTipo: ${type}\nDuración: ${duration}\n\n${keys.map((k) => `<code>${k}</code>`).join("\n")}`);
+      return;
+    }
+    case "/eliminarkey": {
+      const key = cleanKey(args[0]); if (!key) { await reply(chat_id, "Uso: /eliminarkey KEY"); return; }
+      await supabase.from("proxy_keys").delete().ilike("key", key);
+      await reply(chat_id, `Key eliminada: <code>${key}</code>`);
+      return;
+    }
+    case "/bloquear": {
+      const key = cleanKey(args[0]); if (!key) { await reply(chat_id, "Uso: /bloquear KEY"); return; }
+      await supabase.from("active_users").update({ blocked: true }).ilike("key", key);
+      await reply(chat_id, `Usuario bloqueado: <code>${key}</code>`);
+      return;
+    }
+    case "/desbloquear": {
+      const key = cleanKey(args[0]); if (!key) { await reply(chat_id, "Uso: /desbloquear KEY"); return; }
+      await supabase.from("active_users").update({ blocked: false }).ilike("key", key);
+      await reply(chat_id, `Usuario desbloqueado: <code>${key}</code>`);
+      return;
+    }
+    case "/sacar": {
+      const key = cleanKey(args[0]); if (!key) { await reply(chat_id, "Uso: /sacar KEY"); return; }
+      await supabase.from("active_users").delete().ilike("key", key);
+      await reply(chat_id, `Sesión removida: <code>${key}</code>`);
+      return;
+    }
+    case "/eliminarusuario": {
+      const key = cleanKey(args[0]); if (!key) { await reply(chat_id, "Uso: /eliminarusuario KEY"); return; }
+      await supabase.from("active_users").delete().ilike("key", key);
+      await supabase.from("proxy_keys").delete().ilike("key", key);
+      await reply(chat_id, `Usuario y key eliminados: <code>${key}</code>`);
+      return;
+    }
+    case "/sumar":
+    case "/reducir": {
+      const key = cleanKey(args[0]);
+      const amount = args[1]?.toLowerCase();
+      const ms = ADD_TIME_MS[amount];
+      if (!key || !ms) { await reply(chat_id, `Uso: ${cmd.toLowerCase()} KEY 1h\nOpciones: 30m, 1h, 6h, 12h, 1d, 7d`); return; }
+      await reply(chat_id, await changeKeyTime(supabase, key, cmd.toLowerCase() === "/reducir" ? -ms : ms));
+      return;
+    }
     case "/buscar": {
       const id = args[0]; if (!id) { await reply(chat_id, "Uso: /buscar HG-XXXX"); return; }
       const { data: o } = await supabase.from("payment_orders").select("*").eq("payment_id", id).maybeSingle();
-      if (!o) { await reply(chat_id, "No encontrado."); return; }
+      if (!o) {
+        const { data: k } = await supabase.from("proxy_keys").select("*").ilike("key", cleanKey(id)).maybeSingle();
+        if (!k) { await reply(chat_id, "No encontrado."); return; }
+        await reply(chat_id, `<b>Key</b>\n<code>${k.key}</code>\nTipo: ${k.type}\nEstado: <b>${k.status}</b>\nDuración: ${k.duration}\nUsuario: ${k.used_by || "—"}\nRestante: ${timeLeft(k.expires_at)}`);
+        return;
+      }
       await reply(chat_id,
         `<b>${o.payment_id}</b>\nUsuario: ${o.alias}\nEmail: ${o.email || "—"}\n` +
         `Plan: ${o.duration} · ${o.amount_display || o.amount}\nMétodo: ${o.payment_method}\n` +
