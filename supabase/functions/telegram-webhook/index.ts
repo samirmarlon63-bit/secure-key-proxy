@@ -140,11 +140,11 @@ async function handleTextOrCommand(
 
   // Auth gate
   if (!isAuthed(chat_id, adminId)) {
-    if (trimmed === "/start") {
+    if (trimmed === "/start" || trimmed === "Inicio") {
       pending.set(cid, { type: "auth" });
       await tg("sendMessage", {
         chat_id, parse_mode: "HTML",
-        text: "🔒 <b>FFVALHALLA Admin</b>\nIngresa la contraseña secreta para continuar:",
+        text: "<b>FFVALHALLA Admin</b>\nIngresa la contraseña secreta para continuar:",
         reply_markup: { remove_keyboard: true },
       });
       return;
@@ -154,10 +154,10 @@ async function handleTextOrCommand(
         authed.add(cid);
         pending.delete(cid);
         await reply(chat_id,
-          "✅ <b>Acceso concedido</b>\n\nBienvenido al panel de FFVALHALLA.\nUsa la barra inferior para todas las funciones.");
+          "<b>Acceso concedido</b>\n\nBienvenido al panel de FFVALHALLA.\nUsa la barra inferior para todas las funciones.");
         return;
       }
-      await tg("sendMessage", { chat_id, text: "❌ Contraseña incorrecta. Intenta de nuevo:" });
+      await tg("sendMessage", { chat_id, text: "Contraseña incorrecta. Intenta de nuevo:" });
       return;
     }
     await tg("sendMessage", {
@@ -209,16 +209,16 @@ async function handleTextOrCommand(
 
   // Button shortcuts
   switch (trimmed) {
-    case "🏠 Inicio":
+    case "Inicio":
     case "/inicio":
       await reply(chat_id, "<b>FFVALHALLA — Panel principal</b>\nElige una opción de la barra inferior.");
       return;
-    case "❓ Ayuda":
+    case "Ayuda":
     case "/help":
     case "/start":
       await reply(chat_id, helpText());
       return;
-    case "🔑 Generar Key":
+    case "Generar Key":
     case "/generar": {
       pending.set(cid, { type: "gen_type" });
       await tg("sendMessage", {
@@ -231,7 +231,7 @@ async function handleTextOrCommand(
       });
       return;
     }
-    case "📋 Keys activas":
+    case "Keys activas":
     case "/keys": {
       const { data } = await supabase.from("proxy_keys").select("duration,type").eq("status", "Activa");
       const counts: Record<string, number> = {};
@@ -243,18 +243,18 @@ async function handleTextOrCommand(
       await reply(chat_id, `<b>📋 Keys disponibles</b>\n${txt}`);
       return;
     }
-    case "⏳ Pendientes":
+    case "Pendientes":
     case "/pendientes": {
       const { data } = await supabase.from("payment_orders").select("*")
         .eq("status", "PENDING").order("created_at", { ascending: false }).limit(15);
-      if (!data?.length) { await reply(chat_id, "✅ Sin pedidos pendientes."); return; }
+      if (!data?.length) { await reply(chat_id, "Sin pedidos pendientes."); return; }
       const txt = data.map((o: any) =>
         `<code>${o.payment_id}</code> · ${o.alias} · ${o.duration} · ${o.amount_display || o.amount}`
       ).join("\n");
       await reply(chat_id, `<b>⏳ Pendientes (${data.length})</b>\n${txt}`);
       return;
     }
-    case "🕒 Últimos":
+    case "Últimos":
     case "/ultimos": {
       const { data } = await supabase.from("payment_orders").select("*")
         .order("created_at", { ascending: false }).limit(10);
@@ -264,7 +264,7 @@ async function handleTextOrCommand(
       await reply(chat_id, `<b>🕒 Últimos pedidos</b>\n${txt}`);
       return;
     }
-    case "📊 Stats":
+    case "Stats":
     case "/stats": {
       const { data } = await supabase.from("payment_orders").select("status, amount, payment_method");
       const all = data || [];
