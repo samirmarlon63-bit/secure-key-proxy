@@ -66,8 +66,20 @@ const editCaption = (chat_id: number, message_id: number, caption: string) =>
 const deleteMessage = (chat_id: number, message_id: number) =>
   tg("deleteMessage", { chat_id, message_id });
 
-// Pending interactive flows: chat_id -> { type, step, data }
-const pending = new Map<string, any>();
+// Pending interactive flows are persisted in DB to survive edge function cold starts.
+async function getPending(supabase: any, chatId: number): Promise<any> {
+  const { data } = await supabase.from("telegram_admin_sessions")
+    .select("pending").eq("chat_id", String(chatId)).maybeSingle();
+  return data?.pending ?? null;
+}
+async function setPending(supabase: any, chatId: number, value: any) {
+  await supabase.from("telegram_admin_sessions").upsert({
+    chat_id: String(chatId), pending: value, last_seen_at: new Date().toISOString(),
+  }, { onConflict: "chat_id" });
+}
+async function clearPending(supabase: any, chatId: number) {
+  await supabase.from("telegram_admin_sessions").update({ pending: null }).eq("chat_id", String(chatId));
+}
 
 function isAllowedAdmin(chatId: number, adminId: string): boolean {
   return !adminId || String(chatId) === String(adminId);
