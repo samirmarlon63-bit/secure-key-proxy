@@ -541,7 +541,15 @@ const ProxyConfig = () => {
       content: (
         <div className="space-y-3">
           <div className="flex justify-center">
-            <img src={defaultAvatar} alt="Avatar" className="w-20 h-20 rounded-full border-2 border-border object-cover" />
+            <div
+              className="p-[3px] rounded-full"
+              style={{
+                background: "conic-gradient(from 0deg, #00b8ff, #4ddcff, #0066ff, #00b8ff, #1e90ff)",
+                boxShadow: "0 0 24px rgba(0,184,255,0.55)",
+              }}
+            >
+              <img src={defaultAvatar.url} alt="Avatar" className="w-20 h-20 rounded-full object-cover bg-black block" />
+            </div>
           </div>
           {[
             { label: "Nombre", value: session.name },
