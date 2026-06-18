@@ -231,7 +231,7 @@ async function handleTextOrCommand(
   text: string,
   adminId: string,
 ) {
-  void chat_id;
+  
   const trimmed = text.trim();
 
   // Auth gate
