@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import VideoBackground from "@/components/VideoBackground";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import { isUserBlocked } from "@/lib/keys";
-import defaultAvatar from "@/assets/default-avatar.gif";
+import defaultAvatar from "@/assets/skull-avatar.png.asset.json";
 import {
   Wifi, Globe, Signal, Clock, MapPin, Radio, Server,
   Lock, User, KeyRound, Power, LogOut, Gamepad2, Loader2,
@@ -222,15 +222,31 @@ const ProxyConfig = () => {
   }, [session]);
 
   const launchFreeFire = useCallback(() => {
-    setLaunchingFF(true); setFfStatus("Abriendo...");
-    const ua = navigator.userAgent || navigator.vendor;
-    if (/android/i.test(ua)) {
-      window.location.href = "intent://#Intent;package=com.dts.freefireth;end";
+    setLaunchingFF(true); setFfStatus("Abriendo Free Fire...");
+    const ua = (navigator.userAgent || navigator.vendor || "").toLowerCase();
+    const isAndroid = /android/.test(ua);
+    const isIOS = /iphone|ipad|ipod/.test(ua);
+    const start = Date.now();
+
+    if (isAndroid) {
+      // Android intent with package + LAUNCHER category + Play Store fallback
+      window.location.href =
+        "intent://launch/#Intent;scheme=freefireth;package=com.dts.freefireth;S.browser_fallback_url=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Dcom.dts.freefireth;end";
       setTimeout(() => {
-        window.location.href = "https://play.google.com/store/apps/details?id=com.dts.freefireth";
-      }, 2000);
+        if (Date.now() - start < 2500 && !document.hidden) {
+          window.location.href = "https://play.google.com/store/apps/details?id=com.dts.freefireth";
+        }
+      }, 1800);
+    } else if (isIOS) {
+      // iOS custom URL scheme + App Store fallback
+      window.location.href = "freefireth://";
+      setTimeout(() => {
+        if (Date.now() - start < 2500 && !document.hidden) {
+          window.location.href = "https://apps.apple.com/app/garena-free-fire/id1300146617";
+        }
+      }, 1500);
     } else {
-      window.location.href = "https://apps.apple.com/app/id1300146617";
+      window.open("https://ff.garena.com/", "_blank");
     }
     setTimeout(() => { setLaunchingFF(false); setFfStatus(""); }, 3000);
   }, []);
@@ -331,7 +347,15 @@ const ProxyConfig = () => {
       {/* Header */}
       <div className="flex items-center justify-between animate-fade-in-up">
         <div className="flex items-center gap-3">
-          <img src={defaultAvatar} alt="Avatar" className="w-10 h-10 rounded-full border-2 border-border object-cover" />
+          <div
+            className="p-[2px] rounded-full"
+            style={{
+              background: "conic-gradient(from 0deg, #00b8ff, #4ddcff, #0066ff, #00b8ff)",
+              boxShadow: "0 0 14px rgba(0,184,255,0.5)",
+            }}
+          >
+            <img src={defaultAvatar.url} alt="Avatar" className="w-10 h-10 rounded-full object-cover bg-black block" />
+          </div>
           <div>
             <p className="text-sm font-semibold text-foreground">{session.name}</p>
             <p className="text-[10px] text-muted-foreground">{session.duration} — {session.expiresAt ? (timeLeft || "...") : "∞"}</p>
@@ -533,7 +557,15 @@ const ProxyConfig = () => {
       content: (
         <div className="space-y-3">
           <div className="flex justify-center">
-            <img src={defaultAvatar} alt="Avatar" className="w-20 h-20 rounded-full border-2 border-border object-cover" />
+            <div
+              className="p-[3px] rounded-full"
+              style={{
+                background: "conic-gradient(from 0deg, #00b8ff, #4ddcff, #0066ff, #00b8ff, #1e90ff)",
+                boxShadow: "0 0 24px rgba(0,184,255,0.55)",
+              }}
+            >
+              <img src={defaultAvatar.url} alt="Avatar" className="w-20 h-20 rounded-full object-cover bg-black block" />
+            </div>
           </div>
           {[
             { label: "Nombre", value: session.name },

@@ -175,16 +175,19 @@ export type Database = {
           authenticated_at: string
           chat_id: string
           last_seen_at: string
+          pending: Json | null
         }
         Insert: {
           authenticated_at?: string
           chat_id: string
           last_seen_at?: string
+          pending?: Json | null
         }
         Update: {
           authenticated_at?: string
           chat_id?: string
           last_seen_at?: string
+          pending?: Json | null
         }
         Relationships: []
       }

@@ -66,8 +66,20 @@ const editCaption = (chat_id: number, message_id: number, caption: string) =>
 const deleteMessage = (chat_id: number, message_id: number) =>
   tg("deleteMessage", { chat_id, message_id });
 
-// Pending interactive flows: chat_id -> { type, step, data }
-const pending = new Map<string, any>();
+// Pending interactive flows are persisted in DB to survive edge function cold starts.
+async function getPending(supabase: any, chatId: number): Promise<any> {
+  const { data } = await supabase.from("telegram_admin_sessions")
+    .select("pending").eq("chat_id", String(chatId)).maybeSingle();
+  return data?.pending ?? null;
+}
+async function setPending(supabase: any, chatId: number, value: any) {
+  await supabase.from("telegram_admin_sessions").upsert({
+    chat_id: String(chatId), pending: value, last_seen_at: new Date().toISOString(),
+  }, { onConflict: "chat_id" });
+}
+async function clearPending(supabase: any, chatId: number) {
+  await supabase.from("telegram_admin_sessions").update({ pending: null }).eq("chat_id", String(chatId));
+}
 
 function isAllowedAdmin(chatId: number, adminId: string): boolean {
   return !adminId || String(chatId) === String(adminId);
@@ -219,7 +231,7 @@ async function handleTextOrCommand(
   text: string,
   adminId: string,
 ) {
-  const cid = String(chat_id);
+  
   const trimmed = text.trim();
 
   // Auth gate
@@ -230,7 +242,7 @@ async function handleTextOrCommand(
       return;
     }
     if (trimmed === "/start" || trimmed === "Inicio") {
-      pending.set(cid, { type: "auth" });
+      await setPending(supabase, chat_id, { type: "auth" });
       await tg("sendMessage", {
         chat_id, parse_mode: "HTML",
         text: "<b>FFVALHALLA Admin</b>\nIngresa la contraseña secreta para continuar:",
@@ -238,10 +250,10 @@ async function handleTextOrCommand(
       });
       return;
     }
-    if (pending.get(cid)?.type === "auth" || trimmed === ADMIN_PASSWORD) {
+    if ((await getPending(supabase, chat_id))?.type === "auth" || trimmed === ADMIN_PASSWORD) {
       if (trimmed === ADMIN_PASSWORD) {
         await saveAuth(supabase, chat_id);
-        pending.delete(cid);
+        await clearPending(supabase, chat_id);
         await reply(chat_id,
           "<b>Acceso concedido</b>\n\nBienvenido al panel de FFVALHALLA.\nUsa la barra inferior para todas las funciones.");
         return;
@@ -257,11 +269,11 @@ async function handleTextOrCommand(
   }
 
   // Authed: handle pending interactive flows first
-  const p = pending.get(cid);
+  const p = await getPending(supabase, chat_id);
   if (p?.type === "gen_type") {
     const t = trimmed.toLowerCase();
     if (t.includes("cancelar")) {
-      pending.delete(cid);
+      await clearPending(supabase, chat_id);
       await reply(chat_id, "Cancelado.");
       return;
     }
@@ -269,7 +281,7 @@ async function handleTextOrCommand(
       await reply(chat_id, "Elige <b>Normal</b> o <b>Premium</b>.");
       return;
     }
-    pending.set(cid, { type: "gen_duration", data: { type: t === "premium" ? "Premium" : "Normal" } });
+    await setPending(supabase, chat_id, { type: "gen_duration", data: { type: t === "premium" ? "Premium" : "Normal" } });
     await tg("sendMessage", {
       chat_id, parse_mode: "HTML",
       text: "Duración:",
@@ -286,7 +298,7 @@ async function handleTextOrCommand(
   }
   if (p?.type === "gen_duration") {
     if (trimmed.includes("Cancelar")) {
-      pending.delete(cid);
+      await clearPending(supabase, chat_id);
       await reply(chat_id, "Cancelado.");
       return;
     }
@@ -294,7 +306,7 @@ async function handleTextOrCommand(
       await reply(chat_id, "Duración inválida.");
       return;
     }
-    pending.set(cid, { type: "gen_quantity", data: { type: p.data.type, duration: trimmed } });
+    await setPending(supabase, chat_id, { type: "gen_quantity", data: { type: p.data.type, duration: trimmed } });
     await tg("sendMessage", {
       chat_id, parse_mode: "HTML",
       text: "Cantidad de keys (1-100):",
@@ -304,7 +316,7 @@ async function handleTextOrCommand(
   }
   if (p?.type === "gen_quantity") {
     if (trimmed.includes("Cancelar")) {
-      pending.delete(cid);
+      await clearPending(supabase, chat_id);
       await reply(chat_id, "Cancelado.");
       return;
     }
@@ -314,7 +326,7 @@ async function handleTextOrCommand(
       return;
     }
     const keys = await createKeys(supabase, p.data.type, p.data.duration, quantity);
-    pending.delete(cid);
+    await clearPending(supabase, chat_id);
     await reply(chat_id,
       `<b>${keys.length} key${keys.length === 1 ? "" : "s"} generada${keys.length === 1 ? "" : "s"}</b>\n\nTipo: ${p.data.type}\nDuración: ${p.data.duration}\n${keys.map((key) => `<code>${key}</code>`).join("\n")}`);
     return;
@@ -332,6 +344,8 @@ async function handleTextOrCommand(
       await reply(chat_id, helpText());
       return;
     case "Generar Key":
+    case "Generar Contraseña":
+    case "Generar contraseña":
     case "/generar": {
       const direct = trimmed.match(/^\/generar\s+(Normal|Premium)\s+(.+?)\s+(\d+)$/i);
       if (direct) {
@@ -343,7 +357,7 @@ async function handleTextOrCommand(
         await reply(chat_id, `<b>${keys.length} keys generadas</b>\nTipo: ${type}\nDuración: ${duration}\n\n${keys.map((k) => `<code>${k}</code>`).join("\n")}`);
         return;
       }
-      pending.set(cid, { type: "gen_type" });
+      await setPending(supabase, chat_id, { type: "gen_type" });
       await tg("sendMessage", {
         chat_id, parse_mode: "HTML",
         text: "Tipo de key:",
@@ -424,7 +438,7 @@ async function handleTextOrCommand(
     }
     case "/logout":
       await clearAuth(supabase, chat_id);
-      pending.delete(cid);
+      await clearPending(supabase, chat_id);
       await tg("sendMessage", { chat_id, text: "Sesión cerrada.", reply_markup: { remove_keyboard: true } });
       return;
   }

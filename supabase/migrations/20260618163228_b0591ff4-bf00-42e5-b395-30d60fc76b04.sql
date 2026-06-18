@@ -1,0 +1,1 @@
+ALTER TABLE public.telegram_admin_sessions ADD COLUMN IF NOT EXISTS pending JSONB;

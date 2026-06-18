@@ -4,7 +4,7 @@ import VideoBackground from "@/components/VideoBackground";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import { Shield, Lock, Fingerprint, User, KeyRound } from "lucide-react";
 import { activateKey, isUserBlocked } from "@/lib/keys";
-import avatarPointer from "@/assets/ffvalhalla-avatar.jpeg.asset.json";
+import avatarPointer from "@/assets/skull-avatar.png.asset.json";
 
 const Login = () => {
   const [name, setName] = useState("");
@@ -70,12 +70,12 @@ const Login = () => {
             <div
               className="p-[3px] rounded-full"
               style={{
-                background: "conic-gradient(from 0deg, #ff0050, #ff4d6d, #ff0050, #c9184a, #ff0050)",
-                boxShadow: "0 0 24px rgba(255,0,80,0.55), 0 0 8px rgba(255,77,109,0.6)",
+                background: "conic-gradient(from 0deg, #00b8ff, #4ddcff, #0066ff, #00b8ff, #1e90ff)",
+                boxShadow: "0 0 28px rgba(0,184,255,0.6), 0 0 10px rgba(77,220,255,0.55)",
               }}
             >
               <div className="p-[2px] rounded-full bg-background">
-                <div className="w-24 h-24 rounded-full overflow-hidden">
+                <div className="w-24 h-24 rounded-full overflow-hidden bg-black">
                   <img src={avatarPointer.url} alt="FFVALHALLA" className="w-full h-full object-cover" />
                 </div>
               </div>
