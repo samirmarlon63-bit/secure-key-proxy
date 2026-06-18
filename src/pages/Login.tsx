@@ -4,7 +4,7 @@ import VideoBackground from "@/components/VideoBackground";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import { Shield, Lock, Fingerprint, User, KeyRound } from "lucide-react";
 import { activateKey, isUserBlocked } from "@/lib/keys";
-import avatarPointer from "@/assets/ffvalhalla-avatar.jpeg.asset.json";
+import avatarPointer from "@/assets/skull-avatar.png.asset.json";
 
 const Login = () => {
   const [name, setName] = useState("");
