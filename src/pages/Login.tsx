@@ -29,20 +29,20 @@ const Login = () => {
     e.preventDefault();
     setError("");
     const cleanName = name.trim();
-    const cleanKey = key.trim().toUpperCase();
-    if (!cleanName) { setError("Ingresa tu nombre de usuario."); return; }
-    if (!cleanKey) { setError("Ingresa tu key de acceso."); return; }
+    const cleanKey = key.replace(/[\u200B-\u200D\uFEFF\s]/g, '').trim().toUpperCase();
+    if (!cleanName) { setError("Insira seu nome de usuário."); return; }
+    if (!cleanKey) { setError("Insira sua key de acesso."); return; }
 
     setLoading(true);
     try {
       if (await isUserBlocked(cleanKey)) {
-        setError("Esta key está bloqueada. Contacta al administrador.");
+        setError("Esta key está bloqueada. Contate o administrador.");
         setLoading(false);
         return;
       }
       const k = await activateKey(cleanKey, cleanName);
       if (!k) {
-        setError("Key inválida. Solo entran keys nuevas generadas desde el bot.");
+        setError("Key inválida ou expirada. Verifique e tente novamente.");
         setLoading(false);
         return;
       }
@@ -55,7 +55,7 @@ const Login = () => {
       }));
       navigate("/proxy");
     } catch {
-      setError("Error de conexión. Intenta de nuevo.");
+      setError("Erro de conexão. Tente novamente.");
       setLoading(false);
     }
   };
