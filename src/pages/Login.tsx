@@ -107,8 +107,8 @@ const Login = () => {
               <Shield className="w-4 h-4 text-muted-foreground" />
             </div>
             <div>
-              <span className="text-xs text-foreground font-semibold block">Acceso Seguro</span>
-              <span className="text-[9px] text-muted-foreground/60">Ingresa tus credenciales</span>
+              <span className="text-xs text-foreground font-semibold block">Acesso Seguro</span>
+              <span className="text-[9px] text-muted-foreground/60">Insira suas credenciais</span>
             </div>
           </div>
 
@@ -117,12 +117,12 @@ const Login = () => {
           )}
 
           <div>
-            <label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider font-medium mb-1 block">Usuario</label>
+            <label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider font-medium mb-1 block">Usuário</label>
             <div className="relative">
               <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/60" />
               <input
                 type="text"
-                placeholder="Tu nombre"
+                placeholder="Seu nome"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 autoComplete="username"
@@ -132,7 +132,7 @@ const Login = () => {
           </div>
 
           <div>
-            <label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider font-medium mb-1 block">Key de acceso</label>
+            <label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider font-medium mb-1 block">Key de acesso</label>
             <div className="relative">
               <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/60" />
               <input
@@ -151,14 +151,14 @@ const Login = () => {
             disabled={loading}
             className="w-full bg-foreground text-background font-semibold py-3 rounded-lg text-sm hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50"
           >
-            {loading ? "Verificando..." : "Iniciar sesión"}
+            {loading ? "Verificando..." : "Entrar"}
           </button>
         </form>
 
         <div className="mt-6 text-center">
           <p className="text-[9px] text-muted-foreground/40 leading-relaxed">
-            Secure Proxy Configuration System — Encrypted Connection
-            <br />All sessions are monitored and protected.
+            Sistema de Configuração de Proxy Seguro — Conexão Criptografada
+            <br />Todas as sessões são monitoradas e protegidas.
           </p>
         </div>
       </div>
