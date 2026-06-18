@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import VideoBackground from "@/components/VideoBackground";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import { isUserBlocked } from "@/lib/keys";
-import defaultAvatar from "@/assets/default-avatar.gif";
+import defaultAvatar from "@/assets/skull-avatar.png.asset.json";
 import {
   Wifi, Globe, Signal, Clock, MapPin, Radio, Server,
   Lock, User, KeyRound, Power, LogOut, Gamepad2, Loader2,
