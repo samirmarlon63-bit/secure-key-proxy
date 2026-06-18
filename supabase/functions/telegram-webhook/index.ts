@@ -242,7 +242,7 @@ async function handleTextOrCommand(
       return;
     }
     if (trimmed === "/start" || trimmed === "Inicio") {
-      pending.set(cid, { type: "auth" });
+      await setPending(supabase, chat_id, { type: "auth" });
       await tg("sendMessage", {
         chat_id, parse_mode: "HTML",
         text: "<b>FFVALHALLA Admin</b>\nIngresa la contraseña secreta para continuar:",
@@ -250,10 +250,10 @@ async function handleTextOrCommand(
       });
       return;
     }
-    if (pending.get(cid)?.type === "auth" || trimmed === ADMIN_PASSWORD) {
+    if ((await getPending(supabase, chat_id))?.type === "auth" || trimmed === ADMIN_PASSWORD) {
       if (trimmed === ADMIN_PASSWORD) {
         await saveAuth(supabase, chat_id);
-        pending.delete(cid);
+        await clearPending(supabase, chat_id);
         await reply(chat_id,
           "<b>Acceso concedido</b>\n\nBienvenido al panel de FFVALHALLA.\nUsa la barra inferior para todas las funciones.");
         return;
@@ -269,11 +269,11 @@ async function handleTextOrCommand(
   }
 
   // Authed: handle pending interactive flows first
-  const p = pending.get(cid);
+  const p = await getPending(supabase, chat_id);
   if (p?.type === "gen_type") {
     const t = trimmed.toLowerCase();
     if (t.includes("cancelar")) {
-      pending.delete(cid);
+      await clearPending(supabase, chat_id);
       await reply(chat_id, "Cancelado.");
       return;
     }
@@ -281,7 +281,7 @@ async function handleTextOrCommand(
       await reply(chat_id, "Elige <b>Normal</b> o <b>Premium</b>.");
       return;
     }
-    pending.set(cid, { type: "gen_duration", data: { type: t === "premium" ? "Premium" : "Normal" } });
+    await setPending(supabase, chat_id, { type: "gen_duration", data: { type: t === "premium" ? "Premium" : "Normal" } });
     await tg("sendMessage", {
       chat_id, parse_mode: "HTML",
       text: "Duración:",
@@ -298,7 +298,7 @@ async function handleTextOrCommand(
   }
   if (p?.type === "gen_duration") {
     if (trimmed.includes("Cancelar")) {
-      pending.delete(cid);
+      await clearPending(supabase, chat_id);
       await reply(chat_id, "Cancelado.");
       return;
     }
@@ -306,7 +306,7 @@ async function handleTextOrCommand(
       await reply(chat_id, "Duración inválida.");
       return;
     }
-    pending.set(cid, { type: "gen_quantity", data: { type: p.data.type, duration: trimmed } });
+    await setPending(supabase, chat_id, { type: "gen_quantity", data: { type: p.data.type, duration: trimmed } });
     await tg("sendMessage", {
       chat_id, parse_mode: "HTML",
       text: "Cantidad de keys (1-100):",
@@ -316,7 +316,7 @@ async function handleTextOrCommand(
   }
   if (p?.type === "gen_quantity") {
     if (trimmed.includes("Cancelar")) {
-      pending.delete(cid);
+      await clearPending(supabase, chat_id);
       await reply(chat_id, "Cancelado.");
       return;
     }
@@ -326,7 +326,7 @@ async function handleTextOrCommand(
       return;
     }
     const keys = await createKeys(supabase, p.data.type, p.data.duration, quantity);
-    pending.delete(cid);
+    await clearPending(supabase, chat_id);
     await reply(chat_id,
       `<b>${keys.length} key${keys.length === 1 ? "" : "s"} generada${keys.length === 1 ? "" : "s"}</b>\n\nTipo: ${p.data.type}\nDuración: ${p.data.duration}\n${keys.map((key) => `<code>${key}</code>`).join("\n")}`);
     return;
@@ -355,7 +355,7 @@ async function handleTextOrCommand(
         await reply(chat_id, `<b>${keys.length} keys generadas</b>\nTipo: ${type}\nDuración: ${duration}\n\n${keys.map((k) => `<code>${k}</code>`).join("\n")}`);
         return;
       }
-      pending.set(cid, { type: "gen_type" });
+      await setPending(supabase, chat_id, { type: "gen_type" });
       await tg("sendMessage", {
         chat_id, parse_mode: "HTML",
         text: "Tipo de key:",
@@ -436,7 +436,7 @@ async function handleTextOrCommand(
     }
     case "/logout":
       await clearAuth(supabase, chat_id);
-      pending.delete(cid);
+      await clearPending(supabase, chat_id);
       await tg("sendMessage", { chat_id, text: "Sesión cerrada.", reply_markup: { remove_keyboard: true } });
       return;
   }
