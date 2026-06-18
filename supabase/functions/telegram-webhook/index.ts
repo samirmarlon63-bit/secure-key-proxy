@@ -344,6 +344,8 @@ async function handleTextOrCommand(
       await reply(chat_id, helpText());
       return;
     case "Generar Key":
+    case "Generar Contraseña":
+    case "Generar contraseña":
     case "/generar": {
       const direct = trimmed.match(/^\/generar\s+(Normal|Premium)\s+(.+?)\s+(\d+)$/i);
       if (direct) {
