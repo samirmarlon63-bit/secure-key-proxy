@@ -331,7 +331,15 @@ const ProxyConfig = () => {
       {/* Header */}
       <div className="flex items-center justify-between animate-fade-in-up">
         <div className="flex items-center gap-3">
-          <img src={defaultAvatar} alt="Avatar" className="w-10 h-10 rounded-full border-2 border-border object-cover" />
+          <div
+            className="p-[2px] rounded-full"
+            style={{
+              background: "conic-gradient(from 0deg, #00b8ff, #4ddcff, #0066ff, #00b8ff)",
+              boxShadow: "0 0 14px rgba(0,184,255,0.5)",
+            }}
+          >
+            <img src={defaultAvatar.url} alt="Avatar" className="w-10 h-10 rounded-full object-cover bg-black block" />
+          </div>
           <div>
             <p className="text-sm font-semibold text-foreground">{session.name}</p>
             <p className="text-[10px] text-muted-foreground">{session.duration} — {session.expiresAt ? (timeLeft || "...") : "∞"}</p>
