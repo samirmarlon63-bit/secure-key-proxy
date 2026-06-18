@@ -132,8 +132,8 @@ export async function addKeyTime(key: string, addMs: number) {
 }
 
 export async function isUserBlocked(key: string): Promise<boolean> {
-  const clean = key.trim().toUpperCase();
-  const { data } = await supabase.from('active_users').select('blocked').ilike('key', clean).single();
+  const clean = key.replace(/[\u200B-\u200D\uFEFF\s]/g, '').trim().toUpperCase();
+  const { data } = await supabase.from('active_users').select('blocked').ilike('key', clean).maybeSingle();
   return data?.blocked ?? false;
 }
 
@@ -184,22 +184,31 @@ export async function validateKey(inputKey: string): Promise<ProxyKey | null> {
 }
 
 export async function activateKey(inputKey: string, userName: string): Promise<ProxyKey | null> {
-  const clean = inputKey.trim().toUpperCase();
-  if (!clean.startsWith('FFV-')) return null;
-  const { data } = await supabase.from('proxy_keys').select('*').ilike('key', clean).eq('status', 'Activa').single();
-  if (!data || !data.duration_ms || data.duration_ms <= 0) return null;
+  // Sanitize: strip invisible chars and whitespace, uppercase
+  const clean = inputKey.replace(/[\u200B-\u200D\uFEFF\s]/g, '').trim().toUpperCase();
+  if (!clean) return null;
+
+  const { data, error } = await supabase
+    .from('proxy_keys')
+    .select('*')
+    .ilike('key', clean)
+    .maybeSingle();
+
+  if (error || !data) return null;
+  if (data.status !== 'Activa') return null;
+  if (!data.duration_ms || Number(data.duration_ms) <= 0) return null;
 
   const now = new Date();
-  const expiresAt = new Date(now.getTime() + data.duration_ms).toISOString();
+  const expiresAt = new Date(now.getTime() + Number(data.duration_ms)).toISOString();
 
-  const { error } = await supabase.from('proxy_keys').update({
+  const { error: upErr } = await supabase.from('proxy_keys').update({
     status: 'Usada',
     used_by: userName,
     activated_at: now.toISOString(),
     expires_at: expiresAt,
   }).eq('key', data.key);
 
-  if (error) return null;
+  if (upErr) return null;
 
   await registerActiveUser(userName, data.key, data.type, expiresAt);
 
@@ -208,7 +217,7 @@ export async function activateKey(inputKey: string, userName: string): Promise<P
     type: data.type as ProxyKey['type'],
     status: 'Usada',
     duration: data.duration,
-    durationMs: data.duration_ms,
+    durationMs: Number(data.duration_ms),
     createdAt: data.created_at,
     usedBy: userName,
     activatedAt: now.toISOString(),
