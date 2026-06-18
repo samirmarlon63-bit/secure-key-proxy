@@ -222,15 +222,31 @@ const ProxyConfig = () => {
   }, [session]);
 
   const launchFreeFire = useCallback(() => {
-    setLaunchingFF(true); setFfStatus("Abriendo...");
-    const ua = navigator.userAgent || navigator.vendor;
-    if (/android/i.test(ua)) {
-      window.location.href = "intent://#Intent;package=com.dts.freefireth;end";
+    setLaunchingFF(true); setFfStatus("Abriendo Free Fire...");
+    const ua = (navigator.userAgent || navigator.vendor || "").toLowerCase();
+    const isAndroid = /android/.test(ua);
+    const isIOS = /iphone|ipad|ipod/.test(ua);
+    const start = Date.now();
+
+    if (isAndroid) {
+      // Android intent with package + LAUNCHER category + Play Store fallback
+      window.location.href =
+        "intent://launch/#Intent;scheme=freefireth;package=com.dts.freefireth;S.browser_fallback_url=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Dcom.dts.freefireth;end";
       setTimeout(() => {
-        window.location.href = "https://play.google.com/store/apps/details?id=com.dts.freefireth";
-      }, 2000);
+        if (Date.now() - start < 2500 && !document.hidden) {
+          window.location.href = "https://play.google.com/store/apps/details?id=com.dts.freefireth";
+        }
+      }, 1800);
+    } else if (isIOS) {
+      // iOS custom URL scheme + App Store fallback
+      window.location.href = "freefireth://";
+      setTimeout(() => {
+        if (Date.now() - start < 2500 && !document.hidden) {
+          window.location.href = "https://apps.apple.com/app/garena-free-fire/id1300146617";
+        }
+      }, 1500);
     } else {
-      window.location.href = "https://apps.apple.com/app/id1300146617";
+      window.open("https://ff.garena.com/", "_blank");
     }
     setTimeout(() => { setLaunchingFF(false); setFfStatus(""); }, 3000);
   }, []);
