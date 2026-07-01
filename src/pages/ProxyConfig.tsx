@@ -854,7 +854,7 @@ const ProxyConfig = () => {
       id: "security-integrations",
       icon: ShieldCheck,
       title: "Seguridad Avanzada",
-      content: <SecurityToggles />,
+      content: <SecurityInfo />,
     },
   ];
 
