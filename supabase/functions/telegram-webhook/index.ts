@@ -589,59 +589,64 @@ Deno.serve(async (req) => {
     return new Response("Unauthorized", { status: 401, headers: corsHeaders });
   }
 
-  const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-  const adminId = Deno.env.get("TELEGRAM_ADMIN_ID") || "";
-
-  // Always respond 200 quickly so Telegram never marks the webhook as failed.
   let update: any;
-  try {
-    update = await req.json();
-  } catch {
-    return new Response("ok", { headers: corsHeaders });
-  }
+  try { update = await req.json(); } catch { return new Response("ok", { headers: corsHeaders }); }
 
-  try {
-    if (update.message?.text) {
-      const text = update.message.text;
-      const chat_id = update.message.chat.id;
-      await handleTextOrCommand(supabase, chat_id, text, adminId);
-      return new Response("ok", { headers: corsHeaders });
-    }
+  const adminId = Deno.env.get("TELEGRAM_ADMIN_ID") || "";
+  const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-    const cb = update.callback_query;
-    if (!cb) return new Response("ok", { headers: corsHeaders });
+  // Process asynchronously so Telegram gets an instant 200 and NEVER retries/freezes.
+  const process = async () => {
+    const supabase = createClient(supabaseUrl, serviceKey);
+    try {
+      if (update.message?.text) {
+        await handleTextOrCommand(supabase, update.message.chat.id, update.message.text, adminId);
+        return;
+      }
+      const cb = update.callback_query;
+      if (!cb) return;
 
-    const data: string = cb.data || "";
-    const [action, paymentId] = data.split(":");
-    const chat_id = cb.message?.chat?.id;
-    const message_id = cb.message?.message_id;
+      const data: string = cb.data || "";
+      const [action, paymentId] = data.split(":");
+      const chat_id = cb.message?.chat?.id;
+      const message_id = cb.message?.message_id;
 
-    if (!(await isAuthed(supabase, Number(chat_id), adminId))) {
-      await ack(cb.id, "Envía /start y autentícate primero.");
-      return new Response("ok", { headers: corsHeaders });
-    }
+      if (!(await isAuthed(supabase, Number(chat_id), adminId))) {
+        await ack(cb.id, "Envía /start y autentícate primero.");
+        return;
+      }
 
-    const { data: order } = await supabase.from("payment_orders").select("*").eq("payment_id", paymentId).maybeSingle();
-    if (!order) { await ack(cb.id, "No encontrado"); return new Response("ok", { headers: corsHeaders }); }
+      const { data: order } = await supabase.from("payment_orders").select("*").eq("payment_id", paymentId).maybeSingle();
+      if (!order) { await ack(cb.id, "No encontrado"); return; }
 
-    if (action === "approve") {
-        if (order.status === "APPROVED") { await ack(cb.id, "Ya aprobado"); return new Response("ok", { headers: corsHeaders }); }
+      if (action === "approve") {
+        if (order.status === "APPROVED") { await ack(cb.id, "Ya aprobado"); return; }
         const key = await generateKeyForOrder(supabase, order);
         await supabase.from("payment_orders").update({ status: "APPROVED", assigned_key: key, rejection_reason: null }).eq("id", order.id);
         await editCaption(chat_id, message_id,
           `<b>APROBADO</b>\nID: <code>${order.payment_id}</code>\nUsuario: ${order.alias}\nPlan: ${order.duration}\nKey: <code>${key}</code>`);
         await ack(cb.id, "Aprobado");
-    } else if (action === "reject") {
+      } else if (action === "reject") {
         await supabase.from("payment_orders").update({ status: "REJECTED", rejection_reason: "Rechazado por administrador" }).eq("id", order.id);
         await deleteReceipt(supabase, order);
         await ack(cb.id, "Rechazado");
         try { await deleteMessage(chat_id, message_id); } catch {}
-    } else if (action === "info") {
+      } else if (action === "info") {
         await ack(cb.id,
           `${order.alias} · ${order.duration} · ${order.amount_display || order.amount} · ${order.email || "sin email"}`);
+      }
+    } catch (e) {
+      console.error("processing error", e);
     }
-  } catch (e) {
-    console.error("processing error", e);
+  };
+
+  // @ts-ignore EdgeRuntime.waitUntil keeps the task alive after response is returned.
+  if (typeof EdgeRuntime !== "undefined" && EdgeRuntime?.waitUntil) {
+    // @ts-ignore
+    EdgeRuntime.waitUntil(process());
+  } else {
+    process();
   }
 
   return new Response("ok", { headers: corsHeaders });

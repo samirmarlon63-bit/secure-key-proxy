@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef, memo } from "react";
 import { useNavigate } from "react-router-dom";
 import VideoBackground from "@/components/VideoBackground";
 import VerifiedBadge from "@/components/VerifiedBadge";
@@ -68,40 +68,142 @@ const SECURITY_ITEMS = [
   "Memory Guard", "Zero-Day Vault",
 ];
 
-const SecurityToggles = () => {
-  const [states, setStates] = useState<Record<string, boolean>>(() => {
-    const saved = localStorage.getItem("proxy_security_toggles");
-    return saved ? JSON.parse(saved) : {};
-  });
-  const toggle = (label: string) => {
-    const next = { ...states, [label]: !states[label] };
-    setStates(next);
-    localStorage.setItem("proxy_security_toggles", JSON.stringify(next));
+const SECURITY_STATUS: Record<string, string> = {
+  "Anti-Cheat Nullifier": "Activo",
+  "Signature Randomizer": "Activo",
+  "Runtime Decryptor": "v3.2",
+  "Stack Canary Spoof": "Activo",
+  "ASLR Bypass Engine": "Activo",
+  "Integrity Check Hook": "Verificado",
+  "Heartbeat Emulator": "Estable",
+  "Binary Obfuscator": "AES-256",
+  "Sandbox Escape": "Activo",
+  "Token Forge Engine": "OAuth 2.1",
+  "Certificate Pinning": "TLS 1.3",
+  "Syscall Filter": "seccomp",
+  "Entropy Randomizer": "/dev/urandom",
+  "Hook Detection Shield": "Activo",
+  "Debugger Trap Evasion": "Activo",
+  "Code Signing Spoof": "SHA-512",
+  "Rootkit Cloak": "Kernel Level",
+  "Telemetry Blocker": "Activo",
+  "Memory Guard": "Guardado",
+  "Zero-Day Vault": "Actualizado",
+};
+
+const SecurityInfo = () => (
+  <div className="space-y-2">
+    {SECURITY_ITEMS.map((label) => (
+      <div key={label} className="flex items-center justify-between bg-secondary/20 rounded-lg px-3 py-2.5 border border-border/30">
+        <span className="text-[10px] text-muted-foreground">{label}</span>
+        <span className="text-[10px] text-foreground font-mono font-medium">{SECURITY_STATUS[label]}</span>
+      </div>
+    ))}
+  </div>
+);
+
+// ==================== FLUID SLIDERS ====================
+// Extracted to module scope so parent re-renders don't remount them and
+// break dragging. DOM background updates are done via ref (bypassing React)
+// while parent state is committed via rAF-throttled onChange for 60+ FPS.
+
+interface FluidSliderProps {
+  min: number;
+  max: number;
+  value: number;
+  onChange: (v: number) => void;
+  suffix?: string;
+  label: React.ReactNode;
+}
+
+const FluidSlider = memo(({ min, max, value, onChange, suffix = "", label }: FluidSliderProps) => {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const displayRef = useRef<HTMLSpanElement>(null);
+  const rafRef = useRef<number | null>(null);
+  const pendingRef = useRef<number>(value);
+
+  // Keep uncontrolled input in sync when parent value changes externally.
+  useEffect(() => {
+    if (inputRef.current && Number(inputRef.current.value) !== value) {
+      inputRef.current.value = String(value);
+      paint(value);
+    }
+    if (displayRef.current) displayRef.current.textContent = `${value}${suffix}`;
+  }, [value, suffix]);
+
+  const paint = (v: number) => {
+    const pct = ((v - min) / (max - min)) * 100;
+    if (inputRef.current) {
+      inputRef.current.style.background =
+        `linear-gradient(to right, hsl(var(--primary)) ${pct}%, hsl(var(--secondary)) ${pct}%)`;
+    }
   };
+
+  const handleInput = (e: React.FormEvent<HTMLInputElement>) => {
+    const v = Number((e.target as HTMLInputElement).value);
+    pendingRef.current = v;
+    // instant visual feedback without React render
+    if (displayRef.current) displayRef.current.textContent = `${v}${suffix}`;
+    paint(v);
+    // throttle state commit to next animation frame
+    if (rafRef.current == null) {
+      rafRef.current = requestAnimationFrame(() => {
+        rafRef.current = null;
+        onChange(pendingRef.current);
+      });
+    }
+  };
+
+  useEffect(() => {
+    paint(value);
+    return () => { if (rafRef.current != null) cancelAnimationFrame(rafRef.current); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
-    <div className="space-y-2">
-      {SECURITY_ITEMS.map((label) => (
-         <div key={label} className={`flex items-center justify-between rounded-lg px-3 py-2.5 border ${states[label] ? "bg-primary/5 border-primary/30" : "bg-secondary/20 border-border/30"}`} style={{ transition: "background 0.15s ease, border-color 0.15s ease" }}>
-           <span className={`text-[10px] font-medium ${states[label] ? "text-foreground" : "text-muted-foreground"}`} style={{ transition: "color 0.15s ease" }}>{label}</span>
-           <button
-             onClick={() => toggle(label)}
-             className={`relative w-10 h-6 rounded-full flex-shrink-0 ${states[label] ? "bg-primary" : "bg-secondary border border-border/40"}`}
-             style={{ transition: "background 0.15s ease" }}
-           >
-             <span
-               className={`absolute top-[3px] left-[3px] w-[18px] h-[18px] rounded-full shadow-sm ${states[label] ? "bg-primary-foreground" : "bg-muted-foreground/50"}`}
-               style={{
-                 transform: states[label] ? "translateX(16px)" : "translateX(0)",
-                 transition: "transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), background 0.15s ease",
-                 willChange: "transform",
-               }}
-             />
-           </button>
-        </div>
-      ))}
+    <div className="rounded-xl px-4 py-3 bg-secondary/20 border border-border/20">
+      <div className="flex items-center justify-between mb-2.5">
+        {label}
+        <span ref={displayRef} className="text-xs text-foreground font-mono bg-secondary/50 px-2 py-0.5 rounded-md">
+          {value}{suffix}
+        </span>
+      </div>
+      <input
+        ref={inputRef}
+        type="range"
+        min={min}
+        max={max}
+        defaultValue={value}
+        onInput={handleInput}
+        onChange={handleInput}
+        className="w-full h-1.5 rounded-full appearance-none cursor-pointer slider-fluid"
+        style={{ touchAction: "none", willChange: "background" }}
+      />
     </div>
   );
-};
+});
+FluidSlider.displayName = "FluidSlider";
+
+const FovSliderStandalone = memo(({ value, onChange }: { value: number; onChange: (v: number) => void }) => (
+  <FluidSlider
+    min={40} max={300} value={value} onChange={onChange} suffix="px"
+    label={<span className="text-xs text-muted-foreground font-medium">Tamaño de FOV</span>}
+  />
+));
+FovSliderStandalone.displayName = "FovSliderStandalone";
+
+const PerfSliderStandalone = memo(({ label, icon, value, onChange, unit = "%" }: { label: string; icon: React.ReactNode; value: number; onChange: (v: number) => void; unit?: string }) => (
+  <FluidSlider
+    min={0} max={100} value={value} onChange={onChange} suffix={unit}
+    label={
+      <div className="flex items-center gap-2">
+        <span className="text-muted-foreground">{icon}</span>
+        <span className="text-xs text-muted-foreground font-medium">{label}</span>
+      </div>
+    }
+  />
+));
+PerfSliderStandalone.displayName = "PerfSliderStandalone";
 
 // Server modules replaced with advanced exploit modules
 
@@ -298,51 +400,10 @@ const ProxyConfig = () => {
     </div>
   );
 
-  // FOV Slider — fluido sin lag (onInput + sin transitions de fondo)
-  const FovSlider = ({ value, onChange }: { value: number; onChange: (v: number) => void }) => {
-    const pct = ((value - 40) / 260) * 100;
-    return (
-      <div className="rounded-xl px-4 py-3 bg-secondary/20 border border-border/20">
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-xs text-muted-foreground font-medium">Tamaño de FOV</span>
-          <span className="text-xs text-foreground font-mono bg-secondary/50 px-2 py-0.5 rounded-md">{value}px</span>
-        </div>
-        <input
-          type="range"
-          min={40}
-          max={300}
-          value={value}
-          onInput={(e) => onChange(Number((e.target as HTMLInputElement).value))}
-          onChange={(e) => onChange(Number(e.target.value))}
-          className="w-full h-1.5 rounded-full appearance-none cursor-pointer slider-fluid"
-          style={{
-            background: `linear-gradient(to right, hsl(var(--primary)) ${pct}%, hsl(var(--secondary)) ${pct}%)`,
-            touchAction: "none",
-          }}
-        />
-      </div>
-    );
-  };
+  // Fluid sliders are now module-level components (FovSliderStandalone / PerfSliderStandalone).
+  const FovSlider = FovSliderStandalone;
+  const PerfSlider = PerfSliderStandalone;
 
-  // Performance Slider — fluido (onInput, sin animaciones de transición)
-  const PerfSlider = ({ label, icon, value, onChange, unit = "%" }: { label: string; icon: React.ReactNode; value: number; onChange: (v: number) => void; unit?: string }) => (
-    <div className="rounded-xl px-4 py-3 bg-secondary/20 border border-border/20">
-      <div className="flex items-center justify-between mb-2.5">
-        <div className="flex items-center gap-2">
-          <span className="text-muted-foreground">{icon}</span>
-          <span className="text-xs text-muted-foreground font-medium">{label}</span>
-        </div>
-        <span className="text-xs text-foreground font-mono bg-secondary/50 px-2 py-0.5 rounded-md">{value}{unit}</span>
-      </div>
-      <input
-        type="range" min={0} max={100} value={value}
-        onInput={(e) => onChange(Number((e.target as HTMLInputElement).value))}
-        onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full h-1.5 rounded-full appearance-none cursor-pointer slider-fluid"
-        style={{ background: `linear-gradient(to right, hsl(var(--primary)) ${value}%, hsl(var(--secondary)) ${value}%)`, touchAction: "none" }}
-      />
-    </div>
-  );
 
   const renderHome = () => (
     <div className="space-y-4">
@@ -793,7 +854,7 @@ const ProxyConfig = () => {
       id: "security-integrations",
       icon: ShieldCheck,
       title: "Seguridad Avanzada",
-      content: <SecurityToggles />,
+      content: <SecurityInfo />,
     },
   ];
 
