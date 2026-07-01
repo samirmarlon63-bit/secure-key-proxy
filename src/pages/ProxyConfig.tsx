@@ -4,6 +4,7 @@ import VideoBackground from "@/components/VideoBackground";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import { isUserBlocked } from "@/lib/keys";
 import defaultAvatar from "@/assets/skull-avatar.png.asset.json";
+import raveChannel from "@/assets/rave-channel.png.asset.json";
 import {
   Wifi, Globe, Signal, Clock, MapPin, Radio, Server,
   Lock, User, KeyRound, Power, LogOut, Gamepad2, Loader2,
@@ -861,47 +862,51 @@ const ProxyConfig = () => {
   const renderSettings = () => (
     <div className="space-y-4">
       <div className="animate-fade-in-up">
-        <h1 className="text-lg font-semibold text-foreground">Configuración</h1>
-        <p className="text-xs text-muted-foreground">Ajustes y más</p>
+        <h1 className="text-lg font-semibold text-foreground">Ajustes</h1>
+        <p className="text-xs text-muted-foreground">Sobre el creador</p>
       </div>
 
-      {settingsSection === null ? (
-        <div className="space-y-2 animate-fade-in-up" style={{ animationDelay: "0.05s" }}>
-          {settingsSections.map(({ id, icon: Icon, title }) => (
-            <button
-              key={id}
-              onClick={() => setSettingsSection(id)}
-              className="w-full glass-card p-3.5 flex items-center justify-between hover:bg-card/90 active:scale-[0.98] transition-all"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-secondary/50 border border-border/30 flex items-center justify-center">
-                  <Icon className="w-4 h-4 text-muted-foreground" />
-                </div>
-                <span className="text-sm text-foreground font-medium">{title}</span>
-              </div>
-              <ChevronRight className="w-4 h-4 text-muted-foreground" />
-            </button>
-          ))}
-        </div>
-      ) : (
-        <div className="animate-fade-in-up">
-          <button
-            onClick={() => setSettingsSection(null)}
-            className="flex items-center gap-1.5 text-xs text-muted-foreground mb-4 hover:text-foreground transition-colors active:scale-95"
+      <div className="glass-card p-5 animate-fade-in-up" style={{ animationDelay: "0.05s" }}>
+        <div className="flex flex-col items-center text-center">
+          <div
+            className="p-[3px] rounded-full mb-4"
+            style={{
+              background: "conic-gradient(from 0deg, #00b8ff, #4ddcff, #0066ff, #00b8ff, #1e90ff)",
+              boxShadow: "0 0 24px rgba(0,184,255,0.55)",
+            }}
           >
-            <ChevronRight className="w-3 h-3 rotate-180" />
-            Volver
-          </button>
-          <div className="glass-card p-4">
-            <h2 className="text-sm font-semibold text-foreground mb-4">
-              {settingsSections.find(s => s.id === settingsSection)?.title}
-            </h2>
-            {settingsSections.find(s => s.id === settingsSection)?.content}
+            <img
+              src={raveChannel.url}
+              alt="Canal del creador"
+              className="w-24 h-24 rounded-full object-cover bg-black block"
+            />
           </div>
+
+          <div className="flex items-center gap-1.5 mb-1">
+            <h2 className="text-base font-semibold text-foreground">Creador</h2>
+            <VerifiedBadge className="w-4 h-4" />
+          </div>
+          <p className="text-[11px] text-muted-foreground mb-4">
+            Canal oficial de WhatsApp del creador
+          </p>
+
+          <a
+            href="https://whatsapp.com/channel/0029VbC678PIyPtc7iERCH2R"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-primary-foreground active:scale-[0.98] transition-transform"
+            style={{
+              background: "linear-gradient(135deg, #00b8ff, #0066ff)",
+              boxShadow: "0 8px 22px -8px rgba(0,102,255,0.65)",
+            }}
+          >
+            Seguir al creador
+          </a>
         </div>
-      )}
+      </div>
     </div>
   );
+
 
   return (
     <div className="relative min-h-screen pb-20">
