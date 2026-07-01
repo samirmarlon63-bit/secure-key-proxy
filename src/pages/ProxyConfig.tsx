@@ -400,51 +400,10 @@ const ProxyConfig = () => {
     </div>
   );
 
-  // FOV Slider — fluido sin lag (onInput + sin transitions de fondo)
-  const FovSlider = ({ value, onChange }: { value: number; onChange: (v: number) => void }) => {
-    const pct = ((value - 40) / 260) * 100;
-    return (
-      <div className="rounded-xl px-4 py-3 bg-secondary/20 border border-border/20">
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-xs text-muted-foreground font-medium">Tamaño de FOV</span>
-          <span className="text-xs text-foreground font-mono bg-secondary/50 px-2 py-0.5 rounded-md">{value}px</span>
-        </div>
-        <input
-          type="range"
-          min={40}
-          max={300}
-          value={value}
-          onInput={(e) => onChange(Number((e.target as HTMLInputElement).value))}
-          onChange={(e) => onChange(Number(e.target.value))}
-          className="w-full h-1.5 rounded-full appearance-none cursor-pointer slider-fluid"
-          style={{
-            background: `linear-gradient(to right, hsl(var(--primary)) ${pct}%, hsl(var(--secondary)) ${pct}%)`,
-            touchAction: "none",
-          }}
-        />
-      </div>
-    );
-  };
+  // Fluid sliders are now module-level components (FovSliderStandalone / PerfSliderStandalone).
+  const FovSlider = FovSliderStandalone;
+  const PerfSlider = PerfSliderStandalone;
 
-  // Performance Slider — fluido (onInput, sin animaciones de transición)
-  const PerfSlider = ({ label, icon, value, onChange, unit = "%" }: { label: string; icon: React.ReactNode; value: number; onChange: (v: number) => void; unit?: string }) => (
-    <div className="rounded-xl px-4 py-3 bg-secondary/20 border border-border/20">
-      <div className="flex items-center justify-between mb-2.5">
-        <div className="flex items-center gap-2">
-          <span className="text-muted-foreground">{icon}</span>
-          <span className="text-xs text-muted-foreground font-medium">{label}</span>
-        </div>
-        <span className="text-xs text-foreground font-mono bg-secondary/50 px-2 py-0.5 rounded-md">{value}{unit}</span>
-      </div>
-      <input
-        type="range" min={0} max={100} value={value}
-        onInput={(e) => onChange(Number((e.target as HTMLInputElement).value))}
-        onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full h-1.5 rounded-full appearance-none cursor-pointer slider-fluid"
-        style={{ background: `linear-gradient(to right, hsl(var(--primary)) ${value}%, hsl(var(--secondary)) ${value}%)`, touchAction: "none" }}
-      />
-    </div>
-  );
 
   const renderHome = () => (
     <div className="space-y-4">
