@@ -3,8 +3,9 @@ import { useNavigate } from "react-router-dom";
 import VideoBackground from "@/components/VideoBackground";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import { isUserBlocked } from "@/lib/keys";
-import defaultAvatar from "@/assets/skull-avatar.png.asset.json";
-import raveChannel from "@/assets/rave-channel.png.asset.json";
+import { RAVE_LOGO } from "@/lib/assets";
+const defaultAvatar = { url: RAVE_LOGO };
+const raveChannel = { url: RAVE_LOGO };
 import {
   Wifi, Globe, Signal, Clock, MapPin, Radio, Server,
   Lock, User, KeyRound, Power, LogOut, Gamepad2, Loader2,
