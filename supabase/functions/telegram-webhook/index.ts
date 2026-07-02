@@ -130,7 +130,7 @@ async function deleteReceipt(supabase: any, order: any) {
 function genKey(): string {
   const c = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   const seg = () => Array.from({ length: 4 }, () => c[Math.floor(Math.random() * c.length)]).join("");
-  return `FFV-${seg()}-${seg()}`;
+  return `RAVE-${seg()}-${seg()}`;
 }
 
 async function createKey(supabase: any, type: string, duration: string): Promise<string> {
@@ -199,7 +199,7 @@ async function generateKeyForOrder(supabase: any, order: any): Promise<string> {
 
 function helpText(): string {
   return (
-    "<b>FFVALHALLA — Admin Bot</b>\n\n" +
+    "<b>Rave — Admin Bot</b>\n\n" +
     "Usa los botones de abajo o estos comandos:\n\n" +
     "/generar — generar nueva key (interactivo)\n" +
     "/generar Normal 7 días 5 — generar varias keys\n" +
@@ -245,7 +245,7 @@ async function handleTextOrCommand(
       await setPending(supabase, chat_id, { type: "auth" });
       await tg("sendMessage", {
         chat_id, parse_mode: "HTML",
-        text: "<b>FFVALHALLA Admin</b>\nIngresa la contraseña secreta para continuar:",
+        text: "<b>Rave Admin</b>\nIngresa la contraseña secreta para continuar:",
         reply_markup: { remove_keyboard: true },
       });
       return;
@@ -255,7 +255,7 @@ async function handleTextOrCommand(
         await saveAuth(supabase, chat_id);
         await clearPending(supabase, chat_id);
         await reply(chat_id,
-          "<b>Acceso concedido</b>\n\nBienvenido al panel de FFVALHALLA.\nUsa la barra inferior para todas las funciones.");
+          "<b>Acceso concedido</b>\n\nBienvenido al panel de Rave.\nUsa la barra inferior para todas las funciones.");
         return;
       }
       await tg("sendMessage", { chat_id, text: "Contraseña incorrecta. Intenta de nuevo:" });
@@ -336,7 +336,7 @@ async function handleTextOrCommand(
   switch (trimmed) {
     case "Inicio":
     case "/inicio":
-      await reply(chat_id, "<b>FFVALHALLA — Panel principal</b>\nElige una opción de la barra inferior.");
+      await reply(chat_id, "<b>Rave — Panel principal</b>\nElige una opción de la barra inferior.");
       return;
     case "Ayuda":
     case "/help":
