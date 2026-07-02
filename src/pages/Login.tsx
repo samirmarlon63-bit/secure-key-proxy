@@ -2,15 +2,17 @@ import { useEffect, useState, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import VideoBackground from "@/components/VideoBackground";
 import VerifiedBadge from "@/components/VerifiedBadge";
-import { Shield, Lock, Fingerprint, User, KeyRound } from "lucide-react";
+import VideoModal from "@/components/VideoModal";
+import { Shield, Lock, Fingerprint, User, KeyRound, PlayCircle } from "lucide-react";
 import { activateKey, isUserBlocked } from "@/lib/keys";
-import avatarPointer from "@/assets/skull-avatar.png.asset.json";
+import { RAVE_LOGO, EXAMPLE_VIDEO } from "@/lib/assets";
 
 const Login = () => {
   const [name, setName] = useState("");
   const [key, setKey] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [videoOpen, setVideoOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -64,6 +66,13 @@ const Login = () => {
     <div className="relative min-h-screen flex flex-col items-center justify-center px-4">
       <VideoBackground />
 
+      {/* Font for the brand title */}
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap"
+        rel="stylesheet"
+      />
+
       <div className="relative z-10 w-full max-w-sm animate-fade-in-up">
         <div className="flex flex-col items-center mb-6">
           <div className="relative mb-3">
@@ -76,14 +85,26 @@ const Login = () => {
             >
               <div className="p-[2px] rounded-full bg-background">
                 <div className="w-24 h-24 rounded-full overflow-hidden bg-black">
-                  <img src={avatarPointer.url} alt="FFVALHALLA" className="w-full h-full object-cover" />
+                  <img src={RAVE_LOGO} alt="Rave" className="w-full h-full object-cover" />
                 </div>
               </div>
             </div>
           </div>
           <div className="flex items-center gap-1.5 mb-1">
-            <h1 className="text-lg font-bold text-foreground tracking-tight">FFVALHALLA</h1>
-            <VerifiedBadge />
+            <h1
+              className="text-3xl font-bold tracking-tight"
+              style={{
+                fontFamily: "'Space Grotesk', system-ui, sans-serif",
+                background: "linear-gradient(180deg, #ffffff 0%, #9fd0ff 60%, #4db8ff 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+                letterSpacing: "-0.02em",
+              }}
+            >
+              Rave
+            </h1>
+            <VerifiedBadge size={20} />
           </div>
           <p className="text-[10px] text-muted-foreground/70 tracking-widest uppercase">Secure Gateway v2.4</p>
         </div>
@@ -137,7 +158,7 @@ const Login = () => {
               <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/60" />
               <input
                 type="text"
-                placeholder="FFV-XXXX-XXXX"
+                placeholder="RAVE-XXXX-XXXX"
                 value={key}
                 onChange={(e) => setKey(e.target.value.toUpperCase())}
                 autoComplete="off"
@@ -153,6 +174,25 @@ const Login = () => {
           >
             {loading ? "Verificando..." : "Entrar"}
           </button>
+
+          {/* Función Ejemplo — elegant compact button */}
+          <button
+            type="button"
+            onClick={() => setVideoOpen(true)}
+            className="group w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-medium tracking-wide text-white/90 active:scale-[0.98] transition-all"
+            style={{
+              background:
+                "linear-gradient(140deg, rgba(29,155,240,0.18), rgba(29,155,240,0.06))",
+              border: "1px solid rgba(120,190,255,0.35)",
+              boxShadow:
+                "0 0 0 1px rgba(29,155,240,0.15) inset, 0 6px 20px rgba(29,155,240,0.18)",
+              backdropFilter: "blur(8px)",
+              WebkitBackdropFilter: "blur(8px)",
+            }}
+          >
+            <PlayCircle className="w-4 h-4 text-[#4db8ff] group-hover:text-white transition-colors" />
+            <span>Função Ejemplo</span>
+          </button>
         </form>
 
         <div className="mt-6 text-center">
@@ -162,6 +202,13 @@ const Login = () => {
           </p>
         </div>
       </div>
+
+      <VideoModal
+        open={videoOpen}
+        onClose={() => setVideoOpen(false)}
+        src={EXAMPLE_VIDEO}
+        title="Função Ejemplo"
+      />
     </div>
   );
 };
