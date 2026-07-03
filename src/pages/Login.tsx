@@ -46,7 +46,7 @@ const Login = () => {
       }
       const k = await activateKey(cleanKey, cleanName);
       if (!k) {
-        setError("Key inválida ou expirada. Verifique e tente novamente.");
+        setError(t("errInvalid"));
         setLoading(false);
         return;
       }
@@ -59,7 +59,7 @@ const Login = () => {
       }));
       navigate("/proxy");
     } catch {
-      setError("Erro de conexão. Tente novamente.");
+      setError(t("errConn"));
       setLoading(false);
     }
   };
@@ -108,30 +108,53 @@ const Login = () => {
             </h1>
             <VerifiedBadge size={20} />
           </div>
-          <p className="text-[10px] text-muted-foreground/70 tracking-widest uppercase">Secure Gateway v2.4</p>
+          <p className="text-[10px] text-muted-foreground/70 tracking-widest uppercase">{t("secureGateway")}</p>
         </div>
 
-        <div className="flex items-center justify-center gap-4 mb-5">
+        <div className="flex items-center justify-center gap-2 mb-5 flex-wrap">
           {[
-            { icon: Shield, label: "AES-256" },
-            { icon: Lock, label: "TLS 1.3" },
-            { icon: Fingerprint, label: "Auth" },
+            { icon: Shield, label: t("aes") },
+            { icon: Lock, label: t("tls") },
+            { icon: Globe, label: t("auth") },
           ].map(({ icon: Icon, label }) => (
             <div key={label} className="flex items-center gap-1.5 bg-secondary/40 border border-border/40 rounded-full px-3 py-1">
-              <Icon className="w-3 h-3 text-emerald-400" />
+              <Icon className="w-3 h-3 text-sky-400" />
               <span className="text-[9px] text-muted-foreground font-medium">{label}</span>
             </div>
           ))}
         </div>
 
-        <form onSubmit={onSubmit} className="glass-card p-5 glow-border space-y-4">
-          <div className="flex items-center gap-2 pb-3 border-b border-border/30">
-            <div className="w-8 h-8 rounded-lg bg-secondary/60 border border-border/40 flex items-center justify-center">
-              <Shield className="w-4 h-4 text-muted-foreground" />
+        <form
+          onSubmit={onSubmit}
+          className="glass-card p-5 space-y-4 rounded-2xl"
+          style={{
+            border: "1.5px solid rgba(77,184,255,0.55)",
+            boxShadow:
+              "0 0 0 1px rgba(29,155,240,0.18) inset, 0 0 28px rgba(29,155,240,0.22), 0 12px 40px -12px rgba(0,120,255,0.45)",
+          }}
+        >
+          <div className="flex items-center gap-2 pb-3 border-b border-sky-500/20">
+            <div className="w-8 h-8 rounded-lg bg-sky-500/10 border border-sky-400/40 flex items-center justify-center">
+              <Shield className="w-4 h-4 text-sky-300" />
             </div>
-            <div>
-              <span className="text-xs text-foreground font-semibold block">Acesso Seguro</span>
-              <span className="text-[9px] text-muted-foreground/60">Insira suas credenciais</span>
+            <div className="flex-1">
+              <span className="text-xs text-foreground font-semibold block">{t("secureAccess")}</span>
+              <span className="text-[9px] text-muted-foreground/60">{t("enterCreds")}</span>
+            </div>
+            <div className="relative">
+              <Globe className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-sky-300 pointer-events-none" />
+              <select
+                aria-label={t("language")}
+                value={lang}
+                onChange={(e) => setLang(e.target.value as typeof lang)}
+                className="appearance-none bg-secondary/60 border border-sky-400/30 rounded-md pl-7 pr-2 py-1 text-[10px] text-foreground focus:outline-none focus:ring-1 focus:ring-sky-400 max-w-[110px]"
+              >
+                {LANGUAGES.map((l) => (
+                  <option key={l.code} value={l.code} className="bg-background text-foreground">
+                    {l.label}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
