@@ -175,24 +175,48 @@ const Login = () => {
             {loading ? "Verificando..." : "Entrar"}
           </button>
 
-          {/* Función Ejemplo — elegant compact button */}
-          <button
-            type="button"
-            onClick={() => setVideoOpen(true)}
-            className="group w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-medium tracking-wide text-white/90 active:scale-[0.98] transition-all"
-            style={{
-              background:
-                "linear-gradient(140deg, rgba(29,155,240,0.18), rgba(29,155,240,0.06))",
-              border: "1px solid rgba(120,190,255,0.35)",
-              boxShadow:
-                "0 0 0 1px rgba(29,155,240,0.15) inset, 0 6px 20px rgba(29,155,240,0.18)",
-              backdropFilter: "blur(8px)",
-              WebkitBackdropFilter: "blur(8px)",
-            }}
-          >
-            <PlayCircle className="w-4 h-4 text-[#4db8ff] group-hover:text-white transition-colors" />
-            <span>Função Ejemplo</span>
-          </button>
+          {/* Função Exemplo — premium button with mascot pointing at it */}
+          <div className="relative pt-1">
+            <button
+              type="button"
+              onClick={() => setVideoOpen(true)}
+              className="relative group w-full flex items-center justify-center gap-2.5 py-3 rounded-xl text-sm font-semibold tracking-wide text-white overflow-hidden active:scale-[0.98] transition-transform"
+              style={{
+                background:
+                  "linear-gradient(135deg, #0a2a55 0%, #0b6fd1 55%, #1d9bf0 100%)",
+                border: "1px solid rgba(120,190,255,0.55)",
+                boxShadow:
+                  "0 0 0 1px rgba(29,155,240,0.25) inset, 0 10px 28px -8px rgba(29,155,240,0.55), 0 2px 8px rgba(0,0,0,0.4)",
+              }}
+            >
+              {/* subtle sheen */}
+              <span
+                aria-hidden
+                className="absolute inset-0 opacity-40"
+                style={{
+                  background:
+                    "linear-gradient(180deg, rgba(255,255,255,0.25), rgba(255,255,255,0) 45%)",
+                }}
+              />
+              <PlayCircle className="relative w-[18px] h-[18px]" />
+              <span className="relative">Ver Demonstração</span>
+            </button>
+
+            {/* Mascot pointing at the button — chroma-free PNG, static */}
+            <img
+              src={RAVE_MASCOT}
+              alt=""
+              aria-hidden="true"
+              loading="eager"
+              decoding="async"
+              draggable={false}
+              className="pointer-events-none select-none absolute -bottom-6 -right-3 w-24 h-auto z-10"
+              style={{
+                filter: "drop-shadow(0 10px 18px rgba(0,120,255,0.35))",
+                transform: "scaleX(-1)",
+              }}
+            />
+          </div>
         </form>
 
         <div className="mt-6 text-center">
