@@ -231,7 +231,7 @@ const Login = () => {
         open={videoOpen}
         onClose={() => setVideoOpen(false)}
         src={EXAMPLE_VIDEO}
-        title="Função Ejemplo"
+        title="Demonstração"
       />
     </div>
   );
