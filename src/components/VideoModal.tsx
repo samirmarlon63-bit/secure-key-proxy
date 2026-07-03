@@ -27,7 +27,7 @@ const VideoModal = ({ open, onClose, src, title = "Reproductor" }: Props) => {
           videoRef.current.pause();
           videoRef.current.currentTime = 0;
         }
-      }, 260);
+      }, 220);
       return () => clearTimeout(t);
     }
   }, [open, mounted]);
@@ -42,66 +42,52 @@ const VideoModal = ({ open, onClose, src, title = "Reproductor" }: Props) => {
 
   return (
     <div
-      className={`fixed inset-0 z-[9999] flex items-center justify-center px-4 transition-opacity duration-300 ${
+      className={`fixed inset-0 z-[9999] flex items-center justify-center px-6 transition-opacity duration-200 ${
         visible ? "opacity-100" : "opacity-0"
       }`}
-      style={{
-        background:
-          "radial-gradient(ellipse at center, rgba(0,20,60,0.85) 0%, rgba(0,0,0,0.95) 70%)",
-        backdropFilter: "blur(14px)",
-        WebkitBackdropFilter: "blur(14px)",
-      }}
+      style={{ background: "rgba(2,6,20,0.72)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)" }}
       onClick={onClose}
     >
+      {/* Compact floating close button */}
+      <button
+        onClick={onClose}
+        aria-label="Cerrar"
+        className="absolute top-5 right-5 w-9 h-9 rounded-full flex items-center justify-center bg-white/10 hover:bg-white/20 active:scale-95 border border-white/15 text-white transition-all"
+      >
+        <X className="w-4 h-4" />
+      </button>
+
       <div
         onClick={(e) => e.stopPropagation()}
-        className={`relative w-full max-w-md transition-all duration-300 ease-out ${
-          visible ? "scale-100 translate-y-0 opacity-100" : "scale-95 translate-y-4 opacity-0"
+        className={`relative w-full max-w-[240px] transition-all duration-250 ease-out ${
+          visible ? "scale-100 opacity-100" : "scale-95 opacity-0"
         }`}
-        style={{
-          filter: "drop-shadow(0 30px 60px rgba(0,120,255,0.35))",
-        }}
       >
         <div
-          className="relative rounded-3xl overflow-hidden"
+          className="relative rounded-2xl overflow-hidden bg-black"
           style={{
-            background: "linear-gradient(140deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02))",
             border: "1px solid rgba(120,190,255,0.35)",
             boxShadow:
-              "0 0 0 1px rgba(29,155,240,0.25) inset, 0 0 40px rgba(29,155,240,0.35), 0 20px 60px rgba(0,0,0,0.6)",
+              "0 0 0 1px rgba(29,155,240,0.18) inset, 0 10px 40px -8px rgba(29,155,240,0.45), 0 20px 60px rgba(0,0,0,0.55)",
           }}
         >
-          <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-white/5">
-            <span className="text-xs font-semibold tracking-widest uppercase text-white/80">
-              {title}
-            </span>
-            <button
-              onClick={onClose}
-              aria-label="Cerrar"
-              className="w-8 h-8 rounded-full flex items-center justify-center bg-white/10 hover:bg-white/20 active:scale-95 transition-all border border-white/10"
-            >
-              <X className="w-4 h-4 text-white" />
-            </button>
-          </div>
-
-          <div className="relative aspect-[9/16] bg-black">
+          <div className="relative aspect-[9/16]">
             <video
               ref={videoRef}
               src={src}
               controls
               autoPlay
               playsInline
-              className="w-full h-full object-contain"
-            />
-            {/* Blue inner glow ring */}
-            <div
-              className="pointer-events-none absolute inset-0 rounded-b-3xl"
-              style={{
-                boxShadow: "inset 0 0 40px rgba(29,155,240,0.25)",
-              }}
+              className="w-full h-full object-contain bg-black"
             />
           </div>
         </div>
+
+        {title && (
+          <p className="mt-3 text-center text-[10px] uppercase tracking-[0.2em] text-white/60">
+            {title}
+          </p>
+        )}
       </div>
     </div>
   );
