@@ -163,12 +163,12 @@ const Login = () => {
           )}
 
           <div>
-            <label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider font-medium mb-1 block">Usuário</label>
+            <label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider font-medium mb-1 block">{t("user")}</label>
             <div className="relative">
               <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/60" />
               <input
                 type="text"
-                placeholder="Seu nome"
+                placeholder={t("userPlaceholder")}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 autoComplete="username"
@@ -178,12 +178,12 @@ const Login = () => {
           </div>
 
           <div>
-            <label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider font-medium mb-1 block">Key de acesso</label>
+            <label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider font-medium mb-1 block">{t("accessKey")}</label>
             <div className="relative">
               <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/60" />
               <input
                 type="text"
-                placeholder="RAVE-XXXX-XXXX"
+                placeholder={t("keyPlaceholder")}
                 value={key}
                 onChange={(e) => setKey(e.target.value.toUpperCase())}
                 autoComplete="off"
@@ -197,7 +197,7 @@ const Login = () => {
             disabled={loading}
             className="w-full bg-foreground text-background font-semibold py-3 rounded-lg text-sm hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50"
           >
-            {loading ? "Verificando..." : "Entrar"}
+            {loading ? t("verifying") : t("enter")}
           </button>
 
           {/* Função Exemplo — premium button with mascot pointing at it */}
@@ -224,7 +224,7 @@ const Login = () => {
                 }}
               />
               <PlayCircle className="relative w-[18px] h-[18px]" />
-              <span className="relative">Ver Demonstração</span>
+              <span className="relative">{t("seeDemo")}</span>
             </button>
 
             {/* Mascot pointing at the button — chroma-free PNG, static */}
@@ -246,8 +246,8 @@ const Login = () => {
 
         <div className="mt-6 text-center">
           <p className="text-[9px] text-muted-foreground/40 leading-relaxed">
-            Sistema de Configuração de Proxy Seguro — Conexão Criptografada
-            <br />Todas as sessões são monitoradas e protegidas.
+            {t("footer")}
+            <br />{t("footer2")}
           </p>
         </div>
       </div>
@@ -256,7 +256,7 @@ const Login = () => {
         open={videoOpen}
         onClose={() => setVideoOpen(false)}
         src={EXAMPLE_VIDEO}
-        title="Demonstração"
+        title={t("demo")}
       />
     </div>
   );
