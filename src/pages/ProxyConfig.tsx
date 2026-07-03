@@ -487,43 +487,6 @@ const ProxyConfig = () => {
         <PerfSlider label="Sensitivity" icon={<Radar className="w-3.5 h-3.5" />} value={sensitivity} onChange={setSensitivity} />
       </div>
 
-      {/* Network Status Panel */}
-      <div className="glass-card p-4 animate-fade-in-up space-y-3" style={{ animationDelay: "0.2s" }}>
-        <div className="flex items-center gap-2 pb-1 border-b border-border/20 mb-1">
-          <Activity className="w-4 h-4 text-muted-foreground" />
-          <span className="text-xs text-muted-foreground font-semibold tracking-wide uppercase">Network Status</span>
-        </div>
-        <div className="grid grid-cols-3 gap-2">
-          {[
-            { label: "Latency", value: "8ms", icon: <Zap className="w-3 h-3" /> },
-            { label: "Uptime", value: "99.9%", icon: <Activity className="w-3 h-3" /> },
-            { label: "Tunnel", value: "Active", icon: <Lock className="w-3 h-3" /> },
-          ].map(({ label, value, icon }) => (
-            <div key={label} className="bg-secondary/20 rounded-lg p-2.5 border border-border/20 text-center">
-              <div className="flex justify-center text-muted-foreground mb-1">{icon}</div>
-              <p className="text-[10px] text-foreground font-mono font-semibold">{value}</p>
-              <p className="text-[8px] text-muted-foreground mt-0.5">{label}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Packet Injector Console */}
-      <div className="glass-card p-4 animate-fade-in-up" style={{ animationDelay: "0.25s" }}>
-        <div className="flex items-center gap-2 pb-1 border-b border-border/20 mb-3">
-          <Layers className="w-4 h-4 text-muted-foreground" />
-          <span className="text-xs text-muted-foreground font-semibold tracking-wide uppercase">Packet Injector</span>
-        </div>
-        <div className="bg-background/60 rounded-lg p-3 border border-border/30 font-mono text-[9px] space-y-1 max-h-32 overflow-y-auto">
-          <p><span className="text-primary">root@proxy:~$</span> <span className="text-foreground/70">inject --module combat.so --pid 1247</span></p>
-          <p className="text-muted-foreground/60">[OK] Module loaded: combat.so (v3.2.1)</p>
-          <p><span className="text-primary">root@proxy:~$</span> <span className="text-foreground/70">set recoil_offset 0x00</span></p>
-          <p className="text-muted-foreground/60">[OK] Memory patched @ 0x7FFA3B20</p>
-          <p><span className="text-primary">root@proxy:~$</span> <span className="text-foreground/70">hook render_pipeline --wall true</span></p>
-          <p className="text-muted-foreground/60">[OK] Render hook active — entities visible</p>
-          <p><span className="text-primary">root@proxy:~$</span> <span className="text-foreground/70 animate-pulse">_</span></p>
-        </div>
-      </div>
 
       {/* FOV Circle Overlay */}
       {fovEnabled && (
