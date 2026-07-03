@@ -3,11 +3,13 @@ import { useNavigate } from "react-router-dom";
 import VideoBackground from "@/components/VideoBackground";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import VideoModal from "@/components/VideoModal";
-import { Shield, Lock, Fingerprint, User, KeyRound, PlayCircle } from "lucide-react";
+import { Shield, Lock, Globe, User, KeyRound, PlayCircle } from "lucide-react";
 import { activateKey, isUserBlocked } from "@/lib/keys";
 import { RAVE_LOGO, EXAMPLE_VIDEO, RAVE_MASCOT } from "@/lib/assets";
+import { useI18n, LANGUAGES } from "@/lib/i18n";
 
 const Login = () => {
+  const { t, lang, setLang } = useI18n();
   const [name, setName] = useState("");
   const [key, setKey] = useState("");
   const [error, setError] = useState("");
