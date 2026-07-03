@@ -34,13 +34,13 @@ const Login = () => {
     setError("");
     const cleanName = name.trim();
     const cleanKey = key.replace(/[\u200B-\u200D\uFEFF\s]/g, '').trim().toUpperCase();
-    if (!cleanName) { setError("Insira seu nome de usuário."); return; }
-    if (!cleanKey) { setError("Insira sua key de acesso."); return; }
+    if (!cleanName) { setError(t("errUser")); return; }
+    if (!cleanKey) { setError(t("errKey")); return; }
 
     setLoading(true);
     try {
       if (await isUserBlocked(cleanKey)) {
-        setError("Esta key está bloqueada. Contate o administrador.");
+        setError(t("errBlocked"));
         setLoading(false);
         return;
       }
