@@ -5,7 +5,7 @@ import VerifiedBadge from "@/components/VerifiedBadge";
 import VideoModal from "@/components/VideoModal";
 import { Shield, Lock, Fingerprint, User, KeyRound, PlayCircle } from "lucide-react";
 import { activateKey, isUserBlocked } from "@/lib/keys";
-import { RAVE_LOGO, EXAMPLE_VIDEO } from "@/lib/assets";
+import { RAVE_LOGO, EXAMPLE_VIDEO, RAVE_MASCOT } from "@/lib/assets";
 
 const Login = () => {
   const [name, setName] = useState("");
