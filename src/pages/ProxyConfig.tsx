@@ -513,9 +513,9 @@ const ProxyConfig = () => {
       <div
         className="relative rounded-2xl overflow-hidden animate-fade-in-up"
         style={{
-          border: "2px solid #ef4444",
+          border: "2px solid #1d9bf0",
           boxShadow:
-            "0 0 0 1px rgba(239,68,68,0.35) inset, 0 10px 28px -8px rgba(239,68,68,0.55), 0 0 24px rgba(239,68,68,0.25)",
+            "0 0 0 1px rgba(29,155,240,0.35) inset, 0 10px 28px -8px rgba(29,155,240,0.55), 0 0 24px rgba(29,155,240,0.25)",
           background: "#000",
         }}
       >
