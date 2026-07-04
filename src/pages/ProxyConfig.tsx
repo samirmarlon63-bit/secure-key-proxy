@@ -509,26 +509,23 @@ const ProxyConfig = () => {
         <p className="text-xs text-muted-foreground">Exploit Engine v3.8 — Runtime Patches</p>
       </div>
 
-      {/* Memory & Protection */}
-      <div className="glass-card p-4 animate-fade-in-up space-y-3" style={{ animationDelay: "0.05s" }}>
-        <div className="flex items-center gap-2 pb-1 border-b border-border/20 mb-1">
-          <Cpu className="w-4 h-4 text-muted-foreground" />
-          <span className="text-xs text-muted-foreground font-semibold tracking-wide uppercase">Memory & Protection</span>
-        </div>
-        <AnimatedToggle label="Memory Patcher" icon={<HardDrive className="w-4 h-4" />} value={memoryPatcher} onChange={setMemoryPatcher} />
-        <AnimatedToggle label="Anti-Ban Shield" icon={<Shield className="w-4 h-4" />} value={antiBan} onChange={setAntiBan} />
-        <AnimatedToggle label="Kernel Bypass" icon={<Cpu className="w-4 h-4" />} value={kernelBypass} onChange={setKernelBypass} />
-      </div>
-
-      {/* Stealth & Evasion */}
-      <div className="glass-card p-4 animate-fade-in-up space-y-3" style={{ animationDelay: "0.1s" }}>
-        <div className="flex items-center gap-2 pb-1 border-b border-border/20 mb-1">
-          <Ghost className="w-4 h-4 text-muted-foreground" />
-          <span className="text-xs text-muted-foreground font-semibold tracking-wide uppercase">Stealth & Evasion</span>
-        </div>
-        <AnimatedToggle label="Root Cloak" icon={<Lock className="w-4 h-4" />} value={rootCloak} onChange={setRootCloak} />
-        <AnimatedToggle label="Packet Spoofer" icon={<Radio className="w-4 h-4" />} value={packetSpoof} onChange={setPacketSpoof} />
-        <AnimatedToggle label="Process Hider" icon={<Eye className="w-4 h-4" />} value={procHider} onChange={setProcHider} />
+      {/* Banner */}
+      <div
+        className="relative rounded-2xl overflow-hidden animate-fade-in-up"
+        style={{
+          border: "2px solid #ef4444",
+          boxShadow:
+            "0 0 0 1px rgba(239,68,68,0.35) inset, 0 10px 28px -8px rgba(239,68,68,0.55), 0 0 24px rgba(239,68,68,0.25)",
+          background: "#000",
+        }}
+      >
+        <img
+          src={RAVE_MODULES_BANNER}
+          alt="Rave Modules"
+          className="w-full h-auto block object-cover"
+          loading="eager"
+          decoding="async"
+        />
       </div>
 
       {/* Injection Engine */}
@@ -540,36 +537,6 @@ const ProxyConfig = () => {
         <AnimatedToggle label="DEX Injector" icon={<Layers className="w-4 h-4" />} value={dexInjector} onChange={setDexInjector} />
         <AnimatedToggle label="SSL Pinning Bypass" icon={<KeyRound className="w-4 h-4" />} value={sslPinning} onChange={setSslPinning} />
         <AnimatedToggle label="HWID Spoofer" icon={<Server className="w-4 h-4" />} value={hwIdSpoof} onChange={setHwIdSpoof} />
-      </div>
-
-      {/* Runtime Tuning */}
-      <div className="glass-card p-4 animate-fade-in-up space-y-3" style={{ animationDelay: "0.2s" }}>
-        <div className="flex items-center gap-2 pb-1 border-b border-border/20 mb-1">
-          <Gauge className="w-4 h-4 text-muted-foreground" />
-          <span className="text-xs text-muted-foreground font-semibold tracking-wide uppercase">Runtime Tuning</span>
-        </div>
-        <PerfSlider label="Heap Allocation" icon={<BarChart3 className="w-3.5 h-3.5" />} value={heapAlloc} onChange={setHeapAlloc} unit="MB" />
-        <PerfSlider label="Thread Priority" icon={<Zap className="w-3.5 h-3.5" />} value={threadPriority} onChange={setThreadPriority} />
-        <PerfSlider label="Injection Delay" icon={<Clock className="w-3.5 h-3.5" />} value={injectionDelay} onChange={setInjectionDelay} unit="ms" />
-      </div>
-
-      {/* Live Exploit Console */}
-      <div className="glass-card p-4 animate-fade-in-up" style={{ animationDelay: "0.25s" }}>
-        <div className="flex items-center gap-2 pb-1 border-b border-border/20 mb-3">
-          <AlertTriangle className="w-4 h-4 text-muted-foreground" />
-          <span className="text-xs text-muted-foreground font-semibold tracking-wide uppercase">Exploit Console</span>
-        </div>
-        <div className="bg-background/60 rounded-lg p-3 border border-border/30 font-mono text-[9px] space-y-1 max-h-36 overflow-y-auto">
-          <p><span className="text-primary">exploit@kernel:~$</span> <span className="text-foreground/70">load --module anti_ban.ko</span></p>
-          <p className="text-muted-foreground/60">[OK] Kernel module loaded @ ring0</p>
-          <p><span className="text-primary">exploit@kernel:~$</span> <span className="text-foreground/70">patch mem 0x7FFA3B20 --nop</span></p>
-          <p className="text-muted-foreground/60">[OK] 48 bytes patched — signature bypassed</p>
-          <p><span className="text-primary">exploit@kernel:~$</span> <span className="text-foreground/70">spoof hwid --random</span></p>
-          <p className="text-muted-foreground/60">[OK] HWID: A3F8-9C2D-7E1B-4F6A</p>
-          <p><span className="text-primary">exploit@kernel:~$</span> <span className="text-foreground/70">cloak --pid self --depth 3</span></p>
-          <p className="text-muted-foreground/60">[OK] Process hidden from 3 scanners</p>
-          <p><span className="text-primary">exploit@kernel:~$</span> <span className="text-foreground/70 animate-pulse">_</span></p>
-        </div>
       </div>
     </div>
   );
