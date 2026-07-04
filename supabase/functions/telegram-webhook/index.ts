@@ -5,7 +5,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-telegram-bot-api-secret-token",
 };
 
-const ADMIN_PASSWORD = "valhalla117";
+const ADMIN_PASSWORD = "rave117";
 
 const DURATION_MS: Record<string, number> = {
   "1 minuto": 60 * 1000,
