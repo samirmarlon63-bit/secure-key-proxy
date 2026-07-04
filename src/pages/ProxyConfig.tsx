@@ -457,9 +457,6 @@ const ProxyConfig = () => {
         </div>
         <AnimatedToggle label="No Recoil" icon={<Shield className="w-4 h-4" />} value={noRecoil} onChange={setNoRecoil} />
         <AnimatedToggle label="Auto Apuntado" icon={<Target className="w-4 h-4" />} value={autoAim} onChange={setAutoAim} />
-        <AnimatedToggle label="Speed Hack" icon={<Bolt className="w-4 h-4" />} value={speedHack} onChange={setSpeedHack} />
-        <AnimatedToggle label="Wall Hack" icon={<Ghost className="w-4 h-4" />} value={wallHack} onChange={setWallHack} />
-        <AnimatedToggle label="360 Spin" icon={<Orbit className="w-4 h-4" />} value={spinEnabled} onChange={setSpinEnabled} />
       </div>
 
       {/* FOV Section */}
