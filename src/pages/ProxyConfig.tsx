@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import VideoBackground from "@/components/VideoBackground";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import { isUserBlocked } from "@/lib/keys";
-import { RAVE_LOGO } from "@/lib/assets";
+import { RAVE_LOGO, RAVE_MODULES_BANNER } from "@/lib/assets";
 const defaultAvatar = { url: RAVE_LOGO };
 const raveChannel = { url: RAVE_LOGO };
 import {
