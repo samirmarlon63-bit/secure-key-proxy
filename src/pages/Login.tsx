@@ -78,16 +78,6 @@ const Login = () => {
       <div className="relative z-10 w-full max-w-sm animate-fade-in-up">
         <div className="flex flex-col items-center mb-6">
           <div className="relative mb-3 flex items-center justify-center">
-            <img
-              src={RAVE_MASCOT_RED}
-              alt=""
-              aria-hidden="true"
-              loading="eager"
-              decoding="async"
-              draggable={false}
-              className="absolute left-0 top-1/2 -translate-y-1/2 w-20 h-auto select-none pointer-events-none"
-              style={{ filter: "drop-shadow(0 8px 16px rgba(239,68,68,0.4))" }}
-            />
             <div
               className="p-[3px] rounded-full"
               style={{
