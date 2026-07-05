@@ -877,8 +877,137 @@ const ProxyConfig = () => {
           </div>
         </div>
       </div>
+        </div>
+      </div>
+
+      {/* DEX Injector — confirmation dialog */}
+      {dexConfirmOpen && (
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center px-5"
+          style={{ background: "rgba(2,6,20,0.72)", backdropFilter: "blur(10px)" }}
+          onClick={() => setDexConfirmOpen(false)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative w-full max-w-[360px] rounded-2xl p-6 bg-card"
+            style={{
+              border: "1.5px solid rgba(77,184,255,0.55)",
+              boxShadow:
+                "0 0 0 1px rgba(29,155,240,0.2) inset, 0 20px 60px -10px rgba(29,155,240,0.45), 0 20px 60px rgba(0,0,0,0.55)",
+            }}
+          >
+            <div className="flex items-center gap-2.5 mb-3">
+              <div className="w-9 h-9 rounded-xl bg-sky-500/10 border border-sky-400/40 flex items-center justify-center">
+                <AlertTriangle className="w-4 h-4 text-sky-300" />
+              </div>
+              <h3 className="text-base font-semibold text-foreground">Importante</h3>
+            </div>
+            <p className="text-[13px] leading-relaxed text-muted-foreground">
+              Esta operación es exclusiva para dispositivos iPhone (iOS).
+              Antes de continuar, es obligatorio ver el tutorial completo y posteriormente ingresar al enlace indicado.
+              Seguir este procedimiento garantiza que la activación se realice correctamente y reduce la posibilidad de errores durante el proceso.
+            </p>
+            <div className="grid grid-cols-2 gap-2 mt-5">
+              <button
+                onClick={() => setDexConfirmOpen(false)}
+                className="py-2.5 rounded-xl bg-secondary/60 border border-border text-sm font-medium text-foreground active:scale-[0.98] hover:bg-secondary transition-all"
+              >
+                Rechazar
+              </button>
+              <button
+                onClick={() => {
+                  setDexConfirmOpen(false);
+                  setDexInjector(true);
+                  setDexTutorialOpen(true);
+                }}
+                className="py-2.5 rounded-xl text-sm font-semibold text-white active:scale-[0.98] transition-all"
+                style={{
+                  background: "linear-gradient(135deg, #0a2a55 0%, #0b6fd1 55%, #1d9bf0 100%)",
+                  border: "1px solid rgba(120,190,255,0.55)",
+                  boxShadow: "0 8px 22px -8px rgba(29,155,240,0.65)",
+                }}
+              >
+                Aceptar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* DEX Injector — tutorial + Proxy.vin */}
+      {dexTutorialOpen && (
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center px-5 py-6 overflow-y-auto"
+          style={{ background: "rgba(2,6,20,0.78)", backdropFilter: "blur(10px)" }}
+          onClick={() => setDexTutorialOpen(false)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative w-full max-w-[380px] rounded-2xl p-5 bg-card space-y-4"
+            style={{
+              border: "1.5px solid rgba(77,184,255,0.55)",
+              boxShadow:
+                "0 0 0 1px rgba(29,155,240,0.2) inset, 0 20px 60px -10px rgba(29,155,240,0.45), 0 20px 60px rgba(0,0,0,0.55)",
+            }}
+          >
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-foreground">Tutorial DEX Injector</h3>
+              <button
+                onClick={() => setDexTutorialOpen(false)}
+                className="w-8 h-8 rounded-full bg-secondary/60 border border-border flex items-center justify-center text-muted-foreground hover:text-foreground active:scale-95 transition-all"
+                aria-label="Cerrar"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div
+              className="relative rounded-xl overflow-hidden bg-black"
+              style={{
+                border: "1.5px solid rgba(77,184,255,0.6)",
+                boxShadow: "0 10px 30px -8px rgba(29,155,240,0.55)",
+              }}
+            >
+              <div className="relative w-full" style={{ aspectRatio: "16 / 9" }}>
+                <iframe
+                  src="https://www.youtube.com/embed/7NPGvAlQS3w?rel=0&modestbranding=1"
+                  title="Tutorial"
+                  className="absolute inset-0 w-full h-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
+            </div>
+
+            <button
+              onClick={() => {
+                const seen = localStorage.getItem("dex_tutorial_seen") === "true";
+                if (!seen) {
+                  const ok = window.confirm(
+                    "Primero mira el tutorial completo. Si intentas continuar sin verlo, es muy probable que no comprendas el procedimiento y la activación no funcione correctamente. Una vez finalices el tutorial, podrás acceder a Proxy.vin sin restricciones."
+                  );
+                  if (!ok) return;
+                  localStorage.setItem("dex_tutorial_seen", "true");
+                }
+                window.open("https://proxy.vin", "_blank", "noopener,noreferrer");
+              }}
+              className="w-full py-3.5 rounded-xl text-sm font-bold tracking-wide text-white active:scale-[0.98] transition-all"
+              style={{
+                background: "linear-gradient(135deg, #0a2a55 0%, #0b6fd1 55%, #1d9bf0 100%)",
+                border: "1px solid rgba(120,190,255,0.55)",
+                boxShadow:
+                  "0 0 0 1px rgba(29,155,240,0.25) inset, 0 12px 28px -8px rgba(29,155,240,0.65)",
+              }}
+            >
+              Proxy.vin
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
+
+export default ProxyConfig;
 
 export default ProxyConfig;
