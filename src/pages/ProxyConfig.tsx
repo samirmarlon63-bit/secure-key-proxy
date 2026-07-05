@@ -1007,5 +1007,3 @@ const ProxyConfig = () => {
 };
 
 export default ProxyConfig;
-
-export default ProxyConfig;
