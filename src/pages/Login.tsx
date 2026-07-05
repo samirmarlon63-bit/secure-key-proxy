@@ -5,7 +5,7 @@ import VerifiedBadge from "@/components/VerifiedBadge";
 import VideoModal from "@/components/VideoModal";
 import { Shield, Lock, Globe, User, KeyRound, PlayCircle } from "lucide-react";
 import { activateKey, isUserBlocked } from "@/lib/keys";
-import { RAVE_LOGO, EXAMPLE_VIDEO, RAVE_MASCOT, RAVE_MASCOT_RED } from "@/lib/assets";
+import { RAVE_LOGO, EXAMPLE_VIDEO, RAVE_MASCOT } from "@/lib/assets";
 import { useI18n, LANGUAGES } from "@/lib/i18n";
 
 const Login = () => {
@@ -78,16 +78,6 @@ const Login = () => {
       <div className="relative z-10 w-full max-w-sm animate-fade-in-up">
         <div className="flex flex-col items-center mb-6">
           <div className="relative mb-3 flex items-center justify-center">
-            <img
-              src={RAVE_MASCOT_RED}
-              alt=""
-              aria-hidden="true"
-              loading="eager"
-              decoding="async"
-              draggable={false}
-              className="absolute left-0 top-1/2 -translate-y-1/2 w-20 h-auto select-none pointer-events-none"
-              style={{ filter: "drop-shadow(0 8px 16px rgba(239,68,68,0.4))" }}
-            />
             <div
               className="p-[3px] rounded-full"
               style={{

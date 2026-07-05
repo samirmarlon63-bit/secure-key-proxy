@@ -16,7 +16,7 @@ const Admin = () => {
   const [authenticated, setAuthenticated] = useState(() => sessionStorage.getItem("admin_auth") === "true");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [activeTab, setActiveTab] = useState<"keys" | "users" | "generate" | "stats">("generate");
+  const [activeTab, setActiveTab] = useState<"users" | "generate" | "stats">("generate");
 
   const [keyType, setKeyType] = useState<"Normal" | "Premium">("Normal");
   const [duration, setDuration] = useState("7 días");
@@ -57,7 +57,6 @@ const Admin = () => {
   const handleGenerate = async () => {
     await generateKeys(quantity, keyType, duration);
     await refreshData();
-    setActiveTab("keys");
   };
 
   const handleDelete = async (key: string) => {
@@ -251,9 +250,8 @@ const Admin = () => {
         <div className="flex gap-1 mb-4 glass-card p-1 animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
           {([
             { id: "generate", label: "Generar", icon: Plus },
-            { id: "keys", label: "Keys", icon: KeyRound },
             { id: "users", label: "Usuarios", icon: Users },
-            { id: "stats", label: "Monitor", icon: Signal },
+            { id: "stats", label: "Estado", icon: Signal },
           ] as const).map(({ id, label, icon: Icon }) => (
             <button
               key={id}
@@ -350,304 +348,131 @@ const Admin = () => {
           </div>
         )}
 
-        {/* Keys Tab - Grouped by Duration */}
-        {activeTab === "keys" && (
-          <div className="animate-fade-in-up space-y-3" style={{ animationDelay: "0.15s" }}>
-            {/* Keys header */}
-            <div className="glass-card p-3 flex items-center justify-between gap-2 flex-wrap">
-              <div className="flex items-center gap-2">
-                <KeyRound className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm font-mono font-medium">Keys [{keys.length}]</span>
+
+        {/* Users Tab — only users with an active (non-expired) key */}
+        {activeTab === "users" && (() => {
+          const activeUsers = users.filter(u => {
+            if (!u.expiresAt) return true;
+            return new Date(u.expiresAt).getTime() > Date.now();
+          });
+          return (
+            <div className="animate-fade-in-up space-y-3" style={{ animationDelay: "0.15s" }}>
+              <div className="glass-card p-3 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Users className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-sm font-mono font-medium">Usuarios activos [{activeUsers.length}]</span>
+                </div>
+                <span className="text-[9px] px-2 py-0.5 rounded-full bg-emerald-400/10 text-emerald-400 border border-emerald-400/20 font-mono">
+                  {activeUsers.filter(u => !u.blocked).length} online
+                </span>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="flex gap-1">
-                  {["Activa", "Usada", "Expirada"].map(s => (
-                    <span key={s} className={`text-[9px] px-2 py-0.5 rounded-full font-mono ${statusColor(s)}`}>
-                      {keys.filter(k => k.status === s).length}
-                    </span>
+
+              {activeUsers.length === 0 ? (
+                <div className="glass-card p-12 text-center">
+                  <Users className="w-10 h-10 text-muted-foreground/20 mx-auto mb-3" />
+                  <p className="text-sm text-muted-foreground font-mono">Sin usuarios con key activa</p>
+                </div>
+              ) : (
+                <div className="space-y-3 max-h-[70vh] overflow-y-auto pr-0.5">
+                  {activeUsers.map(u => (
+                    <div
+                      key={u.key}
+                      className={`relative rounded-2xl border p-4 space-y-3 bg-gradient-to-br from-secondary/30 to-secondary/10 backdrop-blur-sm shadow-lg ${
+                        u.blocked ? "border-red-500/40" : "border-border/60 hover:border-primary/40"
+                      } transition-all`}
+                    >
+                      {/* Header */}
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2.5">
+                          <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${u.blocked ? "bg-red-500/10 border border-red-500/30" : "bg-primary/10 border border-primary/30"}`}>
+                            <Users className={`w-4 h-4 ${u.blocked ? "text-red-400" : "text-primary"}`} />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-sm font-semibold text-foreground">{u.name}</span>
+                              {!u.blocked && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />}
+                            </div>
+                            <span className="text-[9px] text-muted-foreground font-mono">{u.type}</span>
+                          </div>
+                        </div>
+                        {u.blocked && (
+                          <span className="text-[9px] px-2 py-0.5 rounded-full bg-red-400/10 text-red-400 border border-red-400/20 font-mono">BLOQUEADO</span>
+                        )}
+                      </div>
+
+                      {/* Info */}
+                      <div className="bg-background/40 rounded-xl p-3 border border-border/40 space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[9px] uppercase tracking-wider text-muted-foreground/70">Key</span>
+                          <span className="text-[10px] font-mono text-foreground truncate max-w-[60%]">{u.key}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-[9px] uppercase tracking-wider text-muted-foreground/70">Login</span>
+                          <span className="text-[10px] font-mono text-muted-foreground">{new Date(u.loginAt).toLocaleString()}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-[9px] uppercase tracking-wider text-muted-foreground/70">Expira</span>
+                          <span className="text-[10px] font-mono text-foreground">{getTimeRemaining(u.expiresAt) ?? "—"}</span>
+                        </div>
+                      </div>
+
+                      {/* Primary actions */}
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          onClick={() => handleKick(u.key)}
+                          className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-secondary/60 border border-border text-xs font-medium text-foreground active:scale-95 hover:bg-secondary transition-all"
+                        >
+                          <UserX className="w-3.5 h-3.5" /> Sacar
+                        </button>
+                        {u.blocked ? (
+                          <button
+                            onClick={() => handleUnblock(u.key)}
+                            className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-medium active:scale-95 transition-all"
+                          >
+                            <Shield className="w-3.5 h-3.5" /> Desbloquear
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => handleBlock(u.key)}
+                            className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-medium active:scale-95 transition-all"
+                          >
+                            <Ban className="w-3.5 h-3.5" /> Bloquear
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Add extra time */}
+                      <div className="rounded-xl bg-emerald-500/5 border border-emerald-500/20 p-2.5">
+                        <div className="flex items-center gap-1.5 mb-2">
+                          <Plus className="w-3 h-3 text-emerald-400" />
+                          <span className="text-[10px] font-mono text-emerald-400 uppercase tracking-wider">Agregar tiempo extra</span>
+                        </div>
+                        <div className="grid grid-cols-6 gap-1.5">
+                          {[
+                            { label: "+30m", mins: 30 },
+                            { label: "+1h", mins: 60 },
+                            { label: "+6h", mins: 360 },
+                            { label: "+12h", mins: 720 },
+                            { label: "+1d", mins: 1440 },
+                            { label: "+7d", mins: 10080 },
+                          ].map(({ label, mins }) => (
+                            <button
+                              key={label}
+                              onClick={() => handleAddTime(u.key, mins)}
+                              className="py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-mono text-emerald-400 hover:bg-emerald-500/20 active:scale-95 transition-all"
+                            >
+                              {label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
                   ))}
                 </div>
-                {keys.length > 0 && (
-                  <button
-                    onClick={() => {
-                      const text = keys.map(k => {
-                        const created = new Date(k.createdAt).toLocaleString();
-                        const expires = k.expiresAt ? new Date(k.expiresAt).toLocaleString() : "—";
-                        return `${k.key} | ${k.type} | ${k.status} | Duración: ${k.duration} | Creada: ${created} | Expira: ${expires}`;
-                      }).join("\n");
-                      navigator.clipboard.writeText(text);
-                      setCopiedKey("__all__");
-                      setTimeout(() => setCopiedKey(null), 2000);
-                    }}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-mono font-medium transition-all active:scale-95 border ${
-                      copiedKey === "__all__"
-                        ? "bg-emerald-500/20 text-emerald-400 border-emerald-400/30"
-                        : "bg-secondary/50 text-muted-foreground border-border hover:border-ring hover:text-foreground"
-                    }`}
-                  >
-                    {copiedKey === "__all__" ? <><Check className="w-3 h-3" /> Copiadas</> : <><Copy className="w-3 h-3" /> Copiar todas</>}
-                  </button>
-                )}
-              </div>
+              )}
             </div>
-
-            {keys.length === 0 ? (
-              <div className="glass-card p-12 text-center">
-                <Database className="w-10 h-10 text-muted-foreground/20 mx-auto mb-3" />
-                <p className="text-sm text-muted-foreground font-mono mb-1">No keys found</p>
-                <p className="text-[10px] text-muted-foreground/60">Genera keys desde la pestaña "Generar"</p>
-              </div>
-            ) : (
-              <div className="space-y-5 max-h-[65vh] overflow-y-auto pr-0.5 scrollbar-thin">
-                {([
-                  { dur: "1 día", accent: "emerald", label: "FILA 1 — KEYS DE 1 DÍA" },
-                  { dur: "7 días", accent: "blue", label: "FILA 2 — KEYS DE 7 DÍAS" },
-                  { dur: "30 días", accent: "purple", label: "FILA 3 — KEYS DE 30 DÍAS" },
-                ] as const).map(({ dur, accent, label }) => {
-                  const grouped = keys.filter(k => k.duration === dur);
-                  const unusedKeys = grouped.filter(k => k.status === "Activa");
-                  const copyId = `all-${dur}`;
-                  const handleCopyAll = () => {
-                    if (unusedKeys.length === 0) return;
-                    navigator.clipboard.writeText(unusedKeys.map(k => `${k.key} | ${k.status} | ${k.duration}`).join("\n"));
-                    setCopiedKey(copyId);
-                    setTimeout(() => setCopiedKey(null), 2000);
-                  };
-                  const accentColors: Record<string, { border: string; bg: string; text: string; headerBg: string }> = {
-                    emerald: { border: "border-emerald-500/30", bg: "bg-emerald-500/5", text: "text-emerald-400", headerBg: "bg-emerald-500/10" },
-                    blue: { border: "border-blue-500/30", bg: "bg-blue-500/5", text: "text-blue-400", headerBg: "bg-blue-500/10" },
-                    purple: { border: "border-purple-500/30", bg: "bg-purple-500/5", text: "text-purple-400", headerBg: "bg-purple-500/10" },
-                  };
-                  const ac = accentColors[accent];
-                  return (
-                    <div key={dur} className={`rounded-xl border ${ac.border} ${ac.bg} overflow-hidden`}>
-                      {/* Section Header */}
-                      <div className={`${ac.headerBg} px-4 py-3 flex items-center justify-between border-b ${ac.border}`}>
-                        <div className="flex items-center gap-2">
-                          <Clock className={`w-4 h-4 ${ac.text}`} />
-                          <span className={`text-[11px] font-mono font-bold ${ac.text} tracking-wider`}>{label}</span>
-                          <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-secondary/60 text-muted-foreground font-mono border border-border/40">
-                            {grouped.length}
-                          </span>
-                          {unusedKeys.length > 0 && (
-                            <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${ac.bg} ${ac.text} font-mono border ${ac.border}`}>
-                              {unusedKeys.length} libres
-                            </span>
-                          )}
-                        </div>
-                        {unusedKeys.length > 0 && (
-                          <button
-                            onClick={handleCopyAll}
-                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-mono font-medium transition-all active:scale-95 border ${
-                              copiedKey === copyId
-                                ? "bg-emerald-500/20 text-emerald-400 border-emerald-400/30"
-                                : `bg-secondary/50 text-muted-foreground border-border hover:border-ring hover:text-foreground`
-                            }`}
-                          >
-                            {copiedKey === copyId ? <><Check className="w-3 h-3" /> Copiadas</> : <><Copy className="w-3 h-3" /> Copiar libres</>}
-                          </button>
-                        )}
-                      </div>
-
-                      {/* Keys List */}
-                      <div className="p-3 space-y-2">
-                        {grouped.length === 0 ? (
-                          <div className="text-center py-6">
-                            <p className="text-[10px] text-muted-foreground/50 font-mono">Sin keys de {dur}</p>
-                          </div>
-                        ) : grouped.map((k, i) => (
-                          <div key={k.key} className="glass-card overflow-hidden animate-fade-in-up" style={{ animationDelay: `${0.03 * i}s` }}>
-                            <div className={`h-0.5 w-full ${k.status === "Activa" ? "bg-emerald-500" : k.status === "Usada" ? "bg-amber-500" : k.status === "Bloqueada" ? "bg-red-500" : "bg-neutral-600"}`} />
-                            <div className="p-3 space-y-2">
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-1.5">
-                                  <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-mono font-medium ${statusColor(k.status)}`}>{statusIcon(k.status)} {k.status}</span>
-                                  <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-mono border ${k.type === "Premium" ? "text-amber-300 bg-amber-400/10 border-amber-400/20" : "text-muted-foreground bg-secondary/50 border-border"}`}>
-                                    {k.type === "Premium" && <Zap className="w-2.5 h-2.5 inline mr-0.5" />}{k.type}
-                                  </span>
-                                </div>
-                                <div className="flex items-center gap-0.5">
-                                  <button onClick={() => handleCopy(k.key)} className="p-1 rounded-lg hover:bg-secondary/80 transition-colors active:scale-95">
-                                    {copiedKey === k.key ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3 text-muted-foreground" />}
-                                  </button>
-                                  <button onClick={() => handleDelete(k.key)} className="p-1 rounded-lg hover:bg-destructive/20 transition-colors active:scale-95">
-                                    <Trash2 className="w-3 h-3 text-destructive" />
-                                  </button>
-                                </div>
-                              </div>
-                              <div className="bg-secondary/30 rounded-lg px-2.5 py-2 border border-border/50">
-                                <p className="text-[11px] font-mono text-foreground tracking-wide break-all">{k.key}</p>
-                              </div>
-                              <div className="flex gap-2 text-[9px] font-mono text-muted-foreground/70">
-                                <span>{k.duration}</span>
-                                <span>• {new Date(k.createdAt).toLocaleDateString()}</span>
-                                {k.usedBy && <span>• {k.usedBy}</span>}
-                                {k.expiresAt && <span>• {getTimeRemaining(k.expiresAt)}</span>}
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  );
-                })}
-
-                {/* Other durations (e.g. 1 minuto) */}
-                {(() => {
-                  const otherKeys = keys.filter(k => !["1 día", "7 días", "30 días"].includes(k.duration));
-                  if (otherKeys.length === 0) return null;
-                  const unusedOther = otherKeys.filter(k => k.status === "Activa");
-                  return (
-                    <div className="rounded-xl border border-border/30 bg-secondary/5 overflow-hidden">
-                      <div className="bg-secondary/10 px-4 py-3 flex items-center justify-between border-b border-border/30">
-                        <div className="flex items-center gap-2">
-                          <Clock className="w-4 h-4 text-muted-foreground" />
-                          <span className="text-[11px] font-mono font-bold text-muted-foreground tracking-wider">OTRAS DURACIONES</span>
-                          <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-secondary/60 text-muted-foreground font-mono border border-border/40">{otherKeys.length}</span>
-                        </div>
-                        {unusedOther.length > 0 && (
-                          <button
-                            onClick={() => { navigator.clipboard.writeText(unusedOther.map(k => `${k.key} | ${k.status} | ${k.duration}`).join("\n")); setCopiedKey("all-other"); setTimeout(() => setCopiedKey(null), 2000); }}
-                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-mono font-medium transition-all active:scale-95 border ${copiedKey === "all-other" ? "bg-emerald-500/20 text-emerald-400 border-emerald-400/30" : "bg-secondary/50 text-muted-foreground border-border hover:border-ring hover:text-foreground"}`}
-                          >
-                            {copiedKey === "all-other" ? <><Check className="w-3 h-3" /> Copiadas</> : <><Copy className="w-3 h-3" /> Copiar libres</>}
-                          </button>
-                        )}
-                      </div>
-                      <div className="p-3 space-y-2">
-                        {otherKeys.map((k, i) => (
-                          <div key={k.key} className="glass-card overflow-hidden animate-fade-in-up" style={{ animationDelay: `${0.03 * i}s` }}>
-                            <div className={`h-0.5 w-full ${k.status === "Activa" ? "bg-emerald-500" : k.status === "Usada" ? "bg-amber-500" : k.status === "Bloqueada" ? "bg-red-500" : "bg-neutral-600"}`} />
-                            <div className="p-3 space-y-2">
-                              <div className="flex items-center justify-between">
-                                <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-mono font-medium ${statusColor(k.status)}`}>{statusIcon(k.status)} {k.status}</span>
-                                <div className="flex items-center gap-0.5">
-                                  <button onClick={() => handleCopy(k.key)} className="p-1 rounded-lg hover:bg-secondary/80 transition-colors active:scale-95">
-                                    {copiedKey === k.key ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3 text-muted-foreground" />}
-                                  </button>
-                                  <button onClick={() => handleDelete(k.key)} className="p-1 rounded-lg hover:bg-destructive/20 transition-colors active:scale-95">
-                                    <Trash2 className="w-3 h-3 text-destructive" />
-                                  </button>
-                                </div>
-                              </div>
-                              <div className="bg-secondary/30 rounded-lg px-2.5 py-2 border border-border/50">
-                                <p className="text-[11px] font-mono text-foreground tracking-wide break-all">{k.key}</p>
-                              </div>
-                              <p className="text-[9px] font-mono text-muted-foreground/70">{k.duration}</p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  );
-                })()}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Users Tab */}
-        {activeTab === "users" && (
-          <div className="glass-card p-4 animate-fade-in-up" style={{ animationDelay: "0.15s" }}>
-            <div className="flex items-center gap-2 mb-3">
-              <Users className="w-4 h-4 text-muted-foreground" />
-              <span className="text-sm font-mono font-medium">active_users [{users.length}]</span>
-            </div>
-
-            {users.length === 0 ? (
-              <div className="text-center py-12">
-                <Users className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
-                <p className="text-xs text-muted-foreground font-mono">No active sessions</p>
-              </div>
-            ) : (
-              <div className="space-y-2 max-h-[55vh] overflow-y-auto">
-                {users.map(u => (
-                  <div key={u.key} className={`bg-secondary/20 rounded-lg border p-3 space-y-2 ${u.blocked ? "border-red-500/30" : "border-border/50"}`}>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className={`w-2 h-2 rounded-full ${u.blocked ? "bg-red-500" : "bg-emerald-500 animate-pulse"}`} />
-                        <span className="text-sm font-medium text-foreground">{u.name}</span>
-                        {u.blocked && <span className="text-[9px] px-1.5 py-0.5 rounded bg-red-400/10 text-red-400 border border-red-400/20 font-mono">BLOCKED</span>}
-                      </div>
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-secondary text-muted-foreground font-mono">{u.type}</span>
-                    </div>
-
-                    <div className="grid grid-cols-1 gap-0.5">
-                      <p className="text-[10px] text-muted-foreground font-mono truncate">key: {u.key}</p>
-                      <p className="text-[10px] text-muted-foreground font-mono">login: {new Date(u.loginAt).toLocaleString()}</p>
-                      <p className="text-[10px] text-muted-foreground font-mono">expires: {new Date(u.expiresAt).toLocaleString()}</p>
-                    </div>
-
-                    <div className="flex gap-1.5 pt-1">
-                      {u.blocked ? (
-                        <button
-                          onClick={() => handleUnblock(u.key)}
-                          className="flex-1 flex items-center justify-center gap-1 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-medium active:scale-95 transition-all"
-                        >
-                          <Shield className="w-3 h-3" /> Desbloquear
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => handleBlock(u.key)}
-                          className="flex-1 flex items-center justify-center gap-1 py-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px] font-medium active:scale-95 transition-all"
-                        >
-                          <Ban className="w-3 h-3" /> Bloquear
-                        </button>
-                      )}
-                      <button
-                        onClick={() => handleKick(u.key)}
-                        className="flex-1 flex items-center justify-center gap-1 py-2 rounded-lg bg-secondary/50 border border-border text-muted-foreground text-[10px] font-medium active:scale-95 transition-all hover:text-foreground"
-                      >
-                        <UserX className="w-3 h-3" /> Sacar
-                      </button>
-                      <button
-                        onClick={() => handleDeleteUser(u.key)}
-                        className="flex-1 flex items-center justify-center gap-1 py-2 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-[10px] font-medium active:scale-95 transition-all"
-                      >
-                        <Trash2 className="w-3 h-3" /> Eliminar
-                      </button>
-                    </div>
-
-                    <div className="flex items-center gap-1 pt-1">
-                      <Clock className="w-3 h-3 text-muted-foreground" />
-                      <span className="text-[10px] text-muted-foreground font-mono mr-1">Reducir:</span>
-                      {[1, 6, 12, 24].map(h => (
-                        <button
-                          key={h}
-                          onClick={() => handleReduceTime(u.key, h)}
-                          className="px-2 py-1 rounded bg-secondary/50 border border-border text-[9px] font-mono text-muted-foreground hover:text-foreground active:scale-95 transition-all"
-                        >
-                          -{h}h
-                        </button>
-                      ))}
-                    </div>
-
-                    <div className="flex items-center gap-1 pt-1">
-                      <Plus className="w-3 h-3 text-emerald-400" />
-                      <span className="text-[10px] text-emerald-400 font-mono mr-1">Agregar:</span>
-                      {[
-                        { label: "+30m", mins: 30 },
-                        { label: "+1h", mins: 60 },
-                        { label: "+6h", mins: 360 },
-                        { label: "+12h", mins: 720 },
-                        { label: "+1d", mins: 1440 },
-                        { label: "+7d", mins: 10080 },
-                      ].map(({ label, mins }) => (
-                        <button
-                          key={label}
-                          onClick={() => handleAddTime(u.key, mins)}
-                          className="px-2 py-1 rounded bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-mono text-emerald-400 hover:bg-emerald-500/20 active:scale-95 transition-all"
-                        >
-                          {label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+          );
+        })()}
 
         {/* Monitor/Stats Tab */}
         {activeTab === "stats" && (
@@ -739,13 +564,6 @@ const Admin = () => {
                 >
                   <Plus className="w-3.5 h-3.5" />
                   Generar keys
-                </button>
-                <button
-                  onClick={() => setActiveTab("keys")}
-                  className="flex items-center gap-2 py-2.5 px-3 rounded-lg bg-secondary/30 border border-border/50 text-[11px] font-mono text-muted-foreground hover:text-foreground hover:border-ring transition-all active:scale-95"
-                >
-                  <KeyRound className="w-3.5 h-3.5" />
-                  Ver keys
                 </button>
                 <button
                   onClick={() => setActiveTab("users")}
