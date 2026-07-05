@@ -877,8 +877,6 @@ const ProxyConfig = () => {
           </div>
         </div>
       </div>
-        </div>
-      </div>
 
       {/* DEX Injector — confirmation dialog */}
       {dexConfirmOpen && (
