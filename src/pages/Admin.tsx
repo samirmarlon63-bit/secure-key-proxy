@@ -57,7 +57,6 @@ const Admin = () => {
   const handleGenerate = async () => {
     await generateKeys(quantity, keyType, duration);
     await refreshData();
-    setActiveTab("keys");
   };
 
   const handleDelete = async (key: string) => {
