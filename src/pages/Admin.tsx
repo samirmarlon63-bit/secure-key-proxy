@@ -250,9 +250,8 @@ const Admin = () => {
         <div className="flex gap-1 mb-4 glass-card p-1 animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
           {([
             { id: "generate", label: "Generar", icon: Plus },
-            { id: "keys", label: "Keys", icon: KeyRound },
             { id: "users", label: "Usuarios", icon: Users },
-            { id: "stats", label: "Monitor", icon: Signal },
+            { id: "stats", label: "Estado", icon: Signal },
           ] as const).map(({ id, label, icon: Icon }) => (
             <button
               key={id}
