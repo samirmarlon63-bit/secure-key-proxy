@@ -220,6 +220,8 @@ const ProxyConfig = () => {
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [expandedServer, setExpandedServer] = useState<number | null>(null);
   const [settingsSection, setSettingsSection] = useState<string | null>(null);
+  const [dexConfirmOpen, setDexConfirmOpen] = useState(false);
+  const [dexTutorialOpen, setDexTutorialOpen] = useState(false);
 
   // Game toggles - persisted in localStorage
   const loadToggle = (key: string, def: boolean) => {
