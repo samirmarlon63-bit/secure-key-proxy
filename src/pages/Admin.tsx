@@ -385,7 +385,7 @@ const Admin = () => {
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2.5">
                           <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${u.blocked ? "bg-red-500/10 border border-red-500/30" : "bg-primary/10 border border-primary/30"}`}>
-                            <UserCircleIcon blocked={u.blocked} />
+                            <Users className={`w-4 h-4 ${u.blocked ? "text-red-400" : "text-primary"}`} />
                           </div>
                           <div>
                             <div className="flex items-center gap-1.5">
