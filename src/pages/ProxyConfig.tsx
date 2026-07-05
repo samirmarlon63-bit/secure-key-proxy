@@ -536,7 +536,15 @@ const ProxyConfig = () => {
           <Code className="w-4 h-4 text-muted-foreground" />
           <span className="text-xs text-muted-foreground font-semibold tracking-wide uppercase">Injection Engine</span>
         </div>
-        <AnimatedToggle label="DEX Injector" icon={<Layers className="w-4 h-4" />} value={dexInjector} onChange={setDexInjector} />
+        <AnimatedToggle
+          label="DEX Injector"
+          icon={<Layers className="w-4 h-4" />}
+          value={dexInjector}
+          onChange={(v) => {
+            if (v) setDexConfirmOpen(true);
+            else setDexInjector(false);
+          }}
+        />
         <AnimatedToggle label="SSL Pinning Bypass" icon={<KeyRound className="w-4 h-4" />} value={sslPinning} onChange={setSslPinning} />
         <AnimatedToggle label="HWID Spoofer" icon={<Server className="w-4 h-4" />} value={hwIdSpoof} onChange={setHwIdSpoof} />
       </div>
