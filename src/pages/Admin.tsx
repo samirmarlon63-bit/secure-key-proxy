@@ -544,11 +544,11 @@ const Admin = () => {
                   Generar keys
                 </button>
                 <button
-                  onClick={() => setActiveTab("keys")}
+                  onClick={() => setActiveTab("users")}
                   className="flex items-center gap-2 py-2.5 px-3 rounded-lg bg-secondary/30 border border-border/50 text-[11px] font-mono text-muted-foreground hover:text-foreground hover:border-ring transition-all active:scale-95"
                 >
-                  <KeyRound className="w-3.5 h-3.5" />
-                  Ver keys
+                  <Users className="w-3.5 h-3.5" />
+                  Usuarios
                 </button>
                 <button
                   onClick={() => setActiveTab("users")}
