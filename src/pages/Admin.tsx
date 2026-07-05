@@ -349,108 +349,130 @@ const Admin = () => {
         )}
 
 
-        {/* Users Tab */}
-        {activeTab === "users" && (
-          <div className="glass-card p-4 animate-fade-in-up" style={{ animationDelay: "0.15s" }}>
-            <div className="flex items-center gap-2 mb-3">
-              <Users className="w-4 h-4 text-muted-foreground" />
-              <span className="text-sm font-mono font-medium">active_users [{users.length}]</span>
-            </div>
-
-            {users.length === 0 ? (
-              <div className="text-center py-12">
-                <Users className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
-                <p className="text-xs text-muted-foreground font-mono">No active sessions</p>
+        {/* Users Tab — only users with an active (non-expired) key */}
+        {activeTab === "users" && (() => {
+          const activeUsers = users.filter(u => {
+            if (!u.expiresAt) return true;
+            return new Date(u.expiresAt).getTime() > Date.now();
+          });
+          return (
+            <div className="animate-fade-in-up space-y-3" style={{ animationDelay: "0.15s" }}>
+              <div className="glass-card p-3 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Users className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-sm font-mono font-medium">Usuarios activos [{activeUsers.length}]</span>
+                </div>
+                <span className="text-[9px] px-2 py-0.5 rounded-full bg-emerald-400/10 text-emerald-400 border border-emerald-400/20 font-mono">
+                  {activeUsers.filter(u => !u.blocked).length} online
+                </span>
               </div>
-            ) : (
-              <div className="space-y-2 max-h-[55vh] overflow-y-auto">
-                {users.map(u => (
-                  <div key={u.key} className={`bg-secondary/20 rounded-lg border p-3 space-y-2 ${u.blocked ? "border-red-500/30" : "border-border/50"}`}>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className={`w-2 h-2 rounded-full ${u.blocked ? "bg-red-500" : "bg-emerald-500 animate-pulse"}`} />
-                        <span className="text-sm font-medium text-foreground">{u.name}</span>
-                        {u.blocked && <span className="text-[9px] px-1.5 py-0.5 rounded bg-red-400/10 text-red-400 border border-red-400/20 font-mono">BLOCKED</span>}
+
+              {activeUsers.length === 0 ? (
+                <div className="glass-card p-12 text-center">
+                  <Users className="w-10 h-10 text-muted-foreground/20 mx-auto mb-3" />
+                  <p className="text-sm text-muted-foreground font-mono">Sin usuarios con key activa</p>
+                </div>
+              ) : (
+                <div className="space-y-3 max-h-[70vh] overflow-y-auto pr-0.5">
+                  {activeUsers.map(u => (
+                    <div
+                      key={u.key}
+                      className={`relative rounded-2xl border p-4 space-y-3 bg-gradient-to-br from-secondary/30 to-secondary/10 backdrop-blur-sm shadow-lg ${
+                        u.blocked ? "border-red-500/40" : "border-border/60 hover:border-primary/40"
+                      } transition-all`}
+                    >
+                      {/* Header */}
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2.5">
+                          <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${u.blocked ? "bg-red-500/10 border border-red-500/30" : "bg-primary/10 border border-primary/30"}`}>
+                            <UserCircleIcon blocked={u.blocked} />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-sm font-semibold text-foreground">{u.name}</span>
+                              {!u.blocked && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />}
+                            </div>
+                            <span className="text-[9px] text-muted-foreground font-mono">{u.type}</span>
+                          </div>
+                        </div>
+                        {u.blocked && (
+                          <span className="text-[9px] px-2 py-0.5 rounded-full bg-red-400/10 text-red-400 border border-red-400/20 font-mono">BLOQUEADO</span>
+                        )}
                       </div>
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-secondary text-muted-foreground font-mono">{u.type}</span>
-                    </div>
 
-                    <div className="grid grid-cols-1 gap-0.5">
-                      <p className="text-[10px] text-muted-foreground font-mono truncate">key: {u.key}</p>
-                      <p className="text-[10px] text-muted-foreground font-mono">login: {new Date(u.loginAt).toLocaleString()}</p>
-                      <p className="text-[10px] text-muted-foreground font-mono">expires: {new Date(u.expiresAt).toLocaleString()}</p>
-                    </div>
+                      {/* Info */}
+                      <div className="bg-background/40 rounded-xl p-3 border border-border/40 space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[9px] uppercase tracking-wider text-muted-foreground/70">Key</span>
+                          <span className="text-[10px] font-mono text-foreground truncate max-w-[60%]">{u.key}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-[9px] uppercase tracking-wider text-muted-foreground/70">Login</span>
+                          <span className="text-[10px] font-mono text-muted-foreground">{new Date(u.loginAt).toLocaleString()}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-[9px] uppercase tracking-wider text-muted-foreground/70">Expira</span>
+                          <span className="text-[10px] font-mono text-foreground">{getTimeRemaining(u.expiresAt) ?? "—"}</span>
+                        </div>
+                      </div>
 
-                    <div className="flex gap-1.5 pt-1">
-                      {u.blocked ? (
+                      {/* Primary actions */}
+                      <div className="grid grid-cols-2 gap-2">
                         <button
-                          onClick={() => handleUnblock(u.key)}
-                          className="flex-1 flex items-center justify-center gap-1 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-medium active:scale-95 transition-all"
+                          onClick={() => handleKick(u.key)}
+                          className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-secondary/60 border border-border text-xs font-medium text-foreground active:scale-95 hover:bg-secondary transition-all"
                         >
-                          <Shield className="w-3 h-3" /> Desbloquear
+                          <UserX className="w-3.5 h-3.5" /> Sacar
                         </button>
-                      ) : (
-                        <button
-                          onClick={() => handleBlock(u.key)}
-                          className="flex-1 flex items-center justify-center gap-1 py-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px] font-medium active:scale-95 transition-all"
-                        >
-                          <Ban className="w-3 h-3" /> Bloquear
-                        </button>
-                      )}
-                      <button
-                        onClick={() => handleKick(u.key)}
-                        className="flex-1 flex items-center justify-center gap-1 py-2 rounded-lg bg-secondary/50 border border-border text-muted-foreground text-[10px] font-medium active:scale-95 transition-all hover:text-foreground"
-                      >
-                        <UserX className="w-3 h-3" /> Sacar
-                      </button>
-                      <button
-                        onClick={() => handleDeleteUser(u.key)}
-                        className="flex-1 flex items-center justify-center gap-1 py-2 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-[10px] font-medium active:scale-95 transition-all"
-                      >
-                        <Trash2 className="w-3 h-3" /> Eliminar
-                      </button>
-                    </div>
+                        {u.blocked ? (
+                          <button
+                            onClick={() => handleUnblock(u.key)}
+                            className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-medium active:scale-95 transition-all"
+                          >
+                            <Shield className="w-3.5 h-3.5" /> Desbloquear
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => handleBlock(u.key)}
+                            className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-medium active:scale-95 transition-all"
+                          >
+                            <Ban className="w-3.5 h-3.5" /> Bloquear
+                          </button>
+                        )}
+                      </div>
 
-                    <div className="flex items-center gap-1 pt-1">
-                      <Clock className="w-3 h-3 text-muted-foreground" />
-                      <span className="text-[10px] text-muted-foreground font-mono mr-1">Reducir:</span>
-                      {[1, 6, 12, 24].map(h => (
-                        <button
-                          key={h}
-                          onClick={() => handleReduceTime(u.key, h)}
-                          className="px-2 py-1 rounded bg-secondary/50 border border-border text-[9px] font-mono text-muted-foreground hover:text-foreground active:scale-95 transition-all"
-                        >
-                          -{h}h
-                        </button>
-                      ))}
+                      {/* Add extra time */}
+                      <div className="rounded-xl bg-emerald-500/5 border border-emerald-500/20 p-2.5">
+                        <div className="flex items-center gap-1.5 mb-2">
+                          <Plus className="w-3 h-3 text-emerald-400" />
+                          <span className="text-[10px] font-mono text-emerald-400 uppercase tracking-wider">Agregar tiempo extra</span>
+                        </div>
+                        <div className="grid grid-cols-6 gap-1.5">
+                          {[
+                            { label: "+30m", mins: 30 },
+                            { label: "+1h", mins: 60 },
+                            { label: "+6h", mins: 360 },
+                            { label: "+12h", mins: 720 },
+                            { label: "+1d", mins: 1440 },
+                            { label: "+7d", mins: 10080 },
+                          ].map(({ label, mins }) => (
+                            <button
+                              key={label}
+                              onClick={() => handleAddTime(u.key, mins)}
+                              className="py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-mono text-emerald-400 hover:bg-emerald-500/20 active:scale-95 transition-all"
+                            >
+                              {label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
                     </div>
-
-                    <div className="flex items-center gap-1 pt-1">
-                      <Plus className="w-3 h-3 text-emerald-400" />
-                      <span className="text-[10px] text-emerald-400 font-mono mr-1">Agregar:</span>
-                      {[
-                        { label: "+30m", mins: 30 },
-                        { label: "+1h", mins: 60 },
-                        { label: "+6h", mins: 360 },
-                        { label: "+12h", mins: 720 },
-                        { label: "+1d", mins: 1440 },
-                        { label: "+7d", mins: 10080 },
-                      ].map(({ label, mins }) => (
-                        <button
-                          key={label}
-                          onClick={() => handleAddTime(u.key, mins)}
-                          className="px-2 py-1 rounded bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-mono text-emerald-400 hover:bg-emerald-500/20 active:scale-95 transition-all"
-                        >
-                          {label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })()}
 
         {/* Monitor/Stats Tab */}
         {activeTab === "stats" && (
