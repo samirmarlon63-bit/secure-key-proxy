@@ -550,8 +550,64 @@ const ProxyConfig = () => {
             else setDexInjector(false);
           }}
         />
-        <AnimatedToggle label="SSL Pinning Bypass" icon={<KeyRound className="w-4 h-4" />} value={sslPinning} onChange={setSslPinning} />
-        <AnimatedToggle label="HWID Spoofer" icon={<Server className="w-4 h-4" />} value={hwIdSpoof} onChange={setHwIdSpoof} />
+        <div className={dexInjector ? "" : "dex-locked-group"}>
+          <div className="space-y-3">
+            <AnimatedToggle label="SSL Pinning Bypass" icon={<KeyRound className="w-4 h-4" />} value={sslPinning} onChange={setSslPinning} />
+            <AnimatedToggle label="HWID Spoofer" icon={<Server className="w-4 h-4" />} value={hwIdSpoof} onChange={setHwIdSpoof} />
+          </div>
+          {!dexInjector && (
+            <p className="mt-2 text-[10px] text-red-400/90 font-medium tracking-wide">
+              Activa DEX Injector para desbloquear estos módulos.
+            </p>
+          )}
+        </div>
+
+        {dexInjector && (
+          <div className="pt-3 space-y-2 animate-fade-in-up">
+            <div className="flex items-center gap-2">
+              <PlayIcon />
+              <span className="text-[11px] text-muted-foreground font-semibold tracking-wide uppercase">Tutorial DEX</span>
+            </div>
+            <div
+              className="relative rounded-xl overflow-hidden bg-black"
+              style={{
+                border: "2px solid #000",
+                boxShadow: "0 10px 30px -10px rgba(0,0,0,0.8), 0 0 0 1px rgba(0,0,0,0.9)",
+              }}
+            >
+              <div className="relative w-full" style={{ aspectRatio: "16 / 9" }}>
+                <iframe
+                  src="https://www.youtube.com/embed/lIzxrp9NwHo?autoplay=1&mute=1&loop=1&playlist=lIzxrp9NwHo&controls=0&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&disablekb=1&fs=0"
+                  title="Tutorial DEX"
+                  className="absolute inset-0 w-full h-full pointer-events-none"
+                  allow="autoplay; encrypted-media"
+                  frameBorder={0}
+                />
+              </div>
+            </div>
+            <button
+              onClick={() => {
+                const seen = localStorage.getItem("dex_tutorial_seen") === "true";
+                if (!seen) {
+                  const ok = window.confirm(
+                    "Primero mira el tutorial completo. Si intentas continuar sin verlo, es muy probable que no comprendas el procedimiento y la activación no funcione correctamente. Una vez finalices el tutorial, podrás acceder a Proxy.vin sin restricciones."
+                  );
+                  if (!ok) return;
+                  localStorage.setItem("dex_tutorial_seen", "true");
+                }
+                window.open("https://proxy.vin", "_blank", "noopener,noreferrer");
+              }}
+              className="w-full py-3 rounded-xl text-sm font-bold tracking-wide text-white active:scale-[0.98] transition-all"
+              style={{
+                background: "linear-gradient(135deg, #0a2a55 0%, #0b6fd1 55%, #1d9bf0 100%)",
+                border: "1px solid rgba(120,190,255,0.55)",
+                boxShadow: "0 0 0 1px rgba(29,155,240,0.25) inset, 0 12px 28px -8px rgba(29,155,240,0.65)",
+              }}
+            >
+              Proxy.vin
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
