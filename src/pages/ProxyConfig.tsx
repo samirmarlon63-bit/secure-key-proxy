@@ -565,7 +565,7 @@ const ProxyConfig = () => {
         {dexInjector && (
           <div className="pt-3 space-y-2 animate-fade-in-up">
             <div className="flex items-center gap-2">
-              <PlayIcon />
+              <Bolt className="w-3.5 h-3.5 text-sky-300" />
               <span className="text-[11px] text-muted-foreground font-semibold tracking-wide uppercase">Tutorial DEX</span>
             </div>
             <div
