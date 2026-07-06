@@ -430,7 +430,7 @@ const ProxyConfig = () => {
           </div>
           <div>
             <p className="text-sm font-semibold text-foreground">{session.name}</p>
-            <p className="text-[10px] text-muted-foreground">{session.duration} — {session.expiresAt ? (timeLeft || "...") : "∞"}</p>
+            <p className="text-[10px] text-muted-foreground">Sesión activa</p>
           </div>
         </div>
         <button onClick={handleLogout} className="p-2 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors active:scale-95">
