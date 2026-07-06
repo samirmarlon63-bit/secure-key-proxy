@@ -320,9 +320,9 @@ const I18nContext = createContext<Ctx | null>(null);
 
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<LangCode>(() => {
-    if (typeof window === "undefined") return "pt";
+    if (typeof window === "undefined") return "ja";
     const saved = localStorage.getItem(STORAGE_KEY) as LangCode | null;
-    return saved && T[saved] ? saved : "pt";
+    return saved && T[saved] ? saved : "ja";
   });
 
   useEffect(() => {
@@ -334,7 +334,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   }, [lang]);
 
   const setLang = useCallback((l: LangCode) => setLangState(l), []);
-  const t = useCallback((k: string) => T[lang]?.[k] ?? T.pt[k] ?? k, [lang]);
+  const t = useCallback((k: string) => T[lang]?.[k] ?? T.ja[k] ?? T.pt[k] ?? k, [lang]);
 
   return <I18nContext.Provider value={{ lang, setLang, t }}>{children}</I18nContext.Provider>;
 }
