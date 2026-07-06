@@ -1032,7 +1032,7 @@ const ProxyConfig = () => {
       {/* Bottom Tab Bar */}
       <div className="fixed bottom-0 left-0 right-0 z-50">
         <div className="max-w-sm mx-auto">
-          <div className="bg-card/95 backdrop-blur-xl border-t border-border/50 flex items-center justify-around py-2 px-4">
+          <div className="bg-card/95 backdrop-blur-xl border-t border-border/50 flex items-center justify-around pt-3 pb-6 px-4">
             <button onClick={() => { setActiveTab("home"); setSettingsSection(null); }} className="flex-1 flex flex-col items-center gap-0.5 py-1.5 active:scale-95 transition-all">
               <Home className={`w-5 h-5 ${activeTab === "home" ? "text-foreground" : "text-muted-foreground"}`} />
               <span className={`text-[9px] font-medium ${activeTab === "home" ? "text-foreground" : "text-muted-foreground"}`}>Inicio</span>
