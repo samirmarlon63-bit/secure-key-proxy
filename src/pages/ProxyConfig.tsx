@@ -1021,7 +1021,7 @@ const ProxyConfig = () => {
 
 
   return (
-    <div className="relative min-h-screen pb-20">
+    <div className="relative min-h-screen pb-28">
       <VideoBackground />
       <div className="relative z-10 max-w-sm mx-auto px-4 pt-6">
         {activeTab === "home" && renderHome()}
