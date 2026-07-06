@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import VideoBackground from "@/components/VideoBackground";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import { isUserBlocked } from "@/lib/keys";
-import { RAVE_LOGO, RAVE_MODULES_BANNER } from "@/lib/assets";
+import { RAVE_LOGO, RAVE_MODULES_BANNER, PROFILE_LOOP_VIDEO } from "@/lib/assets";
 const defaultAvatar = { url: RAVE_LOGO };
 const raveChannel = { url: RAVE_LOGO };
 import {
@@ -214,6 +214,7 @@ const ProxyConfig = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [activeTab, setActiveTab] = useState<"home" | "servers" | "settings">("home");
   const [timeLeft, setTimeLeft] = useState("");
+  const [timeParts, setTimeParts] = useState<{ d: number; h: number; m: number; s: number }>({ d: 0, h: 0, m: 0, s: 0 });
   const [launchingFF, setLaunchingFF] = useState(false);
   const [ffMethod, setFfMethod] = useState(0);
   const [ffStatus, setFfStatus] = useState("");
@@ -310,10 +311,11 @@ const ProxyConfig = () => {
 
   useEffect(() => {
     if (!session?.expiresAt) return;
-    const interval = setInterval(() => {
+    const tick = () => {
       const diff = new Date(session.expiresAt!).getTime() - Date.now();
       if (diff <= 0) {
         setTimeLeft("Expirada");
+        setTimeParts({ d: 0, h: 0, m: 0, s: 0 });
         localStorage.removeItem("proxy_session");
         navigate("/", { replace: true });
         return;
@@ -322,10 +324,13 @@ const ProxyConfig = () => {
       const h = Math.floor((diff % 86400000) / 3600000);
       const m = Math.floor((diff % 3600000) / 60000);
       const s = Math.floor((diff % 60000) / 1000);
+      setTimeParts({ d, h, m, s });
       setTimeLeft(d > 0 ? `${d}d ${h}h ${m}m` : `${h}h ${m}m ${s}s`);
-    }, 1000);
+    };
+    tick();
+    const interval = setInterval(tick, 1000);
     return () => clearInterval(interval);
-  }, [session]);
+  }, [session, navigate]);
 
   const launchFreeFire = useCallback(() => {
     setLaunchingFF(true); setFfStatus("Abrindo Free Fire...");
