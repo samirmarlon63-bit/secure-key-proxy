@@ -126,13 +126,21 @@ const Login = () => {
 
         <form
           onSubmit={onSubmit}
-          className="glass-card p-5 space-y-4 rounded-2xl"
+          className="relative glass-card p-5 space-y-4 rounded-2xl overflow-hidden"
           style={{
             border: "1.5px solid rgba(77,184,255,0.55)",
             boxShadow:
-              "0 0 0 1px rgba(29,155,240,0.18) inset, 0 0 28px rgba(29,155,240,0.22), 0 12px 40px -12px rgba(0,120,255,0.45)",
+              "0 0 0 1px rgba(29,155,240,0.18) inset, 0 0 32px rgba(29,155,240,0.28), 0 18px 50px -14px rgba(0,120,255,0.5)",
+            background:
+              "linear-gradient(180deg, rgba(10,20,40,0.72) 0%, rgba(6,12,26,0.78) 100%)",
           }}
         >
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 top-0 h-px"
+            style={{ background: "linear-gradient(90deg, transparent, rgba(120,200,255,0.9), transparent)" }}
+          />
+
           <div className="flex items-center gap-2 pb-3 border-b border-sky-500/20">
             <div className="w-8 h-8 rounded-lg bg-sky-500/10 border border-sky-400/40 flex items-center justify-center">
               <Shield className="w-4 h-4 text-sky-300" />
