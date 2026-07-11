@@ -87,7 +87,7 @@ const Login = () => {
             >
               <div className="p-[2px] rounded-full bg-background">
                 <div className="w-24 h-24 rounded-full overflow-hidden bg-black">
-                  <img src={RAVE_LOGO} alt="Rave" className="w-full h-full object-cover" />
+                  <img src={LOGIN_AVATAR} alt="Reseend" className="w-full h-full object-cover" />
                 </div>
               </div>
             </div>
