@@ -543,10 +543,7 @@ const ProxyConfig = () => {
           label="DEX Injector"
           icon={<Layers className="w-4 h-4" />}
           value={dexInjector}
-          onChange={(v) => {
-            if (v) setDexConfirmOpen(true);
-            else setDexInjector(false);
-          }}
+          onChange={setDexInjector}
         />
         <div className={dexInjector ? "" : "dex-locked-group"}>
           <div className="space-y-3">
@@ -569,32 +566,22 @@ const ProxyConfig = () => {
             <div
               className="relative rounded-xl overflow-hidden bg-black"
               style={{
-                border: "2px solid #000",
-                boxShadow: "0 10px 30px -10px rgba(0,0,0,0.8), 0 0 0 1px rgba(0,0,0,0.9)",
+                border: "1.5px solid rgba(77,184,255,0.55)",
+                boxShadow: "0 10px 30px -10px rgba(29,155,240,0.55)",
               }}
             >
               <div className="relative w-full" style={{ aspectRatio: "16 / 9" }}>
                 <iframe
-                  src="https://www.youtube.com/embed/lIzxrp9NwHo?autoplay=1&mute=1&loop=1&playlist=lIzxrp9NwHo&controls=0&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&disablekb=1&fs=0"
+                  src="https://www.youtube.com/embed/lIzxrp9NwHo?rel=0&modestbranding=1&playsinline=1"
                   title="Tutorial DEX"
-                  className="absolute inset-0 w-full h-full pointer-events-none"
-                  allow="autoplay; encrypted-media"
-                  frameBorder={0}
+                  className="absolute inset-0 w-full h-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                  allowFullScreen
                 />
               </div>
             </div>
             <button
-              onClick={() => {
-                const seen = localStorage.getItem("dex_tutorial_seen") === "true";
-                if (!seen) {
-                  const ok = window.confirm(
-                    "Primero mira el tutorial completo. Si intentas continuar sin verlo, es muy probable que no comprendas el procedimiento y la activación no funcione correctamente. Una vez finalices el tutorial, podrás acceder a Proxy.vin sin restricciones."
-                  );
-                  if (!ok) return;
-                  localStorage.setItem("dex_tutorial_seen", "true");
-                }
-                window.open("https://proxy.vin", "_blank", "noopener,noreferrer");
-              }}
+              onClick={() => window.open("https://proxy.vin", "_blank", "noopener,noreferrer")}
               className="w-full py-3 rounded-xl text-sm font-bold tracking-wide text-white active:scale-[0.98] transition-all"
               style={{
                 background: "linear-gradient(135deg, #0a2a55 0%, #0b6fd1 55%, #1d9bf0 100%)",
@@ -606,6 +593,7 @@ const ProxyConfig = () => {
             </button>
           </div>
         )}
+
       </div>
     </div>
   );
