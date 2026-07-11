@@ -1016,23 +1016,30 @@ const ProxyConfig = () => {
       </div>
 
       {/* Bottom Tab Bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-50">
-        <div className="max-w-sm mx-auto">
-          <div className="bg-card/95 backdrop-blur-xl border-t border-border/50 flex items-center justify-around pt-3 pb-6 px-4">
-            <button onClick={() => { setActiveTab("home"); setSettingsSection(null); }} className="flex-1 flex flex-col items-center gap-0.5 py-1.5 active:scale-95 transition-all">
-              <Home className={`w-5 h-5 ${activeTab === "home" ? "text-foreground" : "text-muted-foreground"}`} />
-              <span className={`text-[9px] font-medium ${activeTab === "home" ? "text-foreground" : "text-muted-foreground"}`}>Inicio</span>
-              {activeTab === "home" && <div className="w-4 h-0.5 rounded-full bg-foreground mt-0.5" />}
+      {/* Bottom Tab Bar — floating glass pill, wider */}
+      <div className="fixed bottom-4 left-0 right-0 z-50 px-3 pointer-events-none">
+        <div className="mx-auto w-full max-w-[440px] pointer-events-auto">
+          <div
+            className="flex items-center justify-around px-3 py-2.5 rounded-[26px] border border-white/10 bg-black/55 backdrop-blur-2xl"
+            style={{
+              boxShadow:
+                "0 12px 40px -12px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.04) inset, 0 0 22px rgba(29,155,240,0.08)",
+            }}
+          >
+            <button onClick={() => { setActiveTab("home"); setSettingsSection(null); }} className="flex-1 flex flex-col items-center gap-0.5 py-1.5 active:scale-95 transition-transform duration-200">
+              <Home className={`w-5 h-5 transition-colors ${activeTab === "home" ? "text-foreground" : "text-muted-foreground"}`} />
+              <span className={`text-[9px] font-medium transition-colors ${activeTab === "home" ? "text-foreground" : "text-muted-foreground"}`}>Inicio</span>
+              <div className={`h-0.5 rounded-full bg-foreground mt-0.5 transition-all duration-300 ${activeTab === "home" ? "w-4 opacity-100" : "w-0 opacity-0"}`} />
             </button>
-            <button onClick={() => { setActiveTab("servers"); setSettingsSection(null); }} className="flex-1 flex flex-col items-center gap-0.5 py-1.5 active:scale-95 transition-all">
-              <Globe className={`w-5 h-5 ${activeTab === "servers" ? "text-foreground" : "text-muted-foreground"}`} />
-              <span className={`text-[9px] font-medium ${activeTab === "servers" ? "text-foreground" : "text-muted-foreground"}`}>Módulos</span>
-              {activeTab === "servers" && <div className="w-4 h-0.5 rounded-full bg-foreground mt-0.5" />}
+            <button onClick={() => { setActiveTab("servers"); setSettingsSection(null); }} className="flex-1 flex flex-col items-center gap-0.5 py-1.5 active:scale-95 transition-transform duration-200">
+              <Globe className={`w-5 h-5 transition-colors ${activeTab === "servers" ? "text-foreground" : "text-muted-foreground"}`} />
+              <span className={`text-[9px] font-medium transition-colors ${activeTab === "servers" ? "text-foreground" : "text-muted-foreground"}`}>Módulos</span>
+              <div className={`h-0.5 rounded-full bg-foreground mt-0.5 transition-all duration-300 ${activeTab === "servers" ? "w-4 opacity-100" : "w-0 opacity-0"}`} />
             </button>
-            <button onClick={() => { setActiveTab("settings"); setSettingsSection(null); }} className="flex-1 flex flex-col items-center gap-0.5 py-1.5 active:scale-95 transition-all">
-              <Settings className={`w-5 h-5 ${activeTab === "settings" ? "text-foreground" : "text-muted-foreground"}`} />
-              <span className={`text-[9px] font-medium ${activeTab === "settings" ? "text-foreground" : "text-muted-foreground"}`}>Ajustes</span>
-              {activeTab === "settings" && <div className="w-4 h-0.5 rounded-full bg-foreground mt-0.5" />}
+            <button onClick={() => { setActiveTab("settings"); setSettingsSection(null); }} className="flex-1 flex flex-col items-center gap-0.5 py-1.5 active:scale-95 transition-transform duration-200">
+              <Settings className={`w-5 h-5 transition-colors ${activeTab === "settings" ? "text-foreground" : "text-muted-foreground"}`} />
+              <span className={`text-[9px] font-medium transition-colors ${activeTab === "settings" ? "text-foreground" : "text-muted-foreground"}`}>Ajustes</span>
+              <div className={`h-0.5 rounded-full bg-foreground mt-0.5 transition-all duration-300 ${activeTab === "settings" ? "w-4 opacity-100" : "w-0 opacity-0"}`} />
             </button>
           </div>
         </div>
