@@ -104,7 +104,7 @@ const Login = () => {
                 letterSpacing: "-0.02em",
               }}
             >
-              Rave
+              Reseend
             </h1>
             <VerifiedBadge size={20} />
           </div>
