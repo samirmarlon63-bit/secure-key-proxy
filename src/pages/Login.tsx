@@ -34,19 +34,18 @@ const Login = () => {
     setError("");
     const cleanName = name.trim();
     const cleanKey = key.replace(/[\u200B-\u200D\uFEFF\s]/g, '').trim().toUpperCase();
-    if (!cleanName) { setError(t("errUser")); return; }
-    if (!cleanKey) { setError(t("errKey")); return; }
+    if (!cleanName || !cleanKey) { setError("Error"); return; }
 
     setLoading(true);
     try {
       if (await isUserBlocked(cleanKey)) {
-        setError(t("errBlocked"));
+        setError("Error");
         setLoading(false);
         return;
       }
       const k = await activateKey(cleanKey, cleanName);
       if (!k) {
-        setError(t("errInvalid"));
+        setError("Error");
         setLoading(false);
         return;
       }
@@ -59,10 +58,11 @@ const Login = () => {
       }));
       navigate("/proxy");
     } catch {
-      setError(t("errConn"));
+      setError("Error");
       setLoading(false);
     }
   };
+
 
   return (
     <div className="relative min-h-screen flex flex-col items-center justify-center px-4">
