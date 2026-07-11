@@ -5,7 +5,7 @@ import VerifiedBadge from "@/components/VerifiedBadge";
 import VideoModal from "@/components/VideoModal";
 import { Shield, Lock, Globe, User, KeyRound, PlayCircle } from "lucide-react";
 import { activateKey, isUserBlocked } from "@/lib/keys";
-import { RAVE_LOGO, EXAMPLE_VIDEO, RAVE_MASCOT } from "@/lib/assets";
+import { RAVE_LOGO, LOGIN_AVATAR, EXAMPLE_VIDEO, RAVE_MASCOT } from "@/lib/assets";
 import { useI18n, LANGUAGES } from "@/lib/i18n";
 
 const Login = () => {
@@ -87,7 +87,7 @@ const Login = () => {
             >
               <div className="p-[2px] rounded-full bg-background">
                 <div className="w-24 h-24 rounded-full overflow-hidden bg-black">
-                  <img src={RAVE_LOGO} alt="Rave" className="w-full h-full object-cover" />
+                  <img src={LOGIN_AVATAR} alt="Reseend" className="w-full h-full object-cover" />
                 </div>
               </div>
             </div>
@@ -104,7 +104,7 @@ const Login = () => {
                 letterSpacing: "-0.02em",
               }}
             >
-              Rave
+              Reseend
             </h1>
             <VerifiedBadge size={20} />
           </div>
