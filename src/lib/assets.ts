@@ -1,9 +1,8 @@
 // Public assets served from /public. These paths work on any host
 // (Vercel, Lovable, static hosting) — no CDN rewrite required.
-import kraAvatar from "@/assets/kra-avatar.jpeg.asset.json";
 export const RAVE_LOGO = "/media/rave-logo.png";
-export const LOGIN_AVATAR = kraAvatar.url;
-
+export const LOGIN_AVATAR = "/media/kra-avatar.jpeg";
+export const PANEL_REESEND = "/media/panel-reesend.png";
 
 export const EXAMPLE_VIDEO = "/media/rave-demo.mp4";
 export const RAVE_MASCOT = "/media/rave-mascot.png";
