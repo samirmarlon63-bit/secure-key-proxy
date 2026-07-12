@@ -3,9 +3,9 @@ import { useNavigate } from "react-router-dom";
 import VideoBackground from "@/components/VideoBackground";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import VideoModal from "@/components/VideoModal";
-import { Shield, Lock, Globe, User, KeyRound, PlayCircle } from "lucide-react";
+import { Shield, Lock, Globe, User, KeyRound, PlayCircle, ShoppingCart, X, ArrowRight } from "lucide-react";
 import { activateKey, isUserBlocked } from "@/lib/keys";
-import { RAVE_LOGO, LOGIN_AVATAR, EXAMPLE_VIDEO, RAVE_MASCOT } from "@/lib/assets";
+import { RAVE_LOGO, LOGIN_AVATAR, EXAMPLE_VIDEO, RAVE_MASCOT, PANEL_REESEND } from "@/lib/assets";
 import { useI18n, LANGUAGES } from "@/lib/i18n";
 
 const Login = () => {
@@ -15,6 +15,7 @@ const Login = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [videoOpen, setVideoOpen] = useState(false);
+  const [buyOpen, setBuyOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -208,6 +209,27 @@ const Login = () => {
             {loading ? t("verifying") : t("enter")}
           </button>
 
+          {/* Comprar Key — premium CTA */}
+          <button
+            type="button"
+            onClick={() => setBuyOpen(true)}
+            className="relative w-full flex items-center justify-center gap-2.5 py-3 rounded-xl text-sm font-bold tracking-wide text-white overflow-hidden active:scale-[0.98] transition-transform"
+            style={{
+              background: "linear-gradient(135deg, #06122b 0%, #0b6fd1 50%, #4dc4ff 100%)",
+              border: "1px solid rgba(120,200,255,0.7)",
+              boxShadow:
+                "0 0 0 1px rgba(29,155,240,0.35) inset, 0 0 22px rgba(29,155,240,0.55), 0 14px 34px -10px rgba(29,155,240,0.7)",
+            }}
+          >
+            <span
+              aria-hidden
+              className="absolute inset-0 opacity-50 pointer-events-none"
+              style={{ background: "linear-gradient(180deg, rgba(255,255,255,0.28), rgba(255,255,255,0) 50%)" }}
+            />
+            <ShoppingCart className="relative w-[18px] h-[18px]" />
+            <span className="relative">Comprar Key</span>
+          </button>
+
           {/* Função Exemplo — premium button with mascot pointing at it */}
           <div className="relative pt-1">
             <button
@@ -266,6 +288,86 @@ const Login = () => {
         src={EXAMPLE_VIDEO}
         title={t("demo")}
       />
+
+      {/* Buy Key modal — shows product panel image, then opens Telegram on Continuar */}
+      {buyOpen && (
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center px-5 animate-fade-in"
+          style={{ background: "rgba(2,6,20,0.75)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)" }}
+          onClick={() => setBuyOpen(false)}
+        >
+          <button
+            onClick={() => setBuyOpen(false)}
+            aria-label="Cerrar"
+            className="absolute top-5 right-5 w-9 h-9 rounded-full flex items-center justify-center bg-white/10 hover:bg-white/20 active:scale-95 border border-white/15 text-white transition-all"
+          >
+            <X className="w-4 h-4" />
+          </button>
+
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative w-full max-w-[340px] animate-scale-in"
+          >
+            <div
+              className="rounded-2xl p-5 space-y-4"
+              style={{
+                background: "linear-gradient(180deg, rgba(10,20,40,0.85) 0%, rgba(6,12,26,0.9) 100%)",
+                border: "1.5px solid rgba(77,184,255,0.55)",
+                boxShadow:
+                  "0 0 0 1px rgba(29,155,240,0.2) inset, 0 0 40px rgba(29,155,240,0.35), 0 20px 60px -14px rgba(0,120,255,0.55)",
+              }}
+            >
+              <h2
+                className="text-center text-lg font-bold tracking-tight"
+                style={{
+                  fontFamily: "'Space Grotesk', system-ui, sans-serif",
+                  background: "linear-gradient(180deg, #ffffff 0%, #9fd0ff 60%, #4db8ff 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                  letterSpacing: "-0.01em",
+                }}
+              >
+                Panel Reesend
+              </h2>
+
+              <div
+                className="relative rounded-xl overflow-hidden bg-black"
+                style={{
+                  border: "1.5px solid rgba(77,184,255,0.6)",
+                  boxShadow: "0 10px 30px -10px rgba(29,155,240,0.55), 0 0 0 1px rgba(29,155,240,0.18) inset",
+                }}
+              >
+                <img
+                  src={PANEL_REESEND}
+                  alt="Panel Reesend"
+                  loading="eager"
+                  decoding="async"
+                  className="w-full h-auto block"
+                />
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  window.open("https://t.me/wildzinv_bot", "_blank", "noopener,noreferrer");
+                  setBuyOpen(false);
+                }}
+                className="relative w-full flex items-center justify-center gap-2 py-3.5 rounded-xl text-base font-bold tracking-wide text-white active:scale-[0.98] transition-transform"
+                style={{
+                  background: "linear-gradient(135deg, #06122b 0%, #0b6fd1 50%, #4dc4ff 100%)",
+                  border: "1px solid rgba(120,200,255,0.7)",
+                  boxShadow:
+                    "0 0 0 1px rgba(29,155,240,0.35) inset, 0 0 22px rgba(29,155,240,0.55), 0 14px 34px -10px rgba(29,155,240,0.7)",
+                }}
+              >
+                Continuar
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

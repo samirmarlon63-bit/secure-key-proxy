@@ -26,9 +26,7 @@ const ADD_TIME_MS: Record<string, number> = {
 const MAIN_KEYBOARD = {
   keyboard: [
     [{ text: "Generar Key" }, { text: "Keys activas" }],
-    [{ text: "Usuarios" }, { text: "Pendientes" }],
-    [{ text: "Últimos" }, { text: "Stats" }],
-    [{ text: "Ayuda" }, { text: "Inicio" }],
+    [{ text: "Usuarios" }, { text: "Inicio" }],
   ],
   resize_keyboard: true,
   is_persistent: true,
@@ -371,23 +369,31 @@ async function handleTextOrCommand(
     case "Keys activas":
     case "/keys": {
       const { data } = await supabase.from("proxy_keys").select("key,duration,type,status,used_by,expires_at").order("created_at", { ascending: false }).limit(80);
+      const rows = data || [];
       const counts: Record<string, number> = {};
-      (data || []).filter((k: any) => k.status === "Activa").forEach((k: any) => {
+      rows.filter((k: any) => k.status === "Activa").forEach((k: any) => {
         const label = `${k.type} · ${k.duration}`;
         counts[label] = (counts[label] || 0) + 1;
       });
-      const summary = Object.entries(counts).map(([d, n]) => `• ${d}: <b>${n}</b>`).join("\n") || "Sin keys disponibles.";
-      const latest = (data || []).slice(0, 20).map((k: any) => `<code>${k.key}</code> · ${k.type} · ${k.duration} · ${k.status}${k.used_by ? ` · ${k.used_by}` : ""}`).join("\n");
-      await reply(chat_id, `<b>Keys disponibles</b>\n${summary}\n\n<b>Últimas keys</b>\n${latest || "Sin keys."}`);
+      const summaryBlocks = Object.entries(counts).map(([d, n]) =>
+        `🟢 <b>${d}</b>\n┌──────────────\n│ Disponibles: <b>${n}</b>\n└──────────────`
+      ).join("\n\n") || "<i>Sin keys disponibles.</i>";
+      const dot = (s: string) => s === "Activa" ? "🟢" : "🔴";
+      const latest = rows.slice(0, 20).map((k: any) => `${dot(k.status)} <code>${k.key}</code>`).join("\n") || "<i>Sin keys.</i>";
+      await reply(chat_id,
+        `🔑 <b>KEYS</b>\n\n${summaryBlocks}\n\n📋 <b>Últimas</b>\n${latest}`);
       return;
     }
     case "Usuarios":
     case "/usuarios": {
       const { data } = await supabase.from("active_users").select("*").order("login_at", { ascending: false }).limit(30);
-      const txt = (data || []).map((u: any) =>
-        `<b>${u.name}</b> ${u.blocked ? "[BLOQUEADO]" : "[ONLINE]"}\n<code>${u.key}</code> · ${u.type} · ${timeLeft(u.expires_at)}`
-      ).join("\n\n") || "Sin sesiones activas.";
-      await reply(chat_id, `<b>Usuarios activos (${data?.length || 0})</b>\n${txt}`);
+      const rows = data || [];
+      const separator = "\n──────────────────\n";
+      const body = rows.map((u: any) => {
+        const dot = u.blocked ? "🔴" : "🟢";
+        return `${dot} <b>${u.name}</b>\n\n🔑 <code>${u.key}</code>\n\n⏳ Expira en ${timeLeft(u.expires_at)}`;
+      }).join(separator) || "<i>Sin sesiones activas.</i>";
+      await reply(chat_id, `👥 <b>Usuarios Activos</b> (${rows.length})\n\n${body}`);
       return;
     }
     case "Pendientes":

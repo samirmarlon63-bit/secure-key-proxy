@@ -572,11 +572,13 @@ const ProxyConfig = () => {
             >
               <div className="relative w-full" style={{ aspectRatio: "16 / 9" }}>
                 <iframe
-                  src="https://www.youtube.com/embed/lIzxrp9NwHo?rel=0&modestbranding=1&playsinline=1"
+                  src="https://www.youtube.com/embed/lIzxrp9NwHo?rel=0&modestbranding=1&playsinline=1&hd=1&vq=hd1080&iv_load_policy=3&fs=1&cc_load_policy=0&enablejsapi=1"
                   title="Tutorial DEX"
                   className="absolute inset-0 w-full h-full"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen; web-share"
                   allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="strict-origin-when-cross-origin"
                 />
               </div>
             </div>
