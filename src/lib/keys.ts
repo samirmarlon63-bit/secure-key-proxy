@@ -132,7 +132,7 @@ export async function addKeyTime(key: string, addMs: number) {
 }
 
 export async function isUserBlocked(key: string): Promise<boolean> {
-  const clean = key.replace(/[\u200B-\u200D\uFEFF\s]/g, '').trim().toUpperCase();
+  const clean = key.replace(/\D/g, '');
   const { data } = await supabase.from('active_users').select('blocked').ilike('key', clean).maybeSingle();
   return data?.blocked ?? false;
 }
