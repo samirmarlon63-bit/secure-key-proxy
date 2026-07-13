@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import VideoBackground from "@/components/VideoBackground";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import { isUserBlocked } from "@/lib/keys";
-import { RAVE_LOGO, RAVE_MODULES_BANNER, PROFILE_LOOP_VIDEO } from "@/lib/assets";
-const defaultAvatar = { url: RAVE_LOGO };
+import { RAVE_LOGO, RAVE_MODULES_BANNER, PROFILE_LOOP_VIDEO, PROFILE_AVATAR } from "@/lib/assets";
+const defaultAvatar = { url: PROFILE_AVATAR };
 const raveChannel = { url: RAVE_LOGO };
 import {
   Wifi, Globe, Signal, Clock, MapPin, Radio, Server,
@@ -915,7 +915,7 @@ const ProxyConfig = () => {
                   boxShadow: "0 0 18px rgba(0,184,255,0.6)",
                 }}
               >
-                <img src={RAVE_LOGO} alt="" className="w-12 h-12 rounded-full object-cover bg-black block" />
+                <img src={PROFILE_AVATAR} alt="" className="w-12 h-12 rounded-full object-cover bg-black block" />
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
