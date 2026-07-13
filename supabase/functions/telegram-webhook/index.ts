@@ -584,30 +584,38 @@ async function deriveSecret(token: string): Promise<string> {
     .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
 }
 
+// Module-level singletons — reused across warm invocations for max speed.
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const TG_TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN") || "";
+const ADMIN_ID = Deno.env.get("TELEGRAM_ADMIN_ID") || "";
+const sharedSupabase = createClient(SUPABASE_URL, SERVICE_KEY, {
+  auth: { persistSession: false, autoRefreshToken: false },
+});
+let cachedSecret: string | null = null;
+const getSecret = async () => {
+  if (cachedSecret) return cachedSecret;
+  cachedSecret = TG_TOKEN ? await deriveSecret(TG_TOKEN) : "";
+  return cachedSecret;
+};
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
-  const token = Deno.env.get("TELEGRAM_BOT_TOKEN") || "";
-  const expected = token ? await deriveSecret(token) : "";
+  const expected = await getSecret();
   const got = req.headers.get("x-telegram-bot-api-secret-token") || "";
   if (!expected || got !== expected) {
-    console.error("Invalid Telegram webhook secret");
     return new Response("Unauthorized", { status: 401, headers: corsHeaders });
   }
 
   let update: any;
   try { update = await req.json(); } catch { return new Response("ok", { headers: corsHeaders }); }
 
-  const adminId = Deno.env.get("TELEGRAM_ADMIN_ID") || "";
-  const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-
-  // Process asynchronously so Telegram gets an instant 200 and NEVER retries/freezes.
   const process = async () => {
-    const supabase = createClient(supabaseUrl, serviceKey);
+    const supabase = sharedSupabase;
     try {
       if (update.message?.text) {
-        await handleTextOrCommand(supabase, update.message.chat.id, update.message.text, adminId);
+        await handleTextOrCommand(supabase, update.message.chat.id, update.message.text, ADMIN_ID);
         return;
       }
       const cb = update.callback_query;
@@ -618,7 +626,7 @@ Deno.serve(async (req) => {
       const chat_id = cb.message?.chat?.id;
       const message_id = cb.message?.message_id;
 
-      if (!(await isAuthed(supabase, Number(chat_id), adminId))) {
+      if (!(await isAuthed(supabase, Number(chat_id), ADMIN_ID))) {
         await ack(cb.id, "Envía /start y autentícate primero.");
         return;
       }
@@ -647,7 +655,7 @@ Deno.serve(async (req) => {
     }
   };
 
-  // @ts-ignore EdgeRuntime.waitUntil keeps the task alive after response is returned.
+  // @ts-ignore
   if (typeof EdgeRuntime !== "undefined" && EdgeRuntime?.waitUntil) {
     // @ts-ignore
     EdgeRuntime.waitUntil(process());
@@ -657,3 +665,4 @@ Deno.serve(async (req) => {
 
   return new Response("ok", { headers: corsHeaders });
 });
+
