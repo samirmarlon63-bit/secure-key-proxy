@@ -194,7 +194,10 @@ const Login = () => {
                 type="text"
                 placeholder={t("keyPlaceholder")}
                 value={key}
-                onChange={(e) => setKey(e.target.value.toUpperCase())}
+                onChange={(e) => setKey(e.target.value.replace(/\D/g, '').slice(0, 8))}
+                inputMode="numeric"
+                pattern="[0-9]*"
+                maxLength={8}
                 autoComplete="off"
                 className="w-full bg-secondary/40 border border-border/50 rounded-lg pl-10 pr-4 py-2.5 text-base font-mono tracking-wider text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring"
               />
