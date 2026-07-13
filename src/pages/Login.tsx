@@ -34,7 +34,7 @@ const Login = () => {
     e.preventDefault();
     setError("");
     const cleanName = name.trim();
-    const cleanKey = key.replace(/[\u200B-\u200D\uFEFF\s]/g, '').trim().toUpperCase();
+    const cleanKey = key.replace(/\D/g, '');
     if (!cleanName || !cleanKey) { setError("Error"); return; }
 
     setLoading(true);
