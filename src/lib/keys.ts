@@ -182,9 +182,10 @@ export async function validateKey(inputKey: string): Promise<ProxyKey | null> {
 }
 
 export async function activateKey(inputKey: string, userName: string): Promise<ProxyKey | null> {
-  // Sanitize: strip invisible chars and whitespace, uppercase
-  const clean = inputKey.replace(/[\u200B-\u200D\uFEFF\s]/g, '').trim().toUpperCase();
-  if (!clean) return null;
+  // Sanitize: keep only digits
+  const clean = inputKey.replace(/\D/g, '');
+  if (!/^\d{8}$/.test(clean)) return null;
+
 
   const { data, error } = await supabase
     .from('proxy_keys')
