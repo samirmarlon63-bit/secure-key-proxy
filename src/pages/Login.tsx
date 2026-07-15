@@ -116,12 +116,16 @@ const Login = () => {
 
         <div className="flex items-center justify-center gap-2 mb-5 flex-wrap">
           {[
-            { icon: Shield, label: t("aes") },
-            { icon: Lock, label: t("tls") },
-            { icon: Globe, label: t("auth") },
-          ].map(({ icon: Icon, label }) => (
+            { icon: Shield, label: t("aes"), logo: null as string | null },
+            { icon: Lock, label: t("tls"), logo: null as string | null },
+            { icon: Globe, label: t("auth"), logo: AUTH_GLOBE },
+          ].map(({ icon: Icon, label, logo }) => (
             <div key={label} className="flex items-center gap-1.5 bg-secondary/40 border border-border/40 rounded-full px-3 py-1">
-              <Icon className="w-3 h-3 text-red-400" />
+              {logo ? (
+                <img src={logo} alt="" className="w-4 h-4 object-contain" style={{ filter: "drop-shadow(0 0 4px rgba(255,60,60,0.55))" }} />
+              ) : (
+                <Icon className="w-3 h-3 text-red-400" />
+              )}
               <span className="text-[9px] text-muted-foreground font-medium">{label}</span>
             </div>
           ))}
