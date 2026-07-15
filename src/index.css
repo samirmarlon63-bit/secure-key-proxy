@@ -170,3 +170,15 @@ input[type="range"]:active::-moz-range-thumb {
 }
 .tick-digit { animation: digit-tick 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
 
+
+@keyframes avatar-wave {
+  0% { box-shadow: 0 0 0 0 rgba(255,59,59,0.55); opacity: 0.9; }
+  100% { box-shadow: 0 0 0 22px rgba(255,59,59,0); opacity: 0; }
+}
+.animate-avatar-wave { animation: avatar-wave 1.8s cubic-bezier(0.16, 1, 0.3, 1) infinite; }
+
+@keyframes avatar-pulse {
+  0%, 100% { box-shadow: 0 0 22px rgba(255,59,59,0.55), 0 0 8px rgba(255,122,122,0.45); transform: scale(1); }
+  50% { box-shadow: 0 0 40px rgba(255,59,59,0.85), 0 0 16px rgba(255,122,122,0.7); transform: scale(1.03); }
+}
+.animate-avatar-pulse { animation: avatar-pulse 2.6s ease-in-out infinite; }

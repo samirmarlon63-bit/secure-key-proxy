@@ -79,11 +79,13 @@ const Login = () => {
       <div className="relative z-10 w-full max-w-sm animate-fade-in-up">
         <div className="flex flex-col items-center mb-6">
           <div className="relative mb-3 flex items-center justify-center">
+            <span aria-hidden className="absolute inset-0 rounded-full pointer-events-none animate-avatar-wave" style={{ boxShadow: "0 0 0 0 rgba(255,59,59,0.55)" }} />
+            <span aria-hidden className="absolute inset-0 rounded-full pointer-events-none animate-avatar-wave" style={{ boxShadow: "0 0 0 0 rgba(255,59,59,0.45)", animationDelay: "0.9s" }} />
             <div
-              className="p-[3px] rounded-full"
+              className="relative p-[3px] rounded-full animate-avatar-pulse"
               style={{
-                background: "conic-gradient(from 0deg, #00b8ff, #4ddcff, #0066ff, #00b8ff, #1e90ff)",
-                boxShadow: "0 0 28px rgba(0,184,255,0.6), 0 0 10px rgba(77,220,255,0.55)",
+                background: "conic-gradient(from 0deg, #ff3b3b, #ff7a7a, #c81e1e, #ff3b3b, #ff4444)",
+                boxShadow: "0 0 28px rgba(255,59,59,0.6), 0 0 10px rgba(255,122,122,0.55)",
               }}
             >
               <div className="p-[2px] rounded-full bg-background">
@@ -98,7 +100,7 @@ const Login = () => {
               className="text-3xl font-bold tracking-tight"
               style={{
                 fontFamily: "'Space Grotesk', system-ui, sans-serif",
-                background: "linear-gradient(180deg, #ffffff 0%, #9fd0ff 60%, #4db8ff 100%)",
+                background: "linear-gradient(180deg, #ffffff 0%, #ffb3b3 60%, #ff4d4d 100%)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
                 backgroundClip: "text",
@@ -119,7 +121,7 @@ const Login = () => {
             { icon: Globe, label: t("auth") },
           ].map(({ icon: Icon, label }) => (
             <div key={label} className="flex items-center gap-1.5 bg-secondary/40 border border-border/40 rounded-full px-3 py-1">
-              <Icon className="w-3 h-3 text-sky-400" />
+              <Icon className="w-3 h-3 text-red-400" />
               <span className="text-[9px] text-muted-foreground font-medium">{label}</span>
             </div>
           ))}
@@ -129,34 +131,34 @@ const Login = () => {
           onSubmit={onSubmit}
           className="relative glass-card p-5 space-y-4 rounded-2xl overflow-hidden"
           style={{
-            border: "1.5px solid rgba(77,184,255,0.55)",
+            border: "1.5px solid rgba(255,77,77,0.55)",
             boxShadow:
-              "0 0 0 1px rgba(29,155,240,0.18) inset, 0 0 32px rgba(29,155,240,0.28), 0 18px 50px -14px rgba(0,120,255,0.5)",
+              "0 0 0 1px rgba(240,29,29,0.18) inset, 0 0 32px rgba(240,29,29,0.28), 0 18px 50px -14px rgba(255,40,40,0.5)",
             background:
-              "linear-gradient(180deg, rgba(10,20,40,0.72) 0%, rgba(6,12,26,0.78) 100%)",
+              "linear-gradient(180deg, rgba(40,10,10,0.72) 0%, rgba(26,6,6,0.78) 100%)",
           }}
         >
           <span
             aria-hidden
             className="pointer-events-none absolute inset-x-0 top-0 h-px"
-            style={{ background: "linear-gradient(90deg, transparent, rgba(120,200,255,0.9), transparent)" }}
+            style={{ background: "linear-gradient(90deg, transparent, rgba(255,120,120,0.9), transparent)" }}
           />
 
-          <div className="flex items-center gap-2 pb-3 border-b border-sky-500/20">
-            <div className="w-8 h-8 rounded-lg bg-sky-500/10 border border-sky-400/40 flex items-center justify-center">
-              <Shield className="w-4 h-4 text-sky-300" />
+          <div className="flex items-center gap-2 pb-3 border-b border-red-500/20">
+            <div className="w-8 h-8 rounded-lg bg-red-500/10 border border-red-400/40 flex items-center justify-center">
+              <Shield className="w-4 h-4 text-red-300" />
             </div>
             <div className="flex-1">
               <span className="text-xs text-foreground font-semibold block">{t("secureAccess")}</span>
               <span className="text-[9px] text-muted-foreground/60">{t("enterCreds")}</span>
             </div>
             <div className="relative">
-              <Globe className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-sky-300 pointer-events-none" />
+              <Globe className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-red-300 pointer-events-none" />
               <select
                 aria-label={t("language")}
                 value={lang}
                 onChange={(e) => setLang(e.target.value as typeof lang)}
-                className="appearance-none bg-secondary/60 border border-sky-400/30 rounded-md pl-7 pr-2 py-1 text-[10px] text-foreground focus:outline-none focus:ring-1 focus:ring-sky-400 max-w-[110px]"
+                className="appearance-none bg-secondary/60 border border-red-400/30 rounded-md pl-7 pr-2 py-1 text-[10px] text-foreground focus:outline-none focus:ring-1 focus:ring-red-400 max-w-[110px]"
               >
                 {LANGUAGES.map((l) => (
                   <option key={l.code} value={l.code} className="bg-background text-foreground">
@@ -218,10 +220,10 @@ const Login = () => {
             onClick={() => setBuyOpen(true)}
             className="relative w-full flex items-center justify-center gap-2.5 py-3 rounded-xl text-sm font-bold tracking-wide text-white overflow-hidden active:scale-[0.98] transition-transform"
             style={{
-              background: "linear-gradient(135deg, #06122b 0%, #0b6fd1 50%, #4dc4ff 100%)",
-              border: "1px solid rgba(120,200,255,0.7)",
+              background: "linear-gradient(135deg, #2b0606 0%, #c81e1e 50%, #ff5555 100%)",
+              border: "1px solid rgba(255,120,120,0.7)",
               boxShadow:
-                "0 0 0 1px rgba(29,155,240,0.35) inset, 0 0 22px rgba(29,155,240,0.55), 0 14px 34px -10px rgba(29,155,240,0.7)",
+                "0 0 0 1px rgba(240,29,29,0.35) inset, 0 0 22px rgba(240,29,29,0.55), 0 14px 34px -10px rgba(240,29,29,0.7)",
             }}
           >
             <span
@@ -241,10 +243,10 @@ const Login = () => {
               className="relative group w-full flex items-center justify-center gap-2.5 py-3 rounded-xl text-sm font-semibold tracking-wide text-white overflow-hidden active:scale-[0.98] transition-transform"
               style={{
                 background:
-                  "linear-gradient(135deg, #0a2a55 0%, #0b6fd1 55%, #1d9bf0 100%)",
-                border: "1px solid rgba(120,190,255,0.55)",
+                  "linear-gradient(135deg, #550a0a 0%, #c81e1e 55%, #f01d1d 100%)",
+                border: "1px solid rgba(255,120,120,0.55)",
                 boxShadow:
-                  "0 0 0 1px rgba(29,155,240,0.25) inset, 0 10px 28px -8px rgba(29,155,240,0.55), 0 2px 8px rgba(0,0,0,0.4)",
+                  "0 0 0 1px rgba(240,29,29,0.25) inset, 0 10px 28px -8px rgba(240,29,29,0.55), 0 2px 8px rgba(0,0,0,0.4)",
               }}
             >
               <span
@@ -268,7 +270,7 @@ const Login = () => {
               draggable={false}
               className="pointer-events-none select-none absolute -bottom-6 -right-3 w-24 h-auto z-10"
               style={{
-                filter: "drop-shadow(0 10px 18px rgba(0,120,255,0.35))",
+                filter: "drop-shadow(0 10px 18px rgba(255,40,40,0.35))",
                 transform: "scaleX(-1)",
               }}
             />
@@ -311,17 +313,17 @@ const Login = () => {
             <div
               className="rounded-2xl p-5 space-y-4"
               style={{
-                background: "linear-gradient(180deg, rgba(10,20,40,0.85) 0%, rgba(6,12,26,0.9) 100%)",
-                border: "1.5px solid rgba(77,184,255,0.55)",
+                background: "linear-gradient(180deg, rgba(40,10,10,0.85) 0%, rgba(26,6,6,0.9) 100%)",
+                border: "1.5px solid rgba(255,77,77,0.55)",
                 boxShadow:
-                  "0 0 0 1px rgba(29,155,240,0.2) inset, 0 0 40px rgba(29,155,240,0.35), 0 20px 60px -14px rgba(0,120,255,0.55)",
+                  "0 0 0 1px rgba(240,29,29,0.2) inset, 0 0 40px rgba(240,29,29,0.35), 0 20px 60px -14px rgba(255,40,40,0.55)",
               }}
             >
               <h2
                 className="text-center text-lg font-bold tracking-tight"
                 style={{
                   fontFamily: "'Space Grotesk', system-ui, sans-serif",
-                  background: "linear-gradient(180deg, #ffffff 0%, #9fd0ff 60%, #4db8ff 100%)",
+                  background: "linear-gradient(180deg, #ffffff 0%, #ffb3b3 60%, #ff4d4d 100%)",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                   backgroundClip: "text",
@@ -334,8 +336,8 @@ const Login = () => {
               <div
                 className="relative rounded-xl overflow-hidden bg-black"
                 style={{
-                  border: "1.5px solid rgba(77,184,255,0.6)",
-                  boxShadow: "0 10px 30px -10px rgba(29,155,240,0.55), 0 0 0 1px rgba(29,155,240,0.18) inset",
+                  border: "1.5px solid rgba(255,77,77,0.6)",
+                  boxShadow: "0 10px 30px -10px rgba(240,29,29,0.55), 0 0 0 1px rgba(240,29,29,0.18) inset",
                 }}
               >
                 <img
@@ -355,10 +357,10 @@ const Login = () => {
                 }}
                 className="relative w-full flex items-center justify-center gap-2 py-3.5 rounded-xl text-base font-bold tracking-wide text-white active:scale-[0.98] transition-transform"
                 style={{
-                  background: "linear-gradient(135deg, #06122b 0%, #0b6fd1 50%, #4dc4ff 100%)",
-                  border: "1px solid rgba(120,200,255,0.7)",
+                  background: "linear-gradient(135deg, #2b0606 0%, #c81e1e 50%, #ff5555 100%)",
+                  border: "1px solid rgba(255,120,120,0.7)",
                   boxShadow:
-                    "0 0 0 1px rgba(29,155,240,0.35) inset, 0 0 22px rgba(29,155,240,0.55), 0 14px 34px -10px rgba(29,155,240,0.7)",
+                    "0 0 0 1px rgba(240,29,29,0.35) inset, 0 0 22px rgba(240,29,29,0.55), 0 14px 34px -10px rgba(240,29,29,0.7)",
                 }}
               >
                 Continuar
