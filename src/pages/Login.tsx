@@ -79,8 +79,10 @@ const Login = () => {
       <div className="relative z-10 w-full max-w-sm animate-fade-in-up">
         <div className="flex flex-col items-center mb-6">
           <div className="relative mb-3 flex items-center justify-center">
+            <span aria-hidden className="absolute inset-0 rounded-full pointer-events-none animate-avatar-wave" style={{ boxShadow: "0 0 0 0 rgba(255,59,59,0.55)" }} />
+            <span aria-hidden className="absolute inset-0 rounded-full pointer-events-none animate-avatar-wave" style={{ boxShadow: "0 0 0 0 rgba(255,59,59,0.45)", animationDelay: "0.9s" }} />
             <div
-              className="p-[3px] rounded-full"
+              className="relative p-[3px] rounded-full animate-avatar-pulse"
               style={{
                 background: "conic-gradient(from 0deg, #ff3b3b, #ff7a7a, #c81e1e, #ff3b3b, #ff4444)",
                 boxShadow: "0 0 28px rgba(255,59,59,0.6), 0 0 10px rgba(255,122,122,0.55)",
