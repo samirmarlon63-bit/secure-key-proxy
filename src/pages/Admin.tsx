@@ -17,7 +17,7 @@ const Admin = () => {
   const [authenticated, setAuthenticated] = useState(() => sessionStorage.getItem("admin_auth") === "true");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [activeTab, setActiveTab] = useState<"users" | "generate" | "stats">("generate");
+  const [activeTab, setActiveTab] = useState<"users" | "generate" | "stats" | "canal">("generate");
 
   const [keyType, setKeyType] = useState<"Normal" | "Premium">("Normal");
   const [duration, setDuration] = useState("7 días");
