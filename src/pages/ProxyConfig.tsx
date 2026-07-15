@@ -213,7 +213,7 @@ PerfSliderStandalone.displayName = "PerfSliderStandalone";
 const ProxyConfig = () => {
   const navigate = useNavigate();
   const [session, setSession] = useState<Session | null>(null);
-  const [activeTab, setActiveTab] = useState<"home" | "servers" | "settings">("home");
+  const [activeTab, setActiveTab] = useState<"home" | "servers" | "channel" | "settings">("home");
   const [timeLeft, setTimeLeft] = useState("");
   const [timeParts, setTimeParts] = useState<{ d: number; h: number; m: number; s: number }>({ d: 0, h: 0, m: 0, s: 0 });
   const [launchingFF, setLaunchingFF] = useState(false);
