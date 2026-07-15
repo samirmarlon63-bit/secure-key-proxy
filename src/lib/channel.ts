@@ -23,7 +23,7 @@ export interface AdminProfile {
 }
 
 export async function listAnnouncements(): Promise<Announcement[]> {
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from("announcements")
     .select("*")
     .order("pinned", { ascending: false })
@@ -68,13 +68,13 @@ export async function uploadChannelMedia(file: File): Promise<{ url: string; typ
     contentType: file.type,
   });
   if (error) throw error;
-  const { data } = supabase.storage.from("channel").getPublicUrl(path);
+  const { data } = (supabase as any).storage.from("channel").getPublicUrl(path);
   const type = file.type.startsWith("video") ? "video" : "image";
   return { url: data.publicUrl, type };
 }
 
 export async function getAdminProfile(): Promise<AdminProfile | null> {
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from("admin_profile")
     .select("*")
     .order("updated_at", { ascending: false })
@@ -98,6 +98,6 @@ export async function uploadAdminAvatar(file: File): Promise<string> {
     contentType: file.type,
   });
   if (error) throw error;
-  const { data } = supabase.storage.from("channel").getPublicUrl(path);
+  const { data } = (supabase as any).storage.from("channel").getPublicUrl(path);
   return data.publicUrl;
 }
