@@ -11,3 +11,4 @@ export const RAVE_MASCOT = "/media/rave-mascot.png";
 export const RAVE_MASCOT_RED = "/media/rave-mascot-red.png";
 export const RAVE_MODULES_BANNER = "/media/rave-modules-banner.png";
 export const PROFILE_LOOP_VIDEO = "/media/profile-loop.mp4";
+export const AUTH_GLOBE = "/media/auth-globe.png";

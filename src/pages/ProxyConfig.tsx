@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback, useRef, memo } from "react";
 import { useNavigate } from "react-router-dom";
 import VideoBackground from "@/components/VideoBackground";
+import ChannelView from "@/components/ChannelView";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import { isUserBlocked } from "@/lib/keys";
-import { RAVE_LOGO, RAVE_MODULES_BANNER, PROFILE_LOOP_VIDEO, PROFILE_AVATAR } from "@/lib/assets";
+import { RAVE_LOGO, RAVE_MODULES_BANNER, PROFILE_LOOP_VIDEO, PROFILE_AVATAR, AUTH_GLOBE } from "@/lib/assets";
 const defaultAvatar = { url: PROFILE_AVATAR };
 const raveChannel = { url: RAVE_LOGO };
 import {
@@ -212,7 +213,7 @@ PerfSliderStandalone.displayName = "PerfSliderStandalone";
 const ProxyConfig = () => {
   const navigate = useNavigate();
   const [session, setSession] = useState<Session | null>(null);
-  const [activeTab, setActiveTab] = useState<"home" | "servers" | "settings">("home");
+  const [activeTab, setActiveTab] = useState<"home" | "servers" | "channel" | "settings">("home");
   const [timeLeft, setTimeLeft] = useState("");
   const [timeParts, setTimeParts] = useState<{ d: number; h: number; m: number; s: number }>({ d: 0, h: 0, m: 0, s: 0 });
   const [launchingFF, setLaunchingFF] = useState(false);
@@ -1014,6 +1015,7 @@ const ProxyConfig = () => {
       <div className="relative z-10 max-w-sm mx-auto px-4 pt-6">
         {activeTab === "home" && renderHome()}
         {activeTab === "servers" && renderServers()}
+        {activeTab === "channel" && <ChannelView />}
         {activeTab === "settings" && renderSettings()}
       </div>
 
@@ -1025,7 +1027,7 @@ const ProxyConfig = () => {
             className="flex items-center justify-around px-3 py-2.5 rounded-[26px] border border-white/10 bg-black/55 backdrop-blur-2xl"
             style={{
               boxShadow:
-                "0 12px 40px -12px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.04) inset, 0 0 22px rgba(29,155,240,0.08)",
+                "0 12px 40px -12px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.04) inset, 0 0 22px rgba(255,60,60,0.08)",
             }}
           >
             <button onClick={() => { setActiveTab("home"); setSettingsSection(null); }} className="flex-1 flex flex-col items-center gap-0.5 py-1.5 active:scale-95 transition-transform duration-200">
@@ -1037,6 +1039,16 @@ const ProxyConfig = () => {
               <Globe className={`w-5 h-5 transition-colors ${activeTab === "servers" ? "text-foreground" : "text-muted-foreground"}`} />
               <span className={`text-[9px] font-medium transition-colors ${activeTab === "servers" ? "text-foreground" : "text-muted-foreground"}`}>Módulos</span>
               <div className={`h-0.5 rounded-full bg-foreground mt-0.5 transition-all duration-300 ${activeTab === "servers" ? "w-4 opacity-100" : "w-0 opacity-0"}`} />
+            </button>
+            <button onClick={() => { setActiveTab("channel"); setSettingsSection(null); }} className="flex-1 flex flex-col items-center gap-0.5 py-1.5 active:scale-95 transition-transform duration-200">
+              <img
+                src={AUTH_GLOBE}
+                alt="Canal"
+                className={`w-5 h-5 object-contain transition-all duration-300 ${activeTab === "channel" ? "opacity-100 scale-100" : "opacity-60 scale-95"}`}
+                style={{ filter: activeTab === "channel" ? "drop-shadow(0 0 6px rgba(255,60,60,0.65))" : "grayscale(30%)" }}
+              />
+              <span className={`text-[9px] font-medium transition-colors ${activeTab === "channel" ? "text-foreground" : "text-muted-foreground"}`}>Canal</span>
+              <div className={`h-0.5 rounded-full bg-foreground mt-0.5 transition-all duration-300 ${activeTab === "channel" ? "w-4 opacity-100" : "w-0 opacity-0"}`} />
             </button>
             <button onClick={() => { setActiveTab("settings"); setSettingsSection(null); }} className="flex-1 flex flex-col items-center gap-0.5 py-1.5 active:scale-95 transition-transform duration-200">
               <Settings className={`w-5 h-5 transition-colors ${activeTab === "settings" ? "text-foreground" : "text-muted-foreground"}`} />

@@ -44,6 +44,72 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_profile: {
+        Row: {
+          avatar_url: string | null
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+          verified: boolean
+        }
+        Insert: {
+          avatar_url?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+          verified?: boolean
+        }
+        Update: {
+          avatar_url?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+          verified?: boolean
+        }
+        Relationships: []
+      }
+      announcements: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          link_label: string | null
+          link_url: string | null
+          media_type: string | null
+          media_url: string | null
+          pinned: boolean
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          link_label?: string | null
+          link_url?: string | null
+          media_type?: string | null
+          media_url?: string | null
+          pinned?: boolean
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          link_label?: string | null
+          link_url?: string | null
+          media_type?: string | null
+          media_url?: string | null
+          pinned?: boolean
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       payment_logs: {
         Row: {
           created_at: string

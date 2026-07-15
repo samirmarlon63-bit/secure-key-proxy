@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import VideoBackground from "@/components/VideoBackground";
+import ChannelAdmin from "@/components/ChannelAdmin";
 import adminBg from "@/assets/admin-bg.jpeg";
 import {
   getKeys, generateKeys, deleteKey, type ProxyKey,
@@ -16,7 +17,7 @@ const Admin = () => {
   const [authenticated, setAuthenticated] = useState(() => sessionStorage.getItem("admin_auth") === "true");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [activeTab, setActiveTab] = useState<"users" | "generate" | "stats">("generate");
+  const [activeTab, setActiveTab] = useState<"users" | "generate" | "stats" | "canal">("generate");
 
   const [keyType, setKeyType] = useState<"Normal" | "Premium">("Normal");
   const [duration, setDuration] = useState("7 días");
@@ -251,6 +252,7 @@ const Admin = () => {
           {([
             { id: "generate", label: "Generar", icon: Plus },
             { id: "users", label: "Usuarios", icon: Users },
+            { id: "canal", label: "Canal", icon: Globe },
             { id: "stats", label: "Estado", icon: Signal },
           ] as const).map(({ id, label, icon: Icon }) => (
             <button
@@ -473,6 +475,9 @@ const Admin = () => {
             </div>
           );
         })()}
+
+        {/* Monitor/Stats Tab */}
+        {activeTab === "canal" && <ChannelAdmin />}
 
         {/* Monitor/Stats Tab */}
         {activeTab === "stats" && (
