@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef, memo } from "react";
 import { useNavigate } from "react-router-dom";
 import VideoBackground from "@/components/VideoBackground";
+import ChannelView from "@/components/ChannelView";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import { isUserBlocked } from "@/lib/keys";
 import { RAVE_LOGO, RAVE_MODULES_BANNER, PROFILE_LOOP_VIDEO, PROFILE_AVATAR } from "@/lib/assets";
