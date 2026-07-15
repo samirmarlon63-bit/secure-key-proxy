@@ -33,7 +33,7 @@ export async function listAnnouncements(): Promise<Announcement[]> {
 }
 
 export async function createAnnouncement(payload: Partial<Announcement>) {
-  const { error } = await supabase.from("announcements").insert({
+  const { error } = await (supabase as any).from("announcements").insert({
     title: payload.title || "Sin título",
     description: payload.description ?? null,
     media_url: payload.media_url ?? null,
@@ -46,12 +46,12 @@ export async function createAnnouncement(payload: Partial<Announcement>) {
 }
 
 export async function updateAnnouncement(id: string, payload: Partial<Announcement>) {
-  const { error } = await supabase.from("announcements").update(payload).eq("id", id);
+  const { error } = await (supabase as any).from("announcements").update(payload).eq("id", id);
   if (error) throw error;
 }
 
 export async function deleteAnnouncement(id: string) {
-  const { error } = await supabase.from("announcements").delete().eq("id", id);
+  const { error } = await (supabase as any).from("announcements").delete().eq("id", id);
   if (error) throw error;
 }
 
@@ -85,7 +85,7 @@ export async function getAdminProfile(): Promise<AdminProfile | null> {
 }
 
 export async function updateAdminProfile(id: string, payload: Partial<AdminProfile>) {
-  const { error } = await supabase.from("admin_profile").update(payload).eq("id", id);
+  const { error } = await (supabase as any).from("admin_profile").update(payload).eq("id", id);
   if (error) throw error;
 }
 
