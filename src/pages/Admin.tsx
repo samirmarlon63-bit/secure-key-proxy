@@ -252,6 +252,7 @@ const Admin = () => {
           {([
             { id: "generate", label: "Generar", icon: Plus },
             { id: "users", label: "Usuarios", icon: Users },
+            { id: "canal", label: "Canal", icon: Globe },
             { id: "stats", label: "Estado", icon: Signal },
           ] as const).map(({ id, label, icon: Icon }) => (
             <button
