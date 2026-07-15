@@ -477,6 +477,9 @@ const Admin = () => {
         })()}
 
         {/* Monitor/Stats Tab */}
+        {activeTab === "canal" && <ChannelAdmin />}
+
+        {/* Monitor/Stats Tab */}
         {activeTab === "stats" && (
           <div className="space-y-3 animate-fade-in-up" style={{ animationDelay: "0.15s" }}>
             {/* Server Status */}
