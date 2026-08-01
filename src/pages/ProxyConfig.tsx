@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useRef, memo } from "react";
 import { useNavigate } from "react-router-dom";
 import VideoBackground from "@/components/VideoBackground";
-import ChannelView from "@/components/ChannelView";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import { isUserBlocked } from "@/lib/keys";
 import { RAVE_LOGO, RAVE_MODULES_BANNER, PROFILE_LOOP_VIDEO, PROFILE_AVATAR, AUTH_GLOBE } from "@/lib/assets";
@@ -213,7 +212,7 @@ PerfSliderStandalone.displayName = "PerfSliderStandalone";
 const ProxyConfig = () => {
   const navigate = useNavigate();
   const [session, setSession] = useState<Session | null>(null);
-  const [activeTab, setActiveTab] = useState<"home" | "servers" | "channel" | "settings">("home");
+  const [activeTab, setActiveTab] = useState<"home" | "servers" | "settings">("home");
   const [timeLeft, setTimeLeft] = useState("");
   const [timeParts, setTimeParts] = useState<{ d: number; h: number; m: number; s: number }>({ d: 0, h: 0, m: 0, s: 0 });
   const [launchingFF, setLaunchingFF] = useState(false);
@@ -1015,7 +1014,6 @@ const ProxyConfig = () => {
       <div className="relative z-10 max-w-sm mx-auto px-4 pt-6">
         {activeTab === "home" && renderHome()}
         {activeTab === "servers" && renderServers()}
-        {activeTab === "channel" && <ChannelView />}
         {activeTab === "settings" && renderSettings()}
       </div>
 
