@@ -1038,17 +1038,8 @@ const ProxyConfig = () => {
               <span className={`text-[9px] font-medium transition-colors ${activeTab === "servers" ? "text-foreground" : "text-muted-foreground"}`}>Módulos</span>
               <div className={`h-0.5 rounded-full bg-foreground mt-0.5 transition-all duration-300 ${activeTab === "servers" ? "w-4 opacity-100" : "w-0 opacity-0"}`} />
             </button>
-            <button onClick={() => { setActiveTab("channel"); setSettingsSection(null); }} className="flex-1 flex flex-col items-center gap-0.5 py-1.5 active:scale-95 transition-transform duration-200">
-              <img
-                src={AUTH_GLOBE}
-                alt="Canal"
-                className={`w-5 h-5 object-contain transition-all duration-300 ${activeTab === "channel" ? "opacity-100 scale-100" : "opacity-60 scale-95"}`}
-                style={{ filter: activeTab === "channel" ? "drop-shadow(0 0 6px rgba(255,60,60,0.65))" : "grayscale(30%)" }}
-              />
-              <span className={`text-[9px] font-medium transition-colors ${activeTab === "channel" ? "text-foreground" : "text-muted-foreground"}`}>Canal</span>
-              <div className={`h-0.5 rounded-full bg-foreground mt-0.5 transition-all duration-300 ${activeTab === "channel" ? "w-4 opacity-100" : "w-0 opacity-0"}`} />
-            </button>
             <button onClick={() => { setActiveTab("settings"); setSettingsSection(null); }} className="flex-1 flex flex-col items-center gap-0.5 py-1.5 active:scale-95 transition-transform duration-200">
+
               <Settings className={`w-5 h-5 transition-colors ${activeTab === "settings" ? "text-foreground" : "text-muted-foreground"}`} />
               <span className={`text-[9px] font-medium transition-colors ${activeTab === "settings" ? "text-foreground" : "text-muted-foreground"}`}>Ajustes</span>
               <div className={`h-0.5 rounded-full bg-foreground mt-0.5 transition-all duration-300 ${activeTab === "settings" ? "w-4 opacity-100" : "w-0 opacity-0"}`} />
