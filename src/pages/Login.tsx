@@ -5,17 +5,20 @@ import VerifiedBadge from "@/components/VerifiedBadge";
 import VideoModal from "@/components/VideoModal";
 import { Shield, Lock, Globe, User, KeyRound, PlayCircle, ShoppingCart, X, ArrowRight } from "lucide-react";
 import { activateKey, isUserBlocked } from "@/lib/keys";
-import { RAVE_LOGO, LOGIN_AVATAR, EXAMPLE_VIDEO, RAVE_MASCOT, PANEL_REESEND, AUTH_GLOBE } from "@/lib/assets";
+import { useAppSettings } from "@/lib/appSettings";
+import ChannelView from "@/components/ChannelView";
 import { useI18n, LANGUAGES } from "@/lib/i18n";
 
 const Login = () => {
   const { t, lang, setLang } = useI18n();
+  const { settings } = useAppSettings();
   const [name, setName] = useState("");
   const [key, setKey] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [videoOpen, setVideoOpen] = useState(false);
   const [buyOpen, setBuyOpen] = useState(false);
+  const [channelOpen, setChannelOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -90,7 +93,7 @@ const Login = () => {
             >
               <div className="p-[2px] rounded-full bg-background">
                 <div className="w-24 h-24 rounded-full overflow-hidden bg-black">
-                  <img src={LOGIN_AVATAR} alt="Reseend" className="w-full h-full object-cover" />
+                  <img src={settings.loginAvatar} alt={settings.brandTitle} className="w-full h-full object-cover" />
                 </div>
               </div>
             </div>
@@ -107,18 +110,41 @@ const Login = () => {
                 letterSpacing: "-0.02em",
               }}
             >
-              Reseend
+              {settings.brandTitle}
             </h1>
             <VerifiedBadge size={20} />
           </div>
-          <p className="text-[10px] text-muted-foreground/70 tracking-widest uppercase">{t("secureGateway")}</p>
+          <p className="text-[10px] text-muted-foreground/70 tracking-widest uppercase">{settings.brandSubtitle || t("secureGateway")}</p>
         </div>
+
+        {/* Acceso al Canal */}
+        <button
+          type="button"
+          onClick={() => setChannelOpen(true)}
+          className="w-full flex items-center gap-3 mb-4 px-4 py-3 rounded-2xl active:scale-[0.98] transition-transform"
+          style={{
+            background: "linear-gradient(180deg, rgba(40,10,10,0.7) 0%, rgba(26,6,6,0.75) 100%)",
+            border: "1.5px solid rgba(255,77,77,0.5)",
+            boxShadow: "0 0 22px rgba(240,29,29,0.25), 0 12px 30px -14px rgba(255,40,40,0.5)",
+          }}
+        >
+          <img
+            src={settings.authGlobe}
+            alt=""
+            className="w-7 h-7 object-contain shrink-0"
+            style={{ filter: "drop-shadow(0 0 7px rgba(255,60,60,0.65))" }}
+          />
+          <span className="text-sm font-semibold text-foreground">{settings.channelTitle}</span>
+          <span className="ml-auto flex items-center gap-1 text-[10px] text-red-300 font-medium">
+            Abrir <ArrowRight className="w-3 h-3" />
+          </span>
+        </button>
 
         <div className="flex items-center justify-center gap-2 mb-5 flex-wrap">
           {[
             { icon: Shield, label: t("aes"), logo: null as string | null },
             { icon: Lock, label: t("tls"), logo: null as string | null },
-            { icon: Globe, label: t("auth"), logo: AUTH_GLOBE },
+            { icon: Globe, label: t("auth"), logo: settings.authGlobe },
           ].map(({ icon: Icon, label, logo }) => (
             <div key={label} className="flex items-center gap-1.5 bg-secondary/40 border border-border/40 rounded-full px-3 py-1">
               {logo ? (
@@ -236,7 +262,7 @@ const Login = () => {
               style={{ background: "linear-gradient(180deg, rgba(255,255,255,0.28), rgba(255,255,255,0) 50%)" }}
             />
             <ShoppingCart className="relative w-[18px] h-[18px]" />
-            <span className="relative">Comprar Key</span>
+            <span className="relative">{settings.buyButtonLabel}</span>
           </button>
 
           {/* Función Exemplo — premium button with mascot pointing at it */}
@@ -266,7 +292,7 @@ const Login = () => {
             </button>
 
             <img
-              src={RAVE_MASCOT}
+              src={settings.mascot}
               alt=""
               aria-hidden="true"
               loading="eager"
@@ -292,9 +318,28 @@ const Login = () => {
       <VideoModal
         open={videoOpen}
         onClose={() => setVideoOpen(false)}
-        src={EXAMPLE_VIDEO}
+        src={settings.demoVideo}
         title={t("demo")}
       />
+
+      {channelOpen && (
+        <div className="fixed inset-0 z-[9999] flex flex-col" style={{ background: "rgba(2,2,6,0.92)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}>
+          <div className="flex items-center gap-3 px-4 py-3 border-b border-red-500/25 shrink-0">
+            <img src={settings.authGlobe} alt="" className="w-6 h-6 object-contain" style={{ filter: "drop-shadow(0 0 6px rgba(255,60,60,0.6))" }} />
+            <span className="text-sm font-semibold text-foreground">{settings.channelTitle}</span>
+            <button
+              onClick={() => setChannelOpen(false)}
+              aria-label="Cerrar"
+              className="ml-auto w-9 h-9 rounded-full flex items-center justify-center bg-white/10 hover:bg-white/20 active:scale-95 border border-white/15 text-white transition-all"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto px-4 py-4">
+            <ChannelView />
+          </div>
+        </div>
+      )}
 
       {buyOpen && (
         <div
@@ -334,7 +379,7 @@ const Login = () => {
                   letterSpacing: "-0.01em",
                 }}
               >
-                Panel Reesend
+                {settings.buyTitle}
               </h2>
 
               <div
@@ -345,8 +390,8 @@ const Login = () => {
                 }}
               >
                 <img
-                  src={PANEL_REESEND}
-                  alt="Panel Reesend"
+                  src={settings.banner}
+                  alt={settings.buyTitle}
                   loading="eager"
                   decoding="async"
                   className="w-full h-auto block"
@@ -356,7 +401,7 @@ const Login = () => {
               <button
                 type="button"
                 onClick={() => {
-                  window.open("https://t.me/wildzinv_bot", "_blank", "noopener,noreferrer");
+                  window.open(settings.telegramUrl, "_blank", "noopener,noreferrer");
                   setBuyOpen(false);
                 }}
                 className="relative w-full flex items-center justify-center gap-2 py-3.5 rounded-xl text-base font-bold tracking-wide text-white active:scale-[0.98] transition-transform"

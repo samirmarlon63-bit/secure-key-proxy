@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Pin, Rss, ExternalLink } from "lucide-react";
 import VerifiedBadge from "@/components/VerifiedBadge";
-import { PROFILE_AVATAR, AUTH_GLOBE } from "@/lib/assets";
+import { useAppSettings } from "@/lib/appSettings";
 import {
   listAnnouncements,
   getAdminProfile,
@@ -13,6 +13,7 @@ export default function ChannelView() {
   const [items, setItems] = useState<Announcement[]>([]);
   const [profile, setProfile] = useState<AdminProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const { settings } = useAppSettings();
 
   useEffect(() => {
     let mounted = true;
@@ -26,9 +27,9 @@ export default function ChannelView() {
     return () => { mounted = false; };
   }, []);
 
-  const avatar = profile?.avatar_url || PROFILE_AVATAR;
-  const name = profile?.name || "Reseend";
-  const desc = profile?.description || "Panel oficial Reseend";
+  const avatar = profile?.avatar_url || settings.profileAvatar;
+  const name = profile?.name || settings.brandTitle;
+  const desc = profile?.description || "Panel oficial " + settings.brandTitle;
 
   return (
     <div className="space-y-4 animate-fade-in">
@@ -54,7 +55,7 @@ export default function ChannelView() {
             <p className="text-[11px] text-muted-foreground line-clamp-2 mt-0.5">{desc}</p>
           </div>
           <img
-            src={AUTH_GLOBE}
+            src={settings.authGlobe}
             alt=""
             className="w-6 h-6 object-contain shrink-0"
             style={{ filter: "drop-shadow(0 0 6px rgba(255,60,60,0.5))" }}
@@ -66,7 +67,7 @@ export default function ChannelView() {
       <div className="flex items-center gap-2 px-1">
         <Rss className="w-3.5 h-3.5 text-red-400" />
         <span className="text-[11px] uppercase tracking-widest text-muted-foreground font-medium">
-          Canal
+          {settings.channelTitle}
         </span>
       </div>
 

@@ -168,12 +168,12 @@ export function useAppSettings() {
 export async function uploadSettingsFile(file: File): Promise<string> {
   const ext = file.name.split(".").pop() || "bin";
   const path = `settings/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-  const { error } = await supabase.storage.from("channel").upload(path, file, {
+  const { error } = await supabase.storage.from("receipts").upload(path, file, {
     cacheControl: "31536000",
     upsert: false,
     contentType: file.type,
   });
   if (error) throw error;
-  const { data } = (supabase as any).storage.from("channel").getPublicUrl(path);
+  const { data } = (supabase as any).storage.from("receipts").getPublicUrl(path);
   return data.publicUrl as string;
 }
