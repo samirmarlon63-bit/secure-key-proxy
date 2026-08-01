@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import VideoBackground from "@/components/VideoBackground";
 import ChannelAdmin from "@/components/ChannelAdmin";
+import AppearanceAdmin from "@/components/AppearanceAdmin";
 import adminBg from "@/assets/admin-bg.jpeg";
 import {
   getKeys, generateKeys, deleteKey, type ProxyKey,
@@ -10,14 +11,14 @@ import {
   KeyRound, Plus, LogOut, Trash2, Copy, Check,
   Users, Ban, UserX, Clock, Terminal, Shield, Activity,
   Database, Minus, Hash, Zap, Wifi,
-  Server, Globe, Signal, Power, ChevronRight, Lock
+  Server, Globe, Signal, Power, ChevronRight, Lock, Palette
 } from "lucide-react";
 
 const Admin = () => {
   const [authenticated, setAuthenticated] = useState(() => sessionStorage.getItem("admin_auth") === "true");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [activeTab, setActiveTab] = useState<"users" | "generate" | "stats" | "canal">("generate");
+  const [activeTab, setActiveTab] = useState<"users" | "generate" | "stats" | "canal" | "cambios">("generate");
 
   const [keyType, setKeyType] = useState<"Normal" | "Premium">("Normal");
   const [duration, setDuration] = useState("7 días");
@@ -253,6 +254,7 @@ const Admin = () => {
             { id: "generate", label: "Generar", icon: Plus },
             { id: "users", label: "Usuarios", icon: Users },
             { id: "canal", label: "Canal", icon: Globe },
+            { id: "cambios", label: "Cambios", icon: Palette },
             { id: "stats", label: "Estado", icon: Signal },
           ] as const).map(({ id, label, icon: Icon }) => (
             <button
@@ -478,6 +480,9 @@ const Admin = () => {
 
         {/* Monitor/Stats Tab */}
         {activeTab === "canal" && <ChannelAdmin />}
+
+        {/* Cambios / Apariencia */}
+        {activeTab === "cambios" && <AppearanceAdmin />}
 
         {/* Monitor/Stats Tab */}
         {activeTab === "stats" && (
