@@ -5,17 +5,20 @@ import VerifiedBadge from "@/components/VerifiedBadge";
 import VideoModal from "@/components/VideoModal";
 import { Shield, Lock, Globe, User, KeyRound, PlayCircle, ShoppingCart, X, ArrowRight } from "lucide-react";
 import { activateKey, isUserBlocked } from "@/lib/keys";
-import { RAVE_LOGO, LOGIN_AVATAR, EXAMPLE_VIDEO, RAVE_MASCOT, PANEL_REESEND, AUTH_GLOBE } from "@/lib/assets";
+import { useAppSettings } from "@/lib/appSettings";
+import ChannelView from "@/components/ChannelView";
 import { useI18n, LANGUAGES } from "@/lib/i18n";
 
 const Login = () => {
   const { t, lang, setLang } = useI18n();
+  const { settings } = useAppSettings();
   const [name, setName] = useState("");
   const [key, setKey] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [videoOpen, setVideoOpen] = useState(false);
   const [buyOpen, setBuyOpen] = useState(false);
+  const [channelOpen, setChannelOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -90,7 +93,7 @@ const Login = () => {
             >
               <div className="p-[2px] rounded-full bg-background">
                 <div className="w-24 h-24 rounded-full overflow-hidden bg-black">
-                  <img src={LOGIN_AVATAR} alt="Reseend" className="w-full h-full object-cover" />
+                  <img src={settings.loginAvatar} alt={settings.brandTitle} className="w-full h-full object-cover" />
                 </div>
               </div>
             </div>
@@ -107,18 +110,18 @@ const Login = () => {
                 letterSpacing: "-0.02em",
               }}
             >
-              Reseend
+              {settings.brandTitle}
             </h1>
             <VerifiedBadge size={20} />
           </div>
-          <p className="text-[10px] text-muted-foreground/70 tracking-widest uppercase">{t("secureGateway")}</p>
+          <p className="text-[10px] text-muted-foreground/70 tracking-widest uppercase">{settings.brandSubtitle || t("secureGateway")}</p>
         </div>
 
         <div className="flex items-center justify-center gap-2 mb-5 flex-wrap">
           {[
             { icon: Shield, label: t("aes"), logo: null as string | null },
             { icon: Lock, label: t("tls"), logo: null as string | null },
-            { icon: Globe, label: t("auth"), logo: AUTH_GLOBE },
+            { icon: Globe, label: t("auth"), logo: settings.authGlobe },
           ].map(({ icon: Icon, label, logo }) => (
             <div key={label} className="flex items-center gap-1.5 bg-secondary/40 border border-border/40 rounded-full px-3 py-1">
               {logo ? (
@@ -236,7 +239,7 @@ const Login = () => {
               style={{ background: "linear-gradient(180deg, rgba(255,255,255,0.28), rgba(255,255,255,0) 50%)" }}
             />
             <ShoppingCart className="relative w-[18px] h-[18px]" />
-            <span className="relative">Comprar Key</span>
+            <span className="relative">{settings.buyButtonLabel}</span>
           </button>
 
           {/* Función Exemplo — premium button with mascot pointing at it */}
@@ -266,7 +269,7 @@ const Login = () => {
             </button>
 
             <img
-              src={RAVE_MASCOT}
+              src={settings.mascot}
               alt=""
               aria-hidden="true"
               loading="eager"
@@ -292,7 +295,7 @@ const Login = () => {
       <VideoModal
         open={videoOpen}
         onClose={() => setVideoOpen(false)}
-        src={EXAMPLE_VIDEO}
+        src={settings.demoVideo}
         title={t("demo")}
       />
 
@@ -334,7 +337,7 @@ const Login = () => {
                   letterSpacing: "-0.01em",
                 }}
               >
-                Panel Reesend
+                {settings.buyTitle}
               </h2>
 
               <div
@@ -345,8 +348,8 @@ const Login = () => {
                 }}
               >
                 <img
-                  src={PANEL_REESEND}
-                  alt="Panel Reesend"
+                  src={settings.banner}
+                  alt={settings.buyTitle}
                   loading="eager"
                   decoding="async"
                   className="w-full h-auto block"
@@ -356,7 +359,7 @@ const Login = () => {
               <button
                 type="button"
                 onClick={() => {
-                  window.open("https://t.me/wildzinv_bot", "_blank", "noopener,noreferrer");
+                  window.open(settings.telegramUrl, "_blank", "noopener,noreferrer");
                   setBuyOpen(false);
                 }}
                 className="relative w-full flex items-center justify-center gap-2 py-3.5 rounded-xl text-base font-bold tracking-wide text-white active:scale-[0.98] transition-transform"
