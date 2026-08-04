@@ -23,14 +23,19 @@ const ADD_TIME_MS: Record<string, number> = {
   "7d": 7 * 24 * 60 * 60 * 1000,
 };
 
+const BTN_LICENSE = "🏦 Generate License";
+const BTN_ACCOUNT = "🏛️ Account";
+const BTN_STATS = "⌛️ Statistics";
+
 const MAIN_KEYBOARD = {
   keyboard: [
-    [{ text: "Generar Key" }, { text: "Keys activas" }],
-    [{ text: "Usuarios" }, { text: "Inicio" }],
+    [{ text: BTN_LICENSE }],
+    [{ text: BTN_ACCOUNT }, { text: BTN_STATS }],
   ],
   resize_keyboard: true,
   is_persistent: true,
 };
+
 
 async function tg(method: string, body: any) {
   const token = Deno.env.get("TELEGRAM_BOT_TOKEN");
