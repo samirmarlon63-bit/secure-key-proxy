@@ -434,12 +434,44 @@ async function handleTextOrCommand(
     return;
   }
 
+  // New license flow: waiting for password count, edits the same message
+  if (p?.type === "lic_count") {
+    const quantity = Number(trimmed);
+    if (!Number.isInteger(quantity) || quantity < 1 || quantity > 100) {
+      await tg("sendMessage", { chat_id, text: "Envía un número entre 1 y 100." });
+      return;
+    }
+    const keys = await createKeys(supabase, "Normal", p.data.duration, quantity);
+    await setPending(supabase, chat_id, { type: "lic_done", data: { duration: p.data.duration, keys, message_id: p.data.message_id } });
+    const m = resultMenu(keys);
+    await editText(chat_id, p.data.message_id, m.text, m.reply_markup);
+    return;
+  }
+
   // Button shortcuts
   switch (trimmed) {
+    case BTN_LICENSE: {
+      const m = durationMenu();
+      const res = await tg("sendMessage", { chat_id, text: m.text, parse_mode: "HTML", reply_markup: m.reply_markup });
+      const json = res ? await res.json().catch(() => null) : null;
+      await setPending(supabase, chat_id, { type: "lic_duration", data: { message_id: json?.result?.message_id } });
+      return;
+    }
+    case BTN_ACCOUNT: {
+      const m = await accountMenu(supabase, 0);
+      await tg("sendMessage", { chat_id, text: m.text, parse_mode: "HTML", reply_markup: m.reply_markup });
+      return;
+    }
+    case BTN_STATS: {
+      const m = await statsMenu(supabase);
+      await tg("sendMessage", { chat_id, text: m.text, parse_mode: "HTML", reply_markup: m.reply_markup });
+      return;
+    }
     case "Inicio":
     case "/inicio":
-      await reply(chat_id, "<b>Rave — Panel principal</b>\nElige una opción de la barra inferior.");
+      await reply(chat_id, "<b>Panel principal</b>\nElige una opción de la barra inferior.");
       return;
+
     case "Ayuda":
     case "/help":
     case "/start":
