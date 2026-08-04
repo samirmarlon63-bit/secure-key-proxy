@@ -69,6 +69,107 @@ const editCaption = (chat_id: number, message_id: number, caption: string) =>
 const deleteMessage = (chat_id: number, message_id: number) =>
   tg("deleteMessage", { chat_id, message_id });
 
+const editText = (chat_id: number, message_id: number, text: string, reply_markup?: any) =>
+  tg("editMessageText", { chat_id, message_id, text, parse_mode: "HTML", reply_markup });
+
+const NAV_ROW = [
+  { text: "🔙 Atrás", callback_data: "nav:back" },
+  { text: "🏠 Inicio", callback_data: "nav:home" },
+];
+
+const DURATIONS = ["1 día", "7 días", "30 días"];
+
+const durationMenu = () => ({
+  text: "❇️ <b>Selecciona la duración</b>",
+  reply_markup: {
+    inline_keyboard: [
+      ...DURATIONS.map((d, i) => [{ text: `🛍️ ${d}`, callback_data: `lic:${i}` }]),
+      NAV_ROW,
+    ],
+  },
+});
+
+const countMenu = (duration: string) => ({
+  text: `❇️ <b>Password Count</b>\n\n<i>${duration}</i>\nEnvía un número (1-100).`,
+  reply_markup: { inline_keyboard: [NAV_ROW] },
+});
+
+const resultMenu = (keys: string[]) => ({
+  text: `*️⃣ <b>Generated Passwords: ${keys.length}</b>\n\n${keys.map((k) => `<code>${k}</code>`).join("\n")}`,
+  reply_markup: {
+    inline_keyboard: [
+      [{ text: "Copy Passwords", callback_data: "lic:copy" }],
+      NAV_ROW,
+    ],
+  },
+});
+
+const homeMenu = () => ({
+  text: "🏠 <b>Panel principal</b>\nElige una opción de la barra inferior.",
+  reply_markup: { inline_keyboard: [] },
+});
+
+async function accountMenu(supabase: any, page = 0) {
+  const perPage = 8;
+  const { data } = await supabase.from("active_users")
+    .select("name,key,blocked,expires_at")
+    .order("login_at", { ascending: false }).limit(200);
+  const rows = data || [];
+  const slice = rows.slice(page * perPage, page * perPage + perPage);
+  const hasNext = rows.length > (page + 1) * perPage;
+  const nav: any[] = [];
+  if (page > 0) nav.push({ text: "🔙 Back", callback_data: `acct:page:${page - 1}` });
+  else nav.push({ text: "🔙 Atrás", callback_data: "nav:home" });
+  if (hasNext) nav.push({ text: "Next 🔜", callback_data: `acct:page:${page + 1}` });
+  return {
+    text: `❇️ <b>Usuarios Activos</b>\n\n${slice.map((u: any) => u.name).join("\n") || "<i>Sin usuarios.</i>"}`,
+    reply_markup: {
+      inline_keyboard: [
+        ...slice.map((u: any) => [{ text: u.name, callback_data: `acct:u:${u.key}` }]),
+        nav,
+      ],
+    },
+  };
+}
+
+async function userDetail(supabase: any, key: string) {
+  const { data: u } = await supabase.from("active_users")
+    .select("name,key,blocked,expires_at").eq("key", key).maybeSingle();
+  if (!u) return { text: "Usuario no encontrado.", reply_markup: { inline_keyboard: [NAV_ROW] } };
+  const { data: k } = await supabase.from("proxy_keys").select("duration").eq("key", key).maybeSingle();
+  const expired = u.expires_at && new Date(u.expires_at).getTime() <= Date.now();
+  const estado = u.blocked ? "Bloqueado" : expired ? "Expirado" : "Activo";
+  return {
+    text:
+      `✴️ <b>${u.name}</b>\n\nEstado: ${estado}\nPassword Duration: ${k?.duration || "—"}\n` +
+      `Password: <code>${u.key}</code>\nRestante: ${timeLeft(u.expires_at)}`,
+    reply_markup: { inline_keyboard: [[{ text: "🔙 Atrás", callback_data: "acct:page:0" }, { text: "🏠 Inicio", callback_data: "nav:home" }]] },
+  };
+}
+
+async function statsMenu(supabase: any) {
+  const [{ data: keyRows }, { data: userRows }] = await Promise.all([
+    supabase.from("proxy_keys").select("status,expires_at"),
+    supabase.from("active_users").select("blocked,expires_at"),
+  ]);
+  const keys = keyRows || [];
+  const users = userRows || [];
+  const now = Date.now();
+  const expired = keys.filter((k: any) =>
+    k.status === "Expirada" || (k.expires_at && new Date(k.expires_at).getTime() <= now)).length;
+  const used = keys.filter((k: any) => k.status === "Usada").length;
+  const active = users.filter((u: any) =>
+    !u.blocked && (!u.expires_at || new Date(u.expires_at).getTime() > now)).length;
+  return {
+    text:
+      `*️⃣ <b>Full Statistics</b>\n\nActive Users: ${active}\n` +
+      `Total Generated Passwords: ${keys.length}\n` +
+      `Expired Passwords: ${expired}\nUsed Passwords: ${used}`,
+    reply_markup: { inline_keyboard: [NAV_ROW] },
+  };
+}
+
+
 // Pending interactive flows are persisted in DB to survive edge function cold starts.
 async function getPending(supabase: any, chatId: number): Promise<any> {
   const { data } = await supabase.from("telegram_admin_sessions")
