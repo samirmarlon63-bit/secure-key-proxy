@@ -767,6 +767,67 @@ Deno.serve(async (req) => {
         return;
       }
 
+      // Menu navigation callbacks (same-message editing)
+      if (action === "nav" || action === "lic" || action === "acct") {
+        const p = await getPending(supabase, Number(chat_id));
+        const arg = data.split(":")[1];
+
+        if (action === "nav" && arg === "home") {
+          const m = homeMenu();
+          await clearPending(supabase, Number(chat_id));
+          await editText(chat_id, message_id, m.text, undefined);
+          await ack(cb.id);
+          return;
+        }
+        if (action === "nav" && arg === "back") {
+          if (p?.type === "lic_done") {
+            await setPending(supabase, Number(chat_id), { type: "lic_count", data: { duration: p.data.duration, message_id } });
+            const m = countMenu(p.data.duration);
+            await editText(chat_id, message_id, m.text, m.reply_markup);
+          } else if (p?.type === "lic_count") {
+            await setPending(supabase, Number(chat_id), { type: "lic_duration", data: { message_id } });
+            const m = durationMenu();
+            await editText(chat_id, message_id, m.text, m.reply_markup);
+          } else {
+            const m = homeMenu();
+            await clearPending(supabase, Number(chat_id));
+            await editText(chat_id, message_id, m.text, undefined);
+          }
+          await ack(cb.id);
+          return;
+        }
+        if (action === "lic" && arg === "copy") {
+          const keys: string[] = p?.data?.keys || [];
+          if (keys.length) await tg("sendMessage", { chat_id, text: keys.join("\n") });
+          await ack(cb.id, "Copy");
+          return;
+        }
+        if (action === "lic") {
+          const duration = DURATIONS[Number(arg)];
+          if (!duration) { await ack(cb.id, "Duración inválida"); return; }
+          await setPending(supabase, Number(chat_id), { type: "lic_count", data: { duration, message_id } });
+          const m = countMenu(duration);
+          await editText(chat_id, message_id, m.text, m.reply_markup);
+          await ack(cb.id);
+          return;
+        }
+        if (action === "acct") {
+          const parts = data.split(":");
+          if (parts[1] === "page") {
+            const m = await accountMenu(supabase, Number(parts[2]) || 0);
+            await editText(chat_id, message_id, m.text, m.reply_markup);
+          } else if (parts[1] === "u") {
+            const m = await userDetail(supabase, parts.slice(2).join(":"));
+            await editText(chat_id, message_id, m.text, m.reply_markup);
+          }
+          await ack(cb.id);
+          return;
+        }
+        await ack(cb.id);
+        return;
+      }
+
+
       const { data: order } = await supabase.from("payment_orders").select("*").eq("payment_id", paymentId).maybeSingle();
       if (!order) { await ack(cb.id, "No encontrado"); return; }
 
