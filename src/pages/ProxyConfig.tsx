@@ -290,6 +290,9 @@ const ProxyConfig = () => {
     const checkSession = async () => {
       const raw = localStorage.getItem("proxy_session");
       if (!raw) { navigate("/"); return; }
+      const { data: authData } = await supabase.auth.getUser();
+      if (!authData.user) { localStorage.removeItem("proxy_session"); navigate("/"); return; }
+
       const s = JSON.parse(raw);
       if (s.expiresAt && new Date(s.expiresAt).getTime() <= Date.now()) {
         localStorage.removeItem("proxy_session");
