@@ -64,17 +64,20 @@ const Login = () => {
   const onGoogle = async () => {
     setError("");
     setGoogleLoading(true);
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
+    // OAuth 2.0 / OpenID Connect directo con Google (credenciales propias en el backend).
+    const { error: oauthError } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: window.location.origin,
+        queryParams: { prompt: "select_account" },
+      },
     });
-    if (result.error) {
+    if (oauthError) {
       setError("No se pudo iniciar sesión con Google");
       setGoogleLoading(false);
-      return;
     }
-    if (result.redirected) return;
-    setGoogleLoading(false);
   };
+
 
   const onLogout = async () => {
     await supabase.auth.signOut();
