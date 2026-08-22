@@ -3,19 +3,23 @@ import { useNavigate } from "react-router-dom";
 import VideoBackground from "@/components/VideoBackground";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import VideoModal from "@/components/VideoModal";
-import { Shield, Lock, Globe, User, KeyRound, PlayCircle, ShoppingCart, X, ArrowRight } from "lucide-react";
+import { Shield, Lock, Globe, KeyRound, PlayCircle, ShoppingCart, X, ArrowRight, LogOut, Loader2 } from "lucide-react";
 import { activateKey, isUserBlocked } from "@/lib/keys";
 import { useAppSettings } from "@/lib/appSettings";
 import ChannelView from "@/components/ChannelView";
 import { useI18n, LANGUAGES } from "@/lib/i18n";
+import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable/index";
 
 const Login = () => {
   const { t, lang, setLang } = useI18n();
   const { settings } = useAppSettings();
-  const [name, setName] = useState("");
   const [key, setKey] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [account, setAccount] = useState<{ name: string; email: string; avatar: string | null } | null>(null);
   const [videoOpen, setVideoOpen] = useState(false);
   const [buyOpen, setBuyOpen] = useState(false);
   const [channelOpen, setChannelOpen] = useState(false);
@@ -33,12 +37,58 @@ const Login = () => {
     }
   }, [navigate]);
 
+  // Google (OAuth 2.0 / OpenID Connect) session state
+  useEffect(() => {
+    const mapUser = (user: { user_metadata?: Record<string, unknown>; email?: string | null } | null) => {
+      if (!user) return null;
+      const meta = (user.user_metadata ?? {}) as Record<string, string | undefined>;
+      return {
+        name: meta.full_name || meta.name || (user.email ?? "").split("@")[0] || "Usuario",
+        email: user.email ?? "",
+        avatar: meta.avatar_url || meta.picture || null,
+      };
+    };
+
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      setAccount(mapUser(session?.user ?? null));
+    });
+
+    supabase.auth.getUser().then(({ data }) => {
+      setAccount(mapUser(data.user));
+      setAuthLoading(false);
+    });
+
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
+  const onGoogle = async () => {
+    setError("");
+    setGoogleLoading(true);
+    const result = await lovable.auth.signInWithOAuth("google", {
+      redirect_uri: window.location.origin,
+    });
+    if (result.error) {
+      setError("No se pudo iniciar sesión con Google");
+      setGoogleLoading(false);
+      return;
+    }
+    if (result.redirected) return;
+    setGoogleLoading(false);
+  };
+
+  const onLogout = async () => {
+    await supabase.auth.signOut();
+    setAccount(null);
+    setKey("");
+  };
+
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError("");
-    const cleanName = name.trim();
+    if (!account) return;
+    const cleanName = account.name.trim();
     const cleanKey = key.replace(/\D/g, '');
-    if (!cleanName || !cleanKey) { setError("Error"); return; }
+    if (!cleanKey) { setError("Error"); return; }
 
     setLoading(true);
     try {
@@ -66,6 +116,7 @@ const Login = () => {
       setLoading(false);
     }
   };
+
 
 
   return (
