@@ -254,46 +254,81 @@ const Login = () => {
             <p className="text-xs text-destructive bg-destructive/10 border border-destructive/20 rounded-lg p-2.5">{error}</p>
           )}
 
-          <div>
-            <label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider font-medium mb-1 block">{t("user")}</label>
-            <div className="relative">
-              <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/60" />
-              <input
-                type="text"
-                placeholder={t("userPlaceholder")}
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                autoComplete="username"
-                className="w-full bg-secondary/40 border border-border/50 rounded-lg pl-10 pr-4 py-2.5 text-base text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring"
-              />
+          {authLoading ? (
+            <div className="flex items-center justify-center py-6">
+              <Loader2 className="w-5 h-5 text-red-300 animate-spin" />
             </div>
-          </div>
+          ) : !account ? (
+            <button
+              type="button"
+              onClick={onGoogle}
+              disabled={googleLoading}
+              className="w-full flex items-center justify-center gap-3 bg-white text-[#1f1f1f] font-semibold py-3 rounded-xl text-sm hover:opacity-95 active:scale-[0.98] transition-all disabled:opacity-60"
+              style={{ boxShadow: "0 10px 26px -12px rgba(0,0,0,0.6)" }}
+            >
+              {googleLoading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+                  <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.91c1.7-1.57 2.69-3.88 2.69-6.62z" />
+                  <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.91-2.26c-.81.54-1.84.86-3.05.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.34A8.997 8.997 0 0 0 9 18z" />
+                  <path fill="#FBBC05" d="M3.97 10.72a5.41 5.41 0 0 1 0-3.44V4.94H.96a9 9 0 0 0 0 8.12l3.01-2.34z" />
+                  <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.46 3.44 1.35l2.58-2.58C13.46.9 11.43 0 9 0A8.997 8.997 0 0 0 .96 4.94l3.01 2.34C4.68 5.16 6.66 3.58 9 3.58z" />
+                </svg>
+              )}
+              <span>Continuar con Google</span>
+            </button>
+          ) : (
+            <>
+              <div
+                className="flex items-center gap-3 rounded-xl px-3 py-2.5"
+                style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,77,77,0.35)" }}
+              >
+                <div className="w-9 h-9 rounded-full overflow-hidden bg-black shrink-0 border border-red-400/40">
+                  <img src={account.avatar || settings.loginAvatar} alt="" className="w-full h-full object-cover" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <span className="block text-xs font-semibold text-foreground truncate">{account.name}</span>
+                  <span className="block text-[10px] text-muted-foreground/70 truncate">{account.email}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={onLogout}
+                  aria-label="Salir"
+                  className="w-8 h-8 rounded-full flex items-center justify-center bg-white/10 hover:bg-white/20 active:scale-95 border border-white/15 text-white transition-all"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                </button>
+              </div>
 
-          <div>
-            <label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider font-medium mb-1 block">{t("accessKey")}</label>
-            <div className="relative">
-              <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/60" />
-              <input
-                type="text"
-                placeholder={t("keyPlaceholder")}
-                value={key}
-                onChange={(e) => setKey(e.target.value.replace(/\D/g, '').slice(0, 8))}
-                inputMode="numeric"
-                pattern="[0-9]*"
-                maxLength={8}
-                autoComplete="off"
-                className="w-full bg-secondary/40 border border-border/50 rounded-lg pl-10 pr-4 py-2.5 text-base font-mono tracking-wider text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring"
-              />
-            </div>
-          </div>
+              <div>
+                <label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider font-medium mb-1 block">{t("accessKey")}</label>
+                <div className="relative">
+                  <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/60" />
+                  <input
+                    type="text"
+                    placeholder={t("keyPlaceholder")}
+                    value={key}
+                    onChange={(e) => setKey(e.target.value.replace(/\D/g, '').slice(0, 8))}
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    maxLength={8}
+                    autoComplete="off"
+                    className="w-full bg-secondary/40 border border-border/50 rounded-lg pl-10 pr-4 py-2.5 text-base font-mono tracking-wider text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring"
+                  />
+                </div>
+              </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-foreground text-background font-semibold py-3 rounded-lg text-sm hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50"
-          >
-            {loading ? t("verifying") : t("enter")}
-          </button>
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-foreground text-background font-semibold py-3 rounded-lg text-sm hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50"
+              >
+                {loading ? t("verifying") : t("enter")}
+              </button>
+            </>
+          )}
+
 
           {/* Comprar Key — premium CTA */}
           <button
