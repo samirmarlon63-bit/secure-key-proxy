@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import VideoBackground from "@/components/VideoBackground";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import { isUserBlocked } from "@/lib/keys";
+import { supabase } from "@/integrations/supabase/client";
 import { RAVE_LOGO, RAVE_MODULES_BANNER, PROFILE_LOOP_VIDEO, PROFILE_AVATAR } from "@/lib/assets";
 const defaultAvatar = { url: PROFILE_AVATAR };
 const raveChannel = { url: RAVE_LOGO };
@@ -365,7 +366,7 @@ const ProxyConfig = () => {
     setTimeout(() => { setLaunchingFF(false); setFfStatus(""); }, 2500);
   }, []);
 
-  const handleLogout = () => { localStorage.removeItem("proxy_session"); navigate("/"); };
+  const handleLogout = async () => { localStorage.removeItem("proxy_session"); await supabase.auth.signOut(); navigate("/"); };
 
   const copyToClipboard = (text: string, id: string) => {
     navigator.clipboard.writeText(text);
