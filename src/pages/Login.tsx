@@ -9,7 +9,6 @@ import { useAppSettings } from "@/lib/appSettings";
 import ChannelView from "@/components/ChannelView";
 import { useI18n, LANGUAGES } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
 
 const Login = () => {
   const { t, lang, setLang } = useI18n();
