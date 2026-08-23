@@ -6,7 +6,8 @@ import VideoModal from "@/components/VideoModal";
 import { Shield, Lock, Globe, KeyRound, PlayCircle, ShoppingCart, X, ArrowRight, LogOut, Loader2 } from "lucide-react";
 import { activateKey, isUserBlocked } from "@/lib/keys";
 import { useAppSettings } from "@/lib/appSettings";
-import ChannelView from "@/components/ChannelView";
+
+
 import { useI18n, LANGUAGES } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
 
