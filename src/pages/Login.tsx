@@ -65,19 +65,39 @@ const Login = () => {
   const onGoogle = async () => {
     setError("");
     setGoogleLoading(true);
-    // Google OAuth 2.0 / OpenID Connect gestionado por el backend (funciona en preview y en Vercel).
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
-      extraParams: { prompt: "select_account" },
-    });
-    if (result?.redirected) return;
-    if (result?.error) {
-      setError("No se pudo iniciar sesión con Google");
+
+    // En hosting de Lovable (preview / publicado) usamos el flujo gestionado.
+    // En cualquier otro dominio (Vercel) vamos directo a Google vía el backend.
+    const isLovableHost = window.location.hostname.endsWith("lovable.app");
+
+    if (isLovableHost) {
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
+        extraParams: { prompt: "select_account" },
+      });
+      if (result?.redirected) return;
+      if (result?.error) {
+        setError("No se pudo iniciar sesión con Google");
+        setGoogleLoading(false);
+        return;
+      }
       setGoogleLoading(false);
       return;
     }
-    setGoogleLoading(false);
+
+    const { error: oauthError } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: window.location.origin,
+        queryParams: { prompt: "select_account" },
+      },
+    });
+    if (oauthError) {
+      setError("No se pudo iniciar sesión con Google");
+      setGoogleLoading(false);
+    }
   };
+
 
 
 
