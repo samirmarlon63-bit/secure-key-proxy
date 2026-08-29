@@ -22,7 +22,7 @@ const Login = () => {
   const [account, setAccount] = useState<{ name: string; email: string; avatar: string | null } | null>(null);
   const [videoOpen, setVideoOpen] = useState(false);
   const [buyOpen, setBuyOpen] = useState(false);
-  const [channelOpen, setChannelOpen] = useState(false);
+  
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -171,28 +171,6 @@ const Login = () => {
           <p className="text-[10px] text-muted-foreground/70 tracking-widest uppercase">{settings.brandSubtitle || t("secureGateway")}</p>
         </div>
 
-        {/* Acceso al Canal */}
-        <button
-          type="button"
-          onClick={() => setChannelOpen(true)}
-          className="w-full flex items-center gap-3 mb-4 px-4 py-3 rounded-2xl active:scale-[0.98] transition-transform"
-          style={{
-            background: "linear-gradient(180deg, rgba(40,10,10,0.7) 0%, rgba(26,6,6,0.75) 100%)",
-            border: "1.5px solid rgba(255,77,77,0.5)",
-            boxShadow: "0 0 22px rgba(240,29,29,0.25), 0 12px 30px -14px rgba(255,40,40,0.5)",
-          }}
-        >
-          <img
-            src={settings.authGlobe}
-            alt=""
-            className="w-7 h-7 object-contain shrink-0"
-            style={{ filter: "drop-shadow(0 0 7px rgba(255,60,60,0.65))" }}
-          />
-          <span className="text-sm font-semibold text-foreground">{settings.channelTitle}</span>
-          <span className="ml-auto flex items-center gap-1 text-[10px] text-red-300 font-medium">
-            Abrir <ArrowRight className="w-3 h-3" />
-          </span>
-        </button>
 
         <div className="flex items-center justify-center gap-2 mb-5 flex-wrap">
           {[
@@ -411,24 +389,6 @@ const Login = () => {
         title={t("demo")}
       />
 
-      {channelOpen && (
-        <div className="fixed inset-0 z-[9999] flex flex-col" style={{ background: "rgba(2,2,6,0.92)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}>
-          <div className="flex items-center gap-3 px-4 py-3 border-b border-red-500/25 shrink-0">
-            <img src={settings.authGlobe} alt="" className="w-6 h-6 object-contain" style={{ filter: "drop-shadow(0 0 6px rgba(255,60,60,0.6))" }} />
-            <span className="text-sm font-semibold text-foreground">{settings.channelTitle}</span>
-            <button
-              onClick={() => setChannelOpen(false)}
-              aria-label="Cerrar"
-              className="ml-auto w-9 h-9 rounded-full flex items-center justify-center bg-white/10 hover:bg-white/20 active:scale-95 border border-white/15 text-white transition-all"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-          <div className="flex-1 overflow-y-auto px-4 py-4">
-            <ChannelView />
-          </div>
-        </div>
-      )}
 
       {buyOpen && (
         <div
