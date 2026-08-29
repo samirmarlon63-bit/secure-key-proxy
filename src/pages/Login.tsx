@@ -10,6 +10,7 @@ import { useAppSettings } from "@/lib/appSettings";
 
 import { useI18n, LANGUAGES } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable";
 
 const Login = () => {
   const { t, lang, setLang } = useI18n();
@@ -64,19 +65,20 @@ const Login = () => {
   const onGoogle = async () => {
     setError("");
     setGoogleLoading(true);
-    // OAuth 2.0 / OpenID Connect directo con Google (credenciales propias en el backend).
-    const { error: oauthError } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: window.location.origin,
-        queryParams: { prompt: "select_account" },
-      },
+    // Google OAuth 2.0 / OpenID Connect gestionado por el backend (funciona en preview y en Vercel).
+    const result = await lovable.auth.signInWithOAuth("google", {
+      redirect_uri: window.location.origin,
+      extraParams: { prompt: "select_account" },
     });
-    if (oauthError) {
+    if (result?.redirected) return;
+    if (result?.error) {
       setError("No se pudo iniciar sesión con Google");
       setGoogleLoading(false);
+      return;
     }
+    setGoogleLoading(false);
   };
+
 
 
   const onLogout = async () => {
