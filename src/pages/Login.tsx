@@ -195,36 +195,42 @@ const Login = () => {
 
         <form
           onSubmit={onSubmit}
-          className="relative glass-card p-5 space-y-4 rounded-2xl overflow-hidden"
+          className="relative p-6 space-y-5 overflow-hidden"
           style={{
-            border: "1.5px solid rgba(255,77,77,0.55)",
+            borderRadius: "34px",
+            background: "linear-gradient(160deg, rgba(46,12,12,0.92) 0%, rgba(24,6,6,0.94) 100%)",
             boxShadow:
-              "0 0 0 1px rgba(240,29,29,0.18) inset, 0 0 32px rgba(240,29,29,0.28), 0 18px 50px -14px rgba(255,40,40,0.5)",
-            background:
-              "linear-gradient(180deg, rgba(40,10,10,0.72) 0%, rgba(26,6,6,0.78) 100%)",
+              "-10px -10px 24px rgba(255,110,110,0.10), 12px 14px 34px rgba(0,0,0,0.65), inset 1px 1px 1px rgba(255,150,150,0.16), inset -1px -1px 2px rgba(0,0,0,0.55)",
           }}
         >
-          <span
-            aria-hidden
-            className="pointer-events-none absolute inset-x-0 top-0 h-px"
-            style={{ background: "linear-gradient(90deg, transparent, rgba(255,120,120,0.9), transparent)" }}
-          />
-
-          <div className="flex items-center gap-2 pb-3 border-b border-red-500/20">
-            <div className="w-8 h-8 rounded-lg bg-red-500/10 border border-red-400/40 flex items-center justify-center">
-              <Shield className="w-4 h-4 text-red-300" />
+          <div className="flex items-center gap-3">
+            <div
+              className="w-11 h-11 flex items-center justify-center shrink-0"
+              style={{
+                borderRadius: "18px",
+                background: "linear-gradient(160deg, rgba(60,16,16,0.9), rgba(30,8,8,0.95))",
+                boxShadow:
+                  "-4px -4px 10px rgba(255,110,110,0.10), 5px 6px 14px rgba(0,0,0,0.6), inset 1px 1px 1px rgba(255,150,150,0.15)",
+              }}
+            >
+              <Shield className="w-5 h-5 text-red-300" />
             </div>
-            <div className="flex-1">
-              <span className="text-xs text-foreground font-semibold block">{t("secureAccess")}</span>
-              <span className="text-[9px] text-muted-foreground/60">{t("enterCreds")}</span>
+            <div className="flex-1 min-w-0">
+              <span className="text-sm text-foreground font-semibold block truncate">{t("secureAccess")}</span>
+              <span className="text-[10px] text-muted-foreground/60">{t("enterCreds")}</span>
             </div>
             <div className="relative">
-              <Globe className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-red-300 pointer-events-none" />
+              <Globe className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-red-300 pointer-events-none" />
               <select
                 aria-label={t("language")}
                 value={lang}
                 onChange={(e) => setLang(e.target.value as typeof lang)}
-                className="appearance-none bg-secondary/60 border border-red-400/30 rounded-md pl-7 pr-2 py-1 text-[10px] text-foreground focus:outline-none focus:ring-1 focus:ring-red-400 max-w-[110px]"
+                className="appearance-none bg-transparent pl-8 pr-3 py-2 text-[10px] text-foreground focus:outline-none max-w-[112px]"
+                style={{
+                  borderRadius: "999px",
+                  boxShadow:
+                    "inset 3px 3px 7px rgba(0,0,0,0.6), inset -3px -3px 7px rgba(255,120,120,0.10)",
+                }}
               >
                 {LANGUAGES.map((l) => (
                   <option key={l.code} value={l.code} className="bg-background text-foreground">
@@ -236,7 +242,15 @@ const Login = () => {
           </div>
 
           {error && (
-            <p className="text-xs text-destructive bg-destructive/10 border border-destructive/20 rounded-lg p-2.5">{error}</p>
+            <p
+              className="text-xs text-destructive px-3 py-2.5"
+              style={{
+                borderRadius: "18px",
+                boxShadow: "inset 3px 3px 8px rgba(0,0,0,0.6), inset -3px -3px 8px rgba(255,120,120,0.10)",
+              }}
+            >
+              {error}
+            </p>
           )}
 
           {authLoading ? (
@@ -248,28 +262,45 @@ const Login = () => {
               type="button"
               onClick={onGoogle}
               disabled={googleLoading}
-              className="w-full flex items-center justify-center gap-3 bg-white text-[#1f1f1f] font-semibold py-3 rounded-xl text-sm hover:opacity-95 active:scale-[0.98] transition-all disabled:opacity-60"
-              style={{ boxShadow: "0 10px 26px -12px rgba(0,0,0,0.6)" }}
+              className="w-full flex items-center justify-center gap-3 text-foreground font-semibold py-3.5 text-sm active:scale-[0.985] transition-all disabled:opacity-60"
+              style={{
+                borderRadius: "999px",
+                background: "linear-gradient(160deg, rgba(58,16,16,0.92), rgba(28,8,8,0.95))",
+                boxShadow:
+                  "-6px -6px 14px rgba(255,110,110,0.10), 7px 8px 18px rgba(0,0,0,0.6), inset 1px 1px 1px rgba(255,150,150,0.16)",
+              }}
             >
               {googleLoading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
-                <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
-                  <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.91c1.7-1.57 2.69-3.88 2.69-6.62z" />
-                  <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.91-2.26c-.81.54-1.84.86-3.05.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.34A8.997 8.997 0 0 0 9 18z" />
-                  <path fill="#FBBC05" d="M3.97 10.72a5.41 5.41 0 0 1 0-3.44V4.94H.96a9 9 0 0 0 0 8.12l3.01-2.34z" />
-                  <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.46 3.44 1.35l2.58-2.58C13.46.9 11.43 0 9 0A8.997 8.997 0 0 0 .96 4.94l3.01 2.34C4.68 5.16 6.66 3.58 9 3.58z" />
-                </svg>
+                <span
+                  className="w-7 h-7 rounded-full flex items-center justify-center bg-white"
+                  style={{ boxShadow: "3px 4px 8px rgba(0,0,0,0.45)" }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 18 18" aria-hidden="true">
+                    <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.91c1.7-1.57 2.69-3.88 2.69-6.62z" />
+                    <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.91-2.26c-.81.54-1.84.86-3.05.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.34A8.997 8.997 0 0 0 9 18z" />
+                    <path fill="#FBBC05" d="M3.97 10.72a5.41 5.41 0 0 1 0-3.44V4.94H.96a9 9 0 0 0 0 8.12l3.01-2.34z" />
+                    <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.46 3.44 1.35l2.58-2.58C13.46.9 11.43 0 9 0A8.997 8.997 0 0 0 .96 4.94l3.01 2.34C4.68 5.16 6.66 3.58 9 3.58z" />
+                  </svg>
+                </span>
               )}
               <span>Continuar con Google</span>
             </button>
           ) : (
             <>
               <div
-                className="flex items-center gap-3 rounded-xl px-3 py-2.5"
-                style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,77,77,0.35)" }}
+                className="flex items-center gap-3 px-3.5 py-3"
+                style={{
+                  borderRadius: "26px",
+                  boxShadow:
+                    "inset 4px 4px 10px rgba(0,0,0,0.6), inset -4px -4px 10px rgba(255,120,120,0.10)",
+                }}
               >
-                <div className="w-9 h-9 rounded-full overflow-hidden bg-black shrink-0 border border-red-400/40">
+                <div
+                  className="w-10 h-10 rounded-full overflow-hidden bg-black shrink-0"
+                  style={{ boxShadow: "3px 4px 10px rgba(0,0,0,0.55), 0 0 0 2px rgba(255,90,90,0.45)" }}
+                >
                   <img src={account.avatar || settings.loginAvatar} alt="" className="w-full h-full object-cover" />
                 </div>
                 <div className="min-w-0 flex-1">
@@ -280,16 +311,21 @@ const Login = () => {
                   type="button"
                   onClick={onLogout}
                   aria-label="Salir"
-                  className="w-8 h-8 rounded-full flex items-center justify-center bg-white/10 hover:bg-white/20 active:scale-95 border border-white/15 text-white transition-all"
+                  className="w-9 h-9 rounded-full flex items-center justify-center text-red-200 active:scale-95 transition-all"
+                  style={{
+                    background: "linear-gradient(160deg, rgba(58,16,16,0.95), rgba(28,8,8,0.95))",
+                    boxShadow:
+                      "-3px -3px 8px rgba(255,110,110,0.10), 4px 5px 12px rgba(0,0,0,0.6), inset 1px 1px 1px rgba(255,150,150,0.15)",
+                  }}
                 >
                   <LogOut className="w-3.5 h-3.5" />
                 </button>
               </div>
 
               <div>
-                <label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider font-medium mb-1 block">{t("accessKey")}</label>
+                <label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider font-medium mb-2 ml-1 block">{t("accessKey")}</label>
                 <div className="relative">
-                  <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/60" />
+                  <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/60" />
                   <input
                     type="text"
                     placeholder={t("keyPlaceholder")}
@@ -299,7 +335,12 @@ const Login = () => {
                     pattern="[0-9]*"
                     maxLength={8}
                     autoComplete="off"
-                    className="w-full bg-secondary/40 border border-border/50 rounded-lg pl-10 pr-4 py-2.5 text-base font-mono tracking-wider text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring"
+                    className="w-full bg-transparent pl-11 pr-4 py-3.5 text-base font-mono tracking-wider text-foreground placeholder:text-muted-foreground/40 focus:outline-none"
+                    style={{
+                      borderRadius: "999px",
+                      boxShadow:
+                        "inset 4px 4px 10px rgba(0,0,0,0.65), inset -4px -4px 10px rgba(255,120,120,0.10)",
+                    }}
                   />
                 </div>
               </div>
@@ -307,59 +348,56 @@ const Login = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-foreground text-background font-semibold py-3 rounded-lg text-sm hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50"
+                className="w-full text-white font-semibold py-3.5 text-sm active:scale-[0.985] transition-all disabled:opacity-50"
+                style={{
+                  borderRadius: "999px",
+                  background: "linear-gradient(160deg, #ff5f5f 0%, #c81e1e 55%, #7c0f0f 100%)",
+                  boxShadow:
+                    "-6px -6px 14px rgba(255,110,110,0.14), 8px 10px 22px rgba(0,0,0,0.6), inset 1px 1px 2px rgba(255,190,190,0.35)",
+                }}
               >
                 {loading ? t("verifying") : t("enter")}
               </button>
             </>
           )}
 
+          <div className="flex items-center gap-3">
+            <span className="h-px flex-1" style={{ background: "rgba(255,140,140,0.16)" }} />
+            <span className="text-[9px] uppercase tracking-widest text-muted-foreground/50">{settings.brandTitle}</span>
+            <span className="h-px flex-1" style={{ background: "rgba(255,140,140,0.16)" }} />
+          </div>
 
-          {/* Comprar Key — premium CTA */}
+          {/* Comprar Key */}
           <button
             type="button"
             onClick={() => setBuyOpen(true)}
-            className="relative w-full flex items-center justify-center gap-2.5 py-3 rounded-xl text-sm font-bold tracking-wide text-white overflow-hidden active:scale-[0.98] transition-transform"
+            className="relative w-full flex items-center justify-center gap-2.5 py-3.5 text-sm font-bold tracking-wide text-white active:scale-[0.985] transition-transform"
             style={{
-              background: "linear-gradient(135deg, #2b0606 0%, #c81e1e 50%, #ff5555 100%)",
-              border: "1px solid rgba(255,120,120,0.7)",
+              borderRadius: "999px",
+              background: "linear-gradient(160deg, rgba(60,16,16,0.95), rgba(28,8,8,0.95))",
               boxShadow:
-                "0 0 0 1px rgba(240,29,29,0.35) inset, 0 0 22px rgba(240,29,29,0.55), 0 14px 34px -10px rgba(240,29,29,0.7)",
+                "-6px -6px 14px rgba(255,110,110,0.10), 8px 10px 20px rgba(0,0,0,0.6), inset 1px 1px 1px rgba(255,150,150,0.16)",
             }}
           >
-            <span
-              aria-hidden
-              className="absolute inset-0 opacity-50 pointer-events-none"
-              style={{ background: "linear-gradient(180deg, rgba(255,255,255,0.28), rgba(255,255,255,0) 50%)" }}
-            />
-            <ShoppingCart className="relative w-[18px] h-[18px]" />
-            <span className="relative">{settings.buyButtonLabel}</span>
+            <ShoppingCart className="w-[18px] h-[18px] text-red-300" />
+            <span>{settings.buyButtonLabel}</span>
           </button>
 
-          {/* Función Exemplo — premium button with mascot pointing at it */}
+          {/* Función Exemplo */}
           <div className="relative pt-1">
             <button
               type="button"
               onClick={() => setVideoOpen(true)}
-              className="relative group w-full flex items-center justify-center gap-2.5 py-3 rounded-xl text-sm font-semibold tracking-wide text-white overflow-hidden active:scale-[0.98] transition-transform"
+              className="relative w-full flex items-center justify-center gap-2.5 py-3.5 text-sm font-semibold tracking-wide text-white active:scale-[0.985] transition-transform"
               style={{
-                background:
-                  "linear-gradient(135deg, #550a0a 0%, #c81e1e 55%, #f01d1d 100%)",
-                border: "1px solid rgba(255,120,120,0.55)",
+                borderRadius: "999px",
+                background: "linear-gradient(160deg, rgba(60,16,16,0.95), rgba(28,8,8,0.95))",
                 boxShadow:
-                  "0 0 0 1px rgba(240,29,29,0.25) inset, 0 10px 28px -8px rgba(240,29,29,0.55), 0 2px 8px rgba(0,0,0,0.4)",
+                  "-6px -6px 14px rgba(255,110,110,0.10), 8px 10px 20px rgba(0,0,0,0.6), inset 1px 1px 1px rgba(255,150,150,0.16)",
               }}
             >
-              <span
-                aria-hidden
-                className="absolute inset-0 opacity-40"
-                style={{
-                  background:
-                    "linear-gradient(180deg, rgba(255,255,255,0.25), rgba(255,255,255,0) 45%)",
-                }}
-              />
-              <PlayCircle className="relative w-[18px] h-[18px]" />
-              <span className="relative">{t("seeDemo")}</span>
+              <PlayCircle className="w-[18px] h-[18px] text-red-300" />
+              <span>{t("seeDemo")}</span>
             </button>
 
             <img
