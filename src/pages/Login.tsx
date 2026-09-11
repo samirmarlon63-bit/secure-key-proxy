@@ -62,8 +62,17 @@ const Login = () => {
     return () => sub.subscription.unsubscribe();
   }, []);
 
+  const OFFICIAL_HOST = "secure-key-proxy.lovable.app";
+
   const onGoogle = async () => {
     setError("");
+
+    // El inicio de sesión con Google solo está disponible en el dominio oficial.
+    if (!/\.lovable\.app$/.test(window.location.hostname) && window.location.hostname !== "localhost") {
+      window.location.replace(`https://${OFFICIAL_HOST}${window.location.pathname}`);
+      return;
+    }
+
     setGoogleLoading(true);
     const result = await lovable.auth.signInWithOAuth("google", {
       redirect_uri: window.location.origin,
