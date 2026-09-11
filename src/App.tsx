@@ -23,6 +23,8 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Login />} />
+          <Route path="/index" element={<Login />} />
+          <Route path="/login" element={<Login />} />
           <Route path="/proxy" element={<ProxyConfig />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/pay" element={<Pay />} />
